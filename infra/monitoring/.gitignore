@@ -1,0 +1,22 @@
+# SonarQube Token and Secrets
+.env
+.env.local
+.env.*.local
+
+# Trivy Reports (already tracked separately)
+trivy-reports/*.json
+trivy-reports/*.ndjson
+
+# Backup files
+*.tar.gz
+*.backup
+
+# Docker volumes data
+loki_data/
+grafana_data/
+prometheus_data/
+sonarqube_data/
+sonarqube_extensions/
+sonarqube_logs/
+sonarqube_db/
+

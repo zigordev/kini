@@ -1,0 +1,183 @@
+{
+    "uid": "trivy-vulns",
+    "title": "Trivy Vulnerabilities",
+    "timezone": "browser",
+    "panels": [
+        {
+            "type": "stat",
+            "title": "Total vulns (last 24h)",
+            "gridPos": {
+                "h": 4,
+                "w": 3,
+                "x": 0,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "expr": "sum(count_over_time({job=\"trivy\"} | json [24h]))",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "stat",
+            "title": "CRITICAL",
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 3,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "expr": "sum(count_over_time({source=\"trivy\"} | json | Severity=\"CRITICAL\" [24h]))",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "stat",
+            "title": "HIGH",
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 5,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "expr": "sum(count_over_time({source=\"trivy\"} | json | Severity=\"HIGH\" [24h]))",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "stat",
+            "title": "MEDIUM",
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 7,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "expr": "sum(count_over_time({source=\"trivy\"} | json | Severity=\"MEDIUM\" [24h]))",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "stat",
+            "title": "LOW",
+            "gridPos": {
+                "h": 4,
+                "w": 2,
+                "x": 9,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "expr": "sum(count_over_time({source=\"trivy\"} | json | Severity=\"LOW\" [24h]))",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "bargauge",
+            "title": "Vulns by Severity (last 7d)",
+            "gridPos": {
+                "h": 7,
+                "w": 6,
+                "x": 0,
+                "y": 4
+            },
+            "targets": [
+                {
+                    "expr": "sum by (Severity) (count_over_time({source=\"trivy\"} | json [7d]))",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "bargauge",
+            "title": "Vulns by Project (last 7d)",
+            "gridPos": {
+                "h": 7,
+                "w": 6,
+                "x": 6,
+                "y": 4
+            },
+            "targets": [
+                {
+                    "expr": "sum by (project) (count_over_time({source=\"trivy\"} | json [7d]))",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        },
+        {
+            "type": "table",
+            "title": "All Vulnerabilities (last 7d)",
+            "gridPos": {
+                "h": 10,
+                "w": 12,
+                "x": 0,
+                "y": 11
+            },
+            "targets": [
+                {
+                    "expr": "{source=\"trivy\"} | json | line_format \"{{.Severity}} | {{.VulnerabilityID}} | {{.PkgName}}@{{.InstalledVersion}} | {{.project}}\"",
+                    "refId": "A",
+                    "datasource": {
+                        "type": "loki",
+                        "uid": "loki"
+                    }
+                }
+            ]
+        }
+    ],
+    "templating": {
+        "list": [
+            {
+                "name": "project",
+                "type": "query",
+                "datasource": {
+                    "type": "loki",
+                    "uid": "loki"
+                },
+                "query": "label_values({source=\"trivy\"}, project)",
+                "hide": 0
+            }
+        ]
+    },
+    "schemaVersion": 36,
+    "version": 2
+}

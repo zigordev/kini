@@ -1,0 +1,100 @@
+{
+  "actions": {
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "save": "Guardar"
+  },
+  "auth": {
+    "connecting": "Conectando...",
+    "google_unavailable": "El inicio de sesión con Google no está disponible. Verifica la configuración del servidor.",
+    "sign_in_google": "Inicia sesión con Google",
+    "sign_out": "Cerrar sesión"
+  },
+  "errors": {
+    "AUTH": {
+      "GOOGLE_UNAVAILABLE": "El inicio de sesión con Google no está disponible. Verifica la configuración del servidor.",
+      "INVALID_CREDENTIALS": "Correo o contraseña inválidos.",
+      "NOT_AUTHENTICATED": "Inicia sesión para continuar."
+    },
+    "EMAIL": {
+      "INVALID": "Introduce un correo válido."
+    },
+    "FUT_POOL_MATCH": {
+      "ELIGE8_LIMIT": "Se permiten como máximo {{max}} partidos Elige8."
+    },
+    "GENERIC": {
+      "UNKNOWN": "Ha ocurrido un error. Inténtalo de nuevo."
+    },
+    "PASSWORD": {
+      "MIN_LENGTH": "La contraseña debe tener al menos {{min}} caracteres."
+    },
+    "VALIDATION": {
+      "FAILED": "Algunos campos requieren atención."
+    }
+  },
+  "fields": {
+    "active": "Activa",
+    "date": "Fecha",
+    "doubles": "Dobles",
+    "triples": "Triples"
+  },
+  "language": {
+    "basque": "Euskera",
+    "english": "Inglés",
+    "spanish": "Español",
+    "title": "Idioma"
+  },
+  "matches": {
+    "away_team": "Visitante",
+    "home_team": "Local",
+    "remove_elige8": "Quitar Elige8",
+    "success_no": "Fallo ❌",
+    "success_yes": "Acierto ✅",
+    "update_status_message": "Selecciona una opción:",
+    "update_status_title": "Actualizar estado"
+  },
+  "notifications": {
+    "match_updated": "Partido actualizado",
+    "pool_updated": "Quiniela actualizada"
+  },
+  "pools": {
+    "create_accessibility": "Crear quiniela",
+    "create_title": "Crear quiniela",
+    "created": "Quiniela creada",
+    "edit_title": "Editar quiniela",
+    "finalized": "Quiniela finalizada",
+    "loading": "Cargando quinielas...",
+    "loading_single": "Cargando quiniela...",
+    "matches": "Partidos",
+    "no_pools": "No se encontraron quinielas disponibles.",
+    "settings_accessibility": "Ajustes de quiniela",
+    "update_app_for_date": "Actualiza tu app para seleccionar otra fecha",
+    "updated": "Quiniela actualizada"
+  },
+  "profile": {
+    "support_hint": "Si pierdes acceso a tu cuenta, comunícate con el administrador para restablecer tus credenciales."
+  },
+  "settings": {
+    "receive_notifications": "Recibir notificaciones"
+  },
+  "stats": {
+    "empty": "No hay datos disponibles.",
+    "loading": "Cargando estadísticas...",
+    "ranking_heading": "Ranking de aciertos"
+  },
+  "status": {
+    "preparing": "Preparando tu experiencia..."
+  },
+  "tabs": {
+    "pools": "Quinielas",
+    "profile": "Perfil",
+    "stats": "Estadísticas"
+  },
+  "user": {
+    "anonymous": "Usuario"
+  },
+  "users": {
+    "loading": "Cargando usuarios...",
+    "select": "Seleccionar usuario"
+  }
+}

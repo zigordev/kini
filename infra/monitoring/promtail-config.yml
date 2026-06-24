@@ -1,0 +1,82 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: docker-logs
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      # Ensure at least one label always exists on every stream
+      - target_label: "source"
+        replacement: "docker"
+      # Tag API container logs as app=kini-api
+      - source_labels:
+          ["__meta_docker_container_label_com_docker_compose_service"]
+        regex: api
+        target_label: app
+        replacement: kini-api
+      # Set container label without the leading slash
+      - source_labels: ["__meta_docker_container_name"]
+        regex: "/(.*)"
+        replacement: "$1"
+        target_label: "container"
+      - source_labels:
+          ["__meta_docker_container_label_com_docker_compose_service"]
+        target_label: "service"
+      - source_labels: ["__meta_docker_container_logstream"]
+        target_label: "stream"
+      # Drop noisy/old DB logs so Loki doesn't reject too-old samples
+      - source_labels:
+          ["__meta_docker_container_label_com_docker_compose_service"]
+        regex: db
+        action: drop
+      - source_labels: ["__meta_docker_container_name"]
+        regex: /.?postgres_db
+        action: drop
+      - source_labels: ["__meta_docker_container_id"]
+        target_label: "__path__"
+        replacement: "/var/lib/docker/containers/$1/*-json.log"
+    pipeline_stages:
+      - labels:
+          source: docker
+          app:
+      - json:
+          expressions:
+            level: level
+            msg: message
+            event_type: event.type
+            event_name: event.name
+            event_path: event.path
+            rum_timestamp: event.timestamp
+            ui_message: log.message
+            ui_timestamp: log.timestamp
+            app: app
+      - labels:
+          level:
+          event_type:
+          event_name:
+          service:
+          container:
+          app:
+      - timestamp:
+          source: ui_timestamp
+          format: UnixMs
+      - timestamp:
+          source: rum_timestamp
+          format: UnixMs
+  - job_name: trivy-reports
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          source: trivy
+          app: trivy-scanner
+          __path__: /var/trivy-reports/*.ndjson

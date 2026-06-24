@@ -1,0 +1,21 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Install OS deps for node-gyp if needed
+RUN apk add --no-cache python3 make g++
+
+# Install deps first for better caching
+COPY package*.json ./
+RUN npm ci
+
+# Copy source
+COPY . .
+
+# Expose Nest default port
+EXPOSE 3000
+
+# Run in dev mode with hot reload
+CMD ["npm", "run", "start:dev"]
+
+

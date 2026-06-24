@@ -1,0 +1,50 @@
+name: kini-ci
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kini
+      POSTGRES_PASSWORD: kini
+      POSTGRES_DB: kini
+    ports:
+      - '15434:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile.dev
+    environment:
+      NODE_ENV: test
+      PORT: 3000
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: kini
+      DATABASE_PASSWORD: kini
+      DATABASE_NAME: kini
+      DATABASE_SSL: 'false'
+      DATABASE_SYNCHRONIZE: 'true'
+      AUTH_CORS_ORIGINS: http://localhost:8081
+      AUTH_SUCCESS_REDIRECT_URL: http://localhost:8081/auth/callback
+      AUTH_FAILURE_REDIRECT_URL: http://localhost:8081/auth/callback
+      SESSION_SECRET: ci-session-secret
+      SESSION_COOKIE_SECRET: ci-cookie-secret
+      SESSION_COOKIE_NAME: kini.sid
+      SESSION_COOKIE_SECURE: 'false'
+      SESSION_COOKIE_MAX_AGE_MS: '604800000'
+      SESSION_COOKIE_SAME_SITE: lax
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      GOOGLE_CALLBACK_URL: http://localhost:3012/auth/google/callback
+      GOOGLE_MOBILE_REDIRECT_URI: kini://auth/callback
+    ports:
+      - '3012:3000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ['npm', 'run', 'start:dev']

@@ -1,0 +1,100 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "create": "Create",
+    "save": "Save"
+  },
+  "auth": {
+    "connecting": "Connecting...",
+    "google_unavailable": "Google Sign-In is unavailable. Check server configuration.",
+    "sign_in_google": "Sign in with Google",
+    "sign_out": "Sign out"
+  },
+  "errors": {
+    "AUTH": {
+      "GOOGLE_UNAVAILABLE": "Google Sign-In is unavailable. Check server configuration.",
+      "INVALID_CREDENTIALS": "Invalid email or password.",
+      "NOT_AUTHENTICATED": "Please sign in to continue."
+    },
+    "EMAIL": {
+      "INVALID": "Please enter a valid email."
+    },
+    "FUT_POOL_MATCH": {
+      "ELIGE8_LIMIT": "A maximum of {{max}} Elige8 matches are allowed."
+    },
+    "GENERIC": {
+      "UNKNOWN": "Something went wrong. Please try again."
+    },
+    "PASSWORD": {
+      "MIN_LENGTH": "Password must be at least {{min}} characters."
+    },
+    "VALIDATION": {
+      "FAILED": "Some fields need attention."
+    }
+  },
+  "fields": {
+    "active": "Active",
+    "date": "Date",
+    "doubles": "Doubles",
+    "triples": "Triples"
+  },
+  "language": {
+    "basque": "Basque",
+    "english": "English",
+    "spanish": "Spanish",
+    "title": "Language"
+  },
+  "matches": {
+    "away_team": "Away",
+    "home_team": "Home",
+    "remove_elige8": "Remove Elige8",
+    "success_no": "Fail ❌",
+    "success_yes": "Success ✅",
+    "update_status_message": "Select an option:",
+    "update_status_title": "Update status"
+  },
+  "notifications": {
+    "match_updated": "Match updated",
+    "pool_updated": "Pool updated"
+  },
+  "pools": {
+    "create_accessibility": "Create pool",
+    "create_title": "Create pool",
+    "created": "Pool created",
+    "edit_title": "Edit pool",
+    "finalized": "Pool finalized",
+    "loading": "Loading pools...",
+    "loading_single": "Loading pool...",
+    "matches": "Matches",
+    "no_pools": "No pools found.",
+    "settings_accessibility": "Pool settings",
+    "update_app_for_date": "Update your app to select another date",
+    "updated": "Pool updated"
+  },
+  "profile": {
+    "support_hint": "If you lose access to your account, contact the administrator to reset your credentials."
+  },
+  "settings": {
+    "receive_notifications": "Receive notifications"
+  },
+  "stats": {
+    "empty": "No data available.",
+    "loading": "Loading stats...",
+    "ranking_heading": "Success ranking"
+  },
+  "status": {
+    "preparing": "Getting things ready..."
+  },
+  "tabs": {
+    "pools": "Pools",
+    "profile": "Profile",
+    "stats": "Stats"
+  },
+  "user": {
+    "anonymous": "User"
+  },
+  "users": {
+    "loading": "Loading users...",
+    "select": "Select user"
+  }
+}

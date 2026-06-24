@@ -1,0 +1,12 @@
+title = "kini gitleaks config"
+
+[allowlist]
+description = "Ignore generated and legacy migration artifacts"
+paths = [
+  '''^\.legacy-git/''',
+  '''^apps/[^/]+/\.env(\..*)?$''',
+  '''^docker/\.env\.app\.local$''',
+  '''^infra/monitoring/\.env$''',
+  '''^infra/monitoring/trivy-reports/''',
+  '''^apps/mobile/ios/Podfile\.lock$'''
+]
