@@ -1,0 +1,67 @@
+# dependencies
+node_modules/
+apps/*/node_modules/
+apps/*/package-lock.json
+.npm-cache/
+
+# build output
+dist/
+build/
+coverage/
+.nyc_output/
+.next/
+web-build/
+*.tsbuildinfo
+
+# Expo / React Native generated state
+apps/mobile/.expo/
+apps/mobile/.metro-health-check*
+apps/mobile/android/.gradle/
+apps/mobile/android/build/
+apps/mobile/ios/build/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# local env and secrets
+.env
+.env.*
+apps/*/.env
+apps/*/.env.*
+infra/monitoring/.env
+!*.env.example
+!docker/*.env.example
+!docker/.env.*.example
+
+# scanners and generated reports
+.scannerwork/
+apps/*/.scannerwork/
+infra/monitoring/trivy-reports/
+artifacts/
+
+# legacy standalone repo metadata kept for recovery only
+.legacy-git/
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+
+# logs and runtime
+/logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+pids/
+*.pid
+*.seed
+*.pid.lock
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

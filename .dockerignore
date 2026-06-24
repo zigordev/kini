@@ -1,0 +1,17 @@
+.git
+.legacy-git
+node_modules
+apps/*/node_modules
+coverage
+dist
+build
+.scannerwork
+apps/*/.scannerwork
+infra/monitoring/trivy-reports
+artifacts
+.env
+.env.*
+apps/*/.env
+apps/*/.env.*
+*.log
+.DS_Store

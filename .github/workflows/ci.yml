@@ -1,0 +1,98 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  HUSKY: '0'
+
+jobs:
+  quality:
+    name: Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Validate compose manifests
+        env:
+          POSTGRES_PASSWORD: kini
+          AUTH_CORS_ORIGINS: http://localhost:8081
+          AUTH_SUCCESS_REDIRECT_URL: http://localhost:8081/auth/callback
+          AUTH_FAILURE_REDIRECT_URL: http://localhost:8081/auth/callback
+          GOOGLE_CLIENT_ID: ci-google-client-id
+          GOOGLE_CALLBACK_URL: http://localhost:3012/auth/google/callback
+          OPENBAO_TOKEN: ci-openbao-token
+        run: |
+          docker compose -f docker/compose.app.local.yml config > /dev/null
+          docker compose -f docker/compose.ci.yml config > /dev/null
+
+      - name: Lint workspaces
+        run: npm run lint
+
+      - name: Typecheck workspaces
+        run: npm run typecheck
+
+      - name: Build workspaces
+        run: npm run build
+
+      - name: API tests with coverage
+        run: npm run test:cov:api
+
+      - name: Upload api coverage
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: api-coverage
+          path: apps/api/coverage
+          if-no-files-found: warn
+
+  secrets-scan:
+    name: Secrets Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        run: |
+          set -euo pipefail
+          VERSION=8.24.2
+          ARCHIVE="gitleaks_${VERSION}_linux_x64.tar.gz"
+          mkdir -p artifacts
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/${ARCHIVE}" -o "/tmp/${ARCHIVE}"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_checksums.txt" -o /tmp/gitleaks_checksums.txt
+          grep "${ARCHIVE}" /tmp/gitleaks_checksums.txt > /tmp/gitleaks_checksum_line.txt
+          (cd /tmp && sha256sum -c /tmp/gitleaks_checksum_line.txt)
+          tar -xzf "/tmp/${ARCHIVE}" -C /tmp gitleaks
+          /tmp/gitleaks detect --source . --no-git --redact --config .gitleaks.toml --report-format json --report-path artifacts/gitleaks-report.json
+
+      - name: Upload gitleaks report
+        if: always()
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: gitleaks-report
+          path: artifacts/gitleaks-report.json
+          if-no-files-found: warn

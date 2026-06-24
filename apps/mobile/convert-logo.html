@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Convert Logo to PNG</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .logo-container {
+            width: 1024px;
+            height: 1024px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        #logo {
+            width: 1024px;
+            height: 1024px;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <svg id="logo" width="1024" height="1024" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+            <!-- Deep purple background circle -->
+            <circle cx="100" cy="100" r="100" fill="#4A1A7A"/>
+            
+            <!-- Orange uppercase K -->
+            <g fill="#FF6B35">
+                <!-- Vertical stroke -->
+                <rect x="70" y="60" width="12" height="80"/>
+                
+                <!-- Upper diagonal -->
+                <polygon points="82,60 82,90 120,60 132,60 94,90 132,100 120,100"/>
+                
+                <!-- Lower diagonal -->
+                <polygon points="82,100 120,100 132,140 120,140 82,110"/>
+            </g>
+        </svg>
+    </div>
+    
+    <script>
+        // Instructions for manual conversion
+        console.log('To convert this to PNG:');
+        console.log('1. Right-click on the logo and "Save image as..." or take a screenshot');
+        console.log('2. Save as PNG with 1024x1024 dimensions');
+        console.log('3. Replace the icon.png file in assets/images/');
+    </script>
+</body>
+</html>
