@@ -20,6 +20,8 @@ export interface UpdateUserRequest {
   textColor?: string;
   backgroundColor?: string;
   language?: 'en' | 'es';
+  theme?: 'light' | 'dark';
+  activeTeamId?: string | null;
 }
 
 export const updateUser = async (
@@ -43,6 +45,18 @@ export const updateLanguage = async (
   language: 'en' | 'es',
 ): Promise<AuthenticatedUser> => {
   return updateUser({ language });
+};
+
+export const updateTheme = async (
+  theme: 'light' | 'dark',
+): Promise<AuthenticatedUser> => {
+  return updateUser({ theme });
+};
+
+export const updateActiveTeam = async (
+  activeTeamId: string | null,
+): Promise<AuthenticatedUser> => {
+  return updateUser({ activeTeamId });
 };
 
 export const listUsers = async (): Promise<UserSummary[]> => {

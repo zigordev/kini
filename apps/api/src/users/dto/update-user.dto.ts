@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString } from 'class-validator';
+import { IsIn, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({
@@ -66,4 +66,22 @@ export class UpdateUserDto {
   @IsString()
   @IsIn(['en', 'es'])
   language?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Preferred theme mode',
+    example: 'dark',
+  })
+  @IsOptional()
+  @IsString()
+  @IsIn(['light', 'dark'])
+  theme?: string | null;
+
+  @ApiPropertyOptional({
+    description: 'Active team id',
+    format: 'uuid',
+    nullable: true,
+  })
+  @IsOptional()
+  @IsUUID()
+  activeTeamId?: string | null;
 }

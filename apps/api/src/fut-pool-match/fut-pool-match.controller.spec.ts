@@ -43,6 +43,7 @@ describe('FutPoolMatchController', () => {
         awayTeam: 'Team B',
         poolOrder: 1,
         results: [Result.HOME, Result.DRAW],
+        officialResults: [],
         success: true,
         elige8: false,
         full15: false,

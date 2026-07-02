@@ -59,6 +59,10 @@ export class UsersService {
       userToPersist.backgroundColor = '#FFFFFF';
     }
 
+    if (!userToPersist.theme) {
+      userToPersist.theme = 'light';
+    }
+
     const savedUser = await this.usersRepository.save(userToPersist);
     return savedUser;
   }
@@ -105,6 +109,8 @@ export class UsersService {
       textColor: entity.textColor,
       backgroundColor: entity.backgroundColor,
       language: entity.language,
+      theme: entity.theme,
+      activeTeamId: entity.activeTeamId,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };

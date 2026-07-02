@@ -8,6 +8,7 @@ import {
   Post,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -16,6 +17,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { CreateFutPoolDto } from './dto/create-fut-pool.dto';
 import { FutPoolQueryDto } from './dto/fut-pool-query.dto';
 import {
@@ -28,6 +30,7 @@ import { FutPoolService } from './fut-pool.service';
 
 @Controller('fut-pool')
 @ApiTags('Pool')
+@UseGuards(AuthenticatedGuard)
 export class FutPoolController {
   constructor(private readonly futPoolService: FutPoolService) {}
 
@@ -39,8 +42,10 @@ export class FutPoolController {
   })
   getFutPools(
     @Query() query: FutPoolQueryDto,
+    @Req() req: any,
   ): Promise<FutPoolPaginatedResponseDto> {
-    return this.futPoolService.findAll(query);
+    const actor = req.user as { id: string } | undefined;
+    return this.futPoolService.findAll(query, actor);
   }
 
   @Get('stats')
@@ -52,8 +57,12 @@ export class FutPoolController {
     type: StatsDto,
     isArray: true,
   })
-  getStats(): Promise<StatsDto> {
-    return this.futPoolService.getStats();
+  getStats(
+    @Query('teamId') teamId?: string,
+    @Req() req?: any,
+  ): Promise<StatsDto> {
+    const actor = req?.user as { id: string } | undefined;
+    return this.futPoolService.getStats(teamId, actor);
   }
 
   @Post()

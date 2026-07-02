@@ -218,6 +218,8 @@ describe('AuthController', () => {
         textColor: '#000',
         backgroundColor: '#FFF',
         language: 'en',
+        theme: 'light',
+        activeTeamId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };

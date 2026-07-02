@@ -1,8 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Picker } from '@react-native-picker/picker';
 import React, {
+  forwardRef,
   useCallback,
   useEffect,
+  useImperativeHandle,
   useMemo,
   useRef,
   useState,
@@ -10,9 +12,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import {
   KeyboardAvoidingView,
-  Modal,
   Platform,
-  Pressable,
   ScrollView,
   Switch,
   Text,
@@ -20,15 +20,15 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import styles from '../../index.styles';
-import { updateMatch } from '../../services/futPoolMatch.service';
+import { useTheme } from '../../contexts/ThemeContext';
+import { createStyles } from '../../index.styles';
 import { listUsers } from '../../services/users.service';
+import { palette } from '../../theme/design';
 
 const DOUBLES_MIN = 0;
 const DOUBLES_MAX = 8;
 const TRIPLES_MIN = 0;
 const TRIPLES_MAX = 8;
-const DEFAULT_USER_COLOR = '#4A1A7A';
 
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
@@ -69,6 +69,7 @@ export type MatchFormEntry = {
 };
 
 export type PoolDetailsFormValues = {
+  name?: string | null;
   description: string;
   doubles: number;
   triples: number;
@@ -79,28 +80,16 @@ export type PoolDetailsFormValues = {
   matches?: MatchFormEntry[];
 };
 
-export type PoolDetailsField =
-  | 'description'
-  | 'doubles'
-  | 'triples'
-  | 'elige8'
-  | 'active'
-  | 'date'
-  | 'earning';
-
 type PoolDetailsModalProps = {
   visible: boolean;
-  title: string;
-  confirmLabel: string;
   initialValues: PoolDetailsFormValues;
   submitting?: boolean;
-  finalizing?: boolean;
-  mode?: 'create' | 'edit';
-  onClose: () => void;
   onSubmit: (values: PoolDetailsFormValues) => void;
-  onFinalize?: (earning: number) => Promise<void> | void;
-  onFieldChange?: (field: PoolDetailsField, value: any) => void;
   matchInitialValues?: MatchFormEntry[];
+};
+
+export type PoolDetailsFormHandle = {
+  submit: () => void;
 };
 
 const normalizeMatches = (
@@ -144,24 +133,24 @@ const buildMatchesDescription = (matches: MatchFormEntry[]) =>
     .filter(Boolean)
     .join('\n');
 
-const PoolDetailsModal = ({
-  visible,
-  title,
-  confirmLabel,
-  initialValues,
-  submitting = false,
-  finalizing = false,
-  mode = 'create',
-  onClose,
-  onSubmit,
-  onFinalize,
-  onFieldChange,
-  matchInitialValues,
-}: PoolDetailsModalProps) => {
+const PoolDetailsModal = forwardRef<
+  PoolDetailsFormHandle,
+  PoolDetailsModalProps
+>(
+  (
+    {
+      visible,
+      initialValues,
+      submitting = false,
+      onSubmit,
+      matchInitialValues,
+    },
+    ref,
+  ) => {
   const { t } = useTranslation();
-  const isEditMode = mode === 'edit';
+  const { isDark } = useTheme();
+  const styles = useMemo(() => createStyles(isDark), [isDark]);
   const [users, setUsers] = useState<MatchUserOption[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
 
   const userMap = useMemo(() => {
     const map = new Map<string, MatchUserOption>();
@@ -172,7 +161,6 @@ const PoolDetailsModal = ({
   }, [users]);
 
   const fetchUsers = useCallback(async () => {
-    setLoadingUsers(true);
     try {
       const usersList = await listUsers();
       const mapped = usersList.map((matchUser) => ({
@@ -185,8 +173,6 @@ const PoolDetailsModal = ({
     } catch (error) {
       console.error('Failed to load users in modal:', error);
       setUsers([]);
-    } finally {
-      setLoadingUsers(false);
     }
   }, []);
 
@@ -203,6 +189,7 @@ const PoolDetailsModal = ({
   }, [normalizedMatches]);
 
   const [doubles, setDoubles] = useState(initialValues.doubles);
+  const [name, setName] = useState(initialValues.name ?? '');
   const [triples, setTriples] = useState(initialValues.triples);
   const [elige8, setElige8] = useState(initialValues.elige8);
   const [active, setActive] = useState(initialValues.active);
@@ -210,65 +197,28 @@ const PoolDetailsModal = ({
   const [showNativeDatePicker, setShowNativeDatePicker] = useState(
     Platform.OS === 'ios',
   );
-  const [currentEarning, setCurrentEarning] = useState(
-    initialValues.earning ?? 0,
-  );
   const [matches, setMatches] = useState<MatchFormEntry[]>([]);
-  const [finalizePromptVisible, setFinalizePromptVisible] = useState(false);
-  const [finalizeInput, setFinalizeInput] = useState(
-    String(initialValues.earning ?? 0),
-  );
-  const [finalizeError, setFinalizeError] = useState('');
-  const [userDropdownIndex, setUserDropdownIndex] = useState<number | null>(
-    null,
-  );
-  const [buttonPositions, setButtonPositions] = useState<{
-    [key: number]: { top: number; left: number; width: number; height: number };
-  }>({});
 
   const matchesDescription = useMemo(
     () => buildMatchesDescription(matches),
     [matches],
   );
 
-  const lastDescriptionRef = useRef(matchesDescription);
-  const hasUserEditedRef = useRef(false);
-
   useEffect(() => {
     if (visible) {
       setDoubles(initialValues.doubles);
+      setName(initialValues.name ?? '');
       setTriples(initialValues.triples);
       setElige8(initialValues.elige8);
       setActive(initialValues.active);
       setDate(normalizeDate(initialValues.date));
       setShowNativeDatePicker(Platform.OS === 'ios');
-      setCurrentEarning(initialValues.earning ?? 0);
-      setFinalizeInput(String(initialValues.earning ?? 0));
-      setFinalizePromptVisible(false);
-      setFinalizeError('');
       // Don't override matches here as they will be set by the normalizedMatches effect
-      lastDescriptionRef.current = buildMatchesDescription(normalizedMatches);
 
       // Fetch users when modal opens
       fetchUsers();
     }
   }, [visible]);
-
-  useEffect(() => {
-    // Only sync description to parent after the user has performed an edit,
-    // to avoid triggering PATCH when the modal opens and data initializes
-    if (!isEditMode || !onFieldChange) {
-      return;
-    }
-    if (!hasUserEditedRef.current) {
-      return;
-    }
-    if (matchesDescription === lastDescriptionRef.current) {
-      return;
-    }
-    onFieldChange('description', matchesDescription);
-    lastDescriptionRef.current = matchesDescription;
-  }, [isEditMode, matchesDescription, onFieldChange]);
 
   const dateLabel = useMemo(() => {
     const dd = String(date.getDate()).padStart(2, '0');
@@ -284,35 +234,29 @@ const PoolDetailsModal = ({
       width: '100%',
       padding: '12px',
       borderRadius: '12px',
-      border: '1px solid #d7deeb',
+      border: `1px solid ${isDark ? palette.darkBorder : palette.border}`,
       fontSize: '16px',
-      color: '#1a1f36',
+      color: isDark ? palette.darkInk : palette.ink,
       outline: 'none',
-      backgroundColor: '#ffffff',
+      backgroundColor: isDark ? palette.darkSurface : palette.surface,
       boxSizing: 'border-box',
     }),
-    [],
-  );
-
-  const notifyFieldChange = useCallback(
-    (field: PoolDetailsField, value: any) => {
-      if (isEditMode && onFieldChange) {
-        hasUserEditedRef.current = true;
-        onFieldChange(field, value);
-      }
-    },
-    [isEditMode, onFieldChange],
+    [isDark],
   );
 
   const handleSetDoubles = useCallback(
     (value: number) => {
       const next = clamp(value, DOUBLES_MIN, DOUBLES_MAX);
       setDoubles(next);
-      if (next !== doubles) {
-        notifyFieldChange('doubles', next);
-      }
     },
-    [doubles, notifyFieldChange],
+    [],
+  );
+
+  const handleSetName = useCallback(
+    (value: string) => {
+      setName(value);
+    },
+    [],
   );
 
   const handleDecreaseDoubles = useCallback(() => {
@@ -327,11 +271,8 @@ const PoolDetailsModal = ({
     (value: number) => {
       const next = clamp(value, TRIPLES_MIN, TRIPLES_MAX);
       setTriples(next);
-      if (next !== triples) {
-        notifyFieldChange('triples', next);
-      }
     },
-    [notifyFieldChange, triples],
+    [],
   );
 
   const handleDecreaseTriples = useCallback(() => {
@@ -345,21 +286,8 @@ const PoolDetailsModal = ({
   const handleToggleElige8 = useCallback(
     (value: boolean) => {
       setElige8(value);
-      if (value !== elige8) {
-        notifyFieldChange('elige8', value);
-      }
     },
-    [elige8, notifyFieldChange],
-  );
-
-  const handleToggleActive = useCallback(
-    (value: boolean) => {
-      setActive(value);
-      if (value !== active) {
-        notifyFieldChange('active', value);
-      }
-    },
-    [active, notifyFieldChange],
+    [],
   );
 
   const updateMatchAt = useCallback(
@@ -374,89 +302,21 @@ const PoolDetailsModal = ({
   );
 
   const handleHomeTeamChange = useCallback(
-    async (index: number, text: string) => {
+    (index: number, text: string) => {
       updateMatchAt(index, { homeTeam: text });
-
-      // Patch the match in the backend
-      const match = matches[index];
-      if (match?.id) {
-        try {
-          hasUserEditedRef.current = true;
-          await updateMatch(match.id, { homeTeam: text });
-        } catch (error) {
-          console.error('Failed to update match home team:', error);
-        }
-      }
     },
-    [updateMatchAt, matches],
+    [updateMatchAt],
   );
 
   const handleAwayTeamChange = useCallback(
-    async (index: number, text: string) => {
+    (index: number, text: string) => {
       updateMatchAt(index, { awayTeam: text });
-
-      // Patch the match in the backend
-      const match = matches[index];
-      if (match?.id) {
-        try {
-          hasUserEditedRef.current = true;
-          await updateMatch(match.id, { awayTeam: text });
-        } catch (error) {
-          console.error('Failed to update match away team:', error);
-        }
-      }
     },
-    [updateMatchAt, matches],
-  );
-
-  const handleToggleUserDropdown = useCallback(
-    (index: number) => {
-      if (users.length === 0) {
-        return;
-      }
-      setUserDropdownIndex((previous) => (previous === index ? null : index));
-    },
-    [users.length],
-  );
-
-  const handleButtonLayout = useCallback((index: number, event: any) => {
-    const { x, y, width, height } = event.nativeEvent.layout;
-    setButtonPositions((prev) => ({
-      ...prev,
-      [index]: { top: y, left: x, width, height },
-    }));
-  }, []);
-
-  const handleSelectUserOption = useCallback(
-    async (option: MatchUserOption | null) => {
-      if (userDropdownIndex === null) {
-        return;
-      }
-
-      const newUserId = option ? String(option.id) : null;
-      updateMatchAt(userDropdownIndex, {
-        userId: newUserId,
-        userName: option?.name,
-      });
-
-      // Patch the match in the backend
-      const match = matches[userDropdownIndex];
-      if (match?.id) {
-        try {
-          hasUserEditedRef.current = true;
-          await updateMatch(match.id, { userId: newUserId || undefined });
-        } catch (error) {
-          console.error('Failed to update match user:', error);
-        }
-      }
-
-      setUserDropdownIndex(null);
-    },
-    [updateMatchAt, userDropdownIndex, matches],
+    [updateMatchAt],
   );
 
   const handleChangeUserSelect = useCallback(
-    async (index: number, value: string) => {
+    (index: number, value: string) => {
       const newUserId = value ? String(value) : null;
       updateMatchAt(index, {
         userId: newUserId,
@@ -464,124 +324,70 @@ const PoolDetailsModal = ({
           ? (userMap.get(String(newUserId))?.name ?? undefined)
           : undefined,
       });
-
-      const match = matches[index];
-      if (match?.id) {
-        try {
-          await updateMatch(match.id, { userId: newUserId || undefined });
-        } catch (error) {
-          console.error('Failed to update match user:', error);
-        }
-      }
     },
-    [matches, updateMatchAt, userMap],
+    [updateMatchAt, userMap],
   );
 
   const handleSubmit = useCallback(() => {
     onSubmit({
+      name: name.trim() || null,
       description: matchesDescription,
       doubles,
       triples,
       elige8,
       active,
       date,
-      earning: currentEarning,
+      earning: initialValues.earning ?? 0,
       matches: matches,
     });
   }, [
     matchesDescription,
+    name,
     doubles,
     triples,
     elige8,
     active,
     date,
-    currentEarning,
+    initialValues.earning,
     matches,
     onSubmit,
   ]);
 
-  const showFinalizeButton = Boolean(onFinalize);
+  useImperativeHandle(
+    ref,
+    () => ({
+      submit: handleSubmit,
+    }),
+    [handleSubmit],
+  );
 
   return (
-    <Modal
-      visible={visible}
-      animationType="fade"
-      transparent
-      onRequestClose={onClose}
+    <KeyboardAvoidingView
+      style={styles.creationModalScreenContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <Pressable style={styles.creationModalOverlay} onPress={onClose}>
-        <View />
-      </Pressable>
-      <KeyboardAvoidingView
-        style={styles.creationModalContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <View style={styles.creationModalContent}>
-          <View style={styles.creationModalHeader}>
-            <Text style={styles.creationModalTitle}>{title}</Text>
-            <TouchableOpacity onPress={onClose} accessibilityLabel="Cerrar">
-              <Ionicons name="close" size={24} color="#4A1A7A" />
-            </TouchableOpacity>
-          </View>
-
-          {/* User dropdown rendered at modal level to ensure proper layering */}
-          {userDropdownIndex !== null && (
-            <>
-              <Pressable
-                style={styles.dropdownBackdrop}
-                onPress={() => setUserDropdownIndex(null)}
-              />
-              <View
-                style={[
-                  styles.userDropdown,
-                  userDropdownIndex !== null &&
-                  buttonPositions[userDropdownIndex]
-                    ? {
-                        top:
-                          buttonPositions[userDropdownIndex].top +
-                          buttonPositions[userDropdownIndex].height +
-                          4,
-                        left: buttonPositions[userDropdownIndex].left,
-                        width: buttonPositions[userDropdownIndex].width,
-                      }
-                    : { top: 200, left: 24, width: '50%' },
-                ]}
-              >
-                {users.map((user) => (
-                  <TouchableOpacity
-                    key={user.id}
-                    style={styles.userDropdownOption}
-                    onPress={() => handleSelectUserOption(user)}
-                  >
-                    <View
-                      style={[
-                        styles.matchUserCapsule,
-                        styles.userDropdownOptionCapsule,
-                        {
-                          backgroundColor:
-                            user.backgroundColor ?? DEFAULT_USER_COLOR,
-                        },
-                      ]}
-                    >
-                      <Text
-                        style={[
-                          styles.matchUserCapsuleText,
-                          { color: user.textColor ?? '#000000' },
-                        ]}
-                      >
-                        {user.name}
-                      </Text>
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            </>
-          )}
+      <View style={styles.creationModalScreenContent}>
           <ScrollView
             style={styles.creationModalScroll}
             contentContainerStyle={styles.creationModalScrollContent}
             keyboardShouldPersistTaps="handled"
           >
+            <View style={styles.creationModalSection}>
+              <Text style={styles.creationModalLabel}>{t('fields.name')}</Text>
+              <TextInput
+                value={name}
+                onChangeText={handleSetName}
+                placeholder={t('pools.name_placeholder')}
+                placeholderTextColor={palette.inkSubtle}
+                style={[
+                  styles.creationModalInput,
+                  styles.creationModalNameInput,
+                ]}
+                editable={!submitting}
+                returnKeyType="done"
+              />
+            </View>
+
             <View style={styles.creationModalRow}>
               <View style={styles.creationModalDateColumn}>
                 <Text style={styles.creationModalLabel}>
@@ -589,7 +395,7 @@ const PoolDetailsModal = ({
                 </Text>
                 {Platform.OS === 'web' ? (
                   <View style={styles.creationModalDateWeb}>
-                    <View style={{ position: 'relative', width: '100%' }}>
+                    <View style={styles.creationModalDateField}>
                       {React.createElement('input', {
                         type: 'date',
                         value: dateISOForWeb,
@@ -602,7 +408,6 @@ const PoolDetailsModal = ({
                           if (!isNaN(parsed.getTime())) {
                             const normalized = normalizeDate(parsed);
                             setDate(normalized);
-                            notifyFieldChange('date', normalized);
                           }
                         },
                         style: {
@@ -620,28 +425,16 @@ const PoolDetailsModal = ({
                           zIndex: 1,
                         },
                       })}
-                      <View
-                        style={{
-                          position: 'absolute',
-                          top: 0,
-                          left: 0,
-                          width: '100%',
-                          height: '100%',
-                          backgroundColor: '#ffffff',
-                          borderWidth: 1,
-                          borderColor: '#d7deeb',
-                          borderRadius: 12,
-                          padding: 12,
-                          alignItems: 'center',
-                          justifyContent: 'flex-start',
-                          pointerEvents: 'none',
-                          zIndex: 0,
-                        }}
-                      >
+                      <View style={styles.creationModalDateDisplay}>
+                        <Ionicons
+                          name="calendar-outline"
+                          size={18}
+                          color={palette.primary}
+                          style={{ marginRight: 8 }}
+                        />
                         <Text
                           style={{
-                            fontSize: 16,
-                            color: '#1a1f36',
+                            color: isDark ? palette.darkInk : palette.ink,
                           }}
                         >
                           {dateLabel}
@@ -659,7 +452,7 @@ const PoolDetailsModal = ({
                       <Ionicons
                         name="calendar-outline"
                         size={20}
-                        color="#4A1A7A"
+                        color="#D71920"
                         style={{ marginRight: 8 }}
                       />
                       <Text style={styles.creationModalDateButtonText}>
@@ -680,7 +473,6 @@ const PoolDetailsModal = ({
                           }
                           const normalized = normalizeDate(selectedDate);
                           setDate(normalized);
-                          notifyFieldChange('date', normalized);
                         }}
                       />
                     )}
@@ -695,26 +487,6 @@ const PoolDetailsModal = ({
                     </Text>
                   </View>
                 )}
-              </View>
-              <View style={styles.creationModalSwitchGroup}>
-                <Text style={styles.creationModalLabel}>
-                  {t('fields.active')}
-                </Text>
-                <View style={styles.creationModalSwitchRow}>
-                  <Switch
-                    value={active}
-                    onValueChange={handleToggleActive}
-                    thumbColor={
-                      Platform.OS === 'android'
-                        ? active
-                          ? '#4A1A7A'
-                          : '#f4f3f4'
-                        : undefined
-                    }
-                    trackColor={{ false: '#d6d8e8', true: '#ceb9f3' }}
-                    disabled={finalizing}
-                  />
-                </View>
               </View>
             </View>
 
@@ -847,12 +619,14 @@ const PoolDetailsModal = ({
                     thumbColor={
                       Platform.OS === 'android'
                         ? elige8
-                          ? '#4A1A7A'
-                          : '#f4f3f4'
+                          ? palette.accent
+                          : palette.backgroundSubtle
                         : undefined
                     }
-                    trackColor={{ false: '#d6d8e8', true: '#ceb9f3' }}
-                    disabled={finalizing}
+                    trackColor={{
+                      false: palette.borderStrong,
+                      true: palette.accentSoft,
+                    }}
                   />
                 </View>
               </View>
@@ -863,7 +637,7 @@ const PoolDetailsModal = ({
                 {t('pools.matches')}
               </Text>
               {matches.map((entry, index) => (
-                <View key={entry.order}>
+                <View key={entry.order} style={styles.matchEntry}>
                   <View style={styles.matchRow}>
                     <View style={styles.matchOrderBadge}>
                       <Text style={styles.matchOrderText}>{entry.order}</Text>
@@ -898,9 +672,13 @@ const PoolDetailsModal = ({
                               width: '100%',
                               padding: '10px 12px',
                               borderRadius: 12,
-                              border: '1px solid #d7deeb',
-                              background: '#ffffff',
-                              color: '#1a1f36',
+                              border: `1px solid ${
+                                isDark ? palette.darkBorder : palette.border
+                              }`,
+                              background: isDark
+                                ? palette.darkSurface
+                                : palette.surface,
+                              color: isDark ? palette.darkInk : palette.ink,
                               outline: 'none',
                               appearance: 'none',
                               WebkitAppearance: 'none',
@@ -932,10 +710,7 @@ const PoolDetailsModal = ({
                           }
                           mode="dropdown"
                         >
-                          <Picker.Item
-                            label={t('users.select')}
-                            value=""
-                          />
+                          <Picker.Item label={t('users.select')} value="" />
                           {users.map((u) => (
                             <Picker.Item
                               key={u.id}
@@ -947,196 +722,15 @@ const PoolDetailsModal = ({
                       </View>
                     )}
                   </View>
-                  {index < matches.length - 1 && (
-                    <View style={styles.matchDivider} />
-                  )}
                 </View>
               ))}
             </View>
           </ScrollView>
 
-          {(showFinalizeButton || mode === 'create') && (
-            <View
-              style={[
-                styles.creationModalActions,
-                (!showFinalizeButton || mode === 'create') &&
-                  styles.creationModalActionsCompact,
-                showFinalizeButton &&
-                  mode !== 'create' &&
-                  styles.creationModalActionsSingle,
-              ]}
-            >
-              {showFinalizeButton && (
-                <TouchableOpacity
-                  style={[
-                    styles.creationModalActionButton,
-                    styles.creationModalFinalizeButton,
-                    (submitting || finalizing) &&
-                      styles.creationModalActionButtonDisabled,
-                  ]}
-                  onPress={() => {
-                    if (!finalizing) {
-                      setFinalizeInput(String(currentEarning ?? 0));
-                      setFinalizeError('');
-                      setFinalizePromptVisible(true);
-                    }
-                  }}
-                  activeOpacity={0.85}
-                  disabled={submitting || finalizing}
-                >
-                  <Text style={styles.creationModalFinalizeButtonLabel}>
-                    Finalizar quiniela
-                  </Text>
-                </TouchableOpacity>
-              )}
-              {mode === 'create' && (
-                <View style={styles.creationModalActionGroup}>
-                  <TouchableOpacity
-                    style={[
-                      styles.creationModalActionButton,
-                      styles.creationModalCancelButton,
-                      submitting && styles.creationModalActionButtonDisabled,
-                    ]}
-                    onPress={onClose}
-                    activeOpacity={0.8}
-                    disabled={submitting}
-                  >
-                    <Text style={styles.creationModalCancelLabel}>
-                      Cancelar
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={[
-                      styles.creationModalActionButton,
-                      styles.creationModalSubmitButton,
-                      submitting && styles.creationModalActionButtonDisabled,
-                    ]}
-                    onPress={handleSubmit}
-                    activeOpacity={0.85}
-                    disabled={submitting}
-                  >
-                    <Text style={styles.creationModalSubmitLabel}>
-                      {confirmLabel}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </View>
-          )}
-        </View>
-      </KeyboardAvoidingView>
-
-      {finalizePromptVisible && (
-        <Modal
-          visible={finalizePromptVisible}
-          transparent
-          animationType="fade"
-          onRequestClose={() => {
-            if (!finalizing) {
-              setFinalizePromptVisible(false);
-            }
-          }}
-        >
-          <Pressable
-            style={styles.creationModalOverlay}
-            onPress={() => {
-              if (!finalizing) {
-                setFinalizePromptVisible(false);
-                setFinalizeError('');
-              }
-            }}
-          >
-            <View />
-          </Pressable>
-          <KeyboardAvoidingView
-            style={styles.finalizeModalContainer}
-            behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-          >
-            <View style={styles.finalizeModalCard}>
-              <Text style={styles.finalizeModalTitle}>Finalizar quiniela</Text>
-              <Text style={styles.finalizeModalSubtitle}>
-                Ingresa las ganancias totales
-              </Text>
-              <TextInput
-                value={finalizeInput}
-                onChangeText={(text) => {
-                  setFinalizeInput(text);
-                  setFinalizeError('');
-                }}
-                style={styles.finalizeModalInput}
-                keyboardType={Platform.OS === 'ios' ? 'decimal-pad' : 'numeric'}
-                placeholder="0"
-                autoFocus
-              />
-              {finalizeError ? (
-                <Text style={styles.finalizeModalError}>{finalizeError}</Text>
-              ) : null}
-              <View style={styles.finalizeModalActions}>
-                <TouchableOpacity
-                  style={[
-                    styles.finalizeModalButton,
-                    styles.finalizeModalCancelButton,
-                    finalizing && styles.finalizeModalButtonDisabled,
-                  ]}
-                  onPress={() => {
-                    if (!finalizing) {
-                      setFinalizePromptVisible(false);
-                      setFinalizeError('');
-                    }
-                  }}
-                  activeOpacity={0.8}
-                  disabled={finalizing}
-                >
-                  <Text style={styles.finalizeModalCancelLabel}>Cancelar</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.finalizeModalButton,
-                    styles.finalizeModalSubmitButton,
-                    finalizing && styles.finalizeModalButtonDisabled,
-                  ]}
-                  onPress={async () => {
-                    if (!onFinalize) {
-                      return;
-                    }
-                    const sanitized = String(finalizeInput ?? '').trim();
-                    const normalizedValue =
-                      sanitized.length === 0
-                        ? 0
-                        : Number(sanitized.replace(/,/g, '.'));
-                    if (!Number.isFinite(normalizedValue)) {
-                      setFinalizeError('Ingresa un número válido');
-                      return;
-                    }
-                    if (normalizedValue < 0) {
-                      setFinalizeError('Ingresa un valor mayor o igual a 0');
-                      return;
-                    }
-                    try {
-                      await onFinalize(normalizedValue);
-                      setCurrentEarning(normalizedValue);
-                      setActive(false);
-                      setFinalizePromptVisible(false);
-                      setFinalizeError('');
-                    } catch (error) {
-                      console.error('Failed to finalize pool', error);
-                      setFinalizeError(
-                        'No se pudo finalizar. Intenta nuevamente.',
-                      );
-                    }
-                  }}
-                  activeOpacity={0.85}
-                  disabled={finalizing}
-                >
-                  <Text style={styles.finalizeModalSubmitLabel}>Guardar</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-          </KeyboardAvoidingView>
-        </Modal>
-      )}
-    </Modal>
+      </View>
+    </KeyboardAvoidingView>
   );
-};
+  },
+);
 
 export default PoolDetailsModal;

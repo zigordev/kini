@@ -1,15 +1,30 @@
+import { useCallback } from 'react';
 import {
   ActivityIndicator,
+  ActionSheetIOS,
+  Alert,
+  Platform,
+  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTheme } from '../contexts/ThemeContext';
+import { palette, radius, shadow } from '../theme/design';
 import GoogleIcon from './GoogleIcon';
 import Logo from './Logo';
+
+type LanguageCode = 'es' | 'en';
+
+const LANGUAGES: Array<{ code: LanguageCode; labelKey: string; flag: string }> =
+  [
+    { code: 'es', labelKey: 'language.spanish', flag: '🇪🇸' },
+    { code: 'en', labelKey: 'language.english', flag: '🇬🇧' },
+  ];
 
 interface SignInScreenProps {
   signingIn: boolean;
@@ -24,44 +39,119 @@ const SignInScreen = ({
   googleAuthEnabled,
   onSignIn,
 }: SignInScreenProps) => {
-  const { t } = useTranslation();
+  const { i18n, t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { isDark } = useTheme();
   const canUseGoogle = googleAuthEnabled && !providersLoading;
+  const currentLanguage = (i18n.language?.slice(0, 2) || 'en') as LanguageCode;
+  const currentLanguageOption =
+    LANGUAGES.find((language) => language.code === currentLanguage) ??
+    LANGUAGES[0];
+
+  const handleLanguageSelect = useCallback(
+    (language: LanguageCode) => {
+      if (language !== currentLanguage) {
+        void i18n.changeLanguage(language);
+      }
+    },
+    [currentLanguage, i18n],
+  );
+
+  const openLanguageSelector = useCallback(() => {
+    const options = LANGUAGES.map(
+      (language) => `${language.flag} ${t(language.labelKey)}`,
+    );
+
+    if (Platform.OS === 'ios') {
+      ActionSheetIOS.showActionSheetWithOptions(
+        {
+          title: t('language.title'),
+          options: [...options, t('actions.cancel')],
+          cancelButtonIndex: options.length,
+        },
+        (buttonIndex) => {
+          const language = LANGUAGES[buttonIndex];
+          if (language) {
+            handleLanguageSelect(language.code);
+          }
+        },
+      );
+      return;
+    }
+
+    Alert.alert(
+      t('language.title'),
+      undefined,
+      [
+        ...LANGUAGES.map((language) => ({
+          text: `${language.flag} ${t(language.labelKey)}`,
+          onPress: () => handleLanguageSelect(language.code),
+        })),
+        { text: t('actions.cancel'), style: 'cancel' as const },
+      ],
+      { cancelable: true },
+    );
+  }, [handleLanguageSelect, t]);
 
   return (
     <View
       style={[
         styles.screen,
-        { backgroundColor: isDark ? '#111827' : '#f4f6fb' },
+        {
+          backgroundColor: isDark ? palette.darkBackground : palette.background,
+        },
       ]}
     >
+      {Platform.OS !== 'web' ? (
+        <View
+          style={[
+            styles.languageButtonShell,
+            {
+              top: insets.top + 12,
+              backgroundColor: isDark ? palette.darkSurface : palette.surface,
+              borderColor: isDark ? palette.darkBorder : palette.border,
+            },
+          ]}
+        >
+          <Pressable
+            onPress={openLanguageSelector}
+            style={({ pressed }) => [
+              styles.languageButton,
+              pressed && styles.languageButtonPressed,
+            ]}
+            accessibilityRole="button"
+            accessibilityLabel={t('nav.language')}
+          >
+            <Text
+              style={[
+                styles.languageButtonText,
+                { color: isDark ? palette.darkInk : palette.primary },
+              ]}
+            >
+              {currentLanguageOption.flag} {currentLanguage.toUpperCase()}
+            </Text>
+          </Pressable>
+        </View>
+      ) : null}
+
       <View
         style={[
           styles.card,
           {
-            backgroundColor: isDark
-              ? 'rgba(23, 32, 51, 0.9)'
-              : 'rgba(255, 255, 255, 0.88)',
-            borderColor: isDark ? '#2c3a55' : '#dbe2f2',
+            backgroundColor: isDark ? palette.darkSurface : palette.surface,
+            borderColor: isDark ? palette.darkBorder : palette.border,
           },
         ]}
       >
         <View style={styles.header}>
           <Logo size={92} />
           <Text
-            style={[styles.eyebrow, { color: isDark ? '#aeb8d0' : '#6f7a9b' }]}
+            style={[
+              styles.eyebrow,
+              { color: isDark ? palette.darkMuted : palette.primary },
+            ]}
           >
             {t('login.eyebrow')}
-          </Text>
-          <Text
-            style={[styles.title, { color: isDark ? '#f8fafc' : '#1a1f36' }]}
-          >
-            {t('login.title')}
-          </Text>
-          <Text
-            style={[styles.tagline, { color: isDark ? '#c8d1e4' : '#626e91' }]}
-          >
-            {t('login.tagline')}
           </Text>
         </View>
 
@@ -71,15 +161,15 @@ const SignInScreen = ({
             style={[
               styles.warning,
               {
-                backgroundColor: isDark ? '#3b2230' : '#fff2f2',
-                borderColor: isDark ? '#7f3448' : '#f3b8c0',
+                backgroundColor: isDark ? '#3B2422' : palette.dangerSoft,
+                borderColor: isDark ? '#7F3A35' : '#F0B8B2',
               },
             ]}
           >
             <Text
               style={[
                 styles.warningText,
-                { color: isDark ? '#ffd7df' : '#9f1d35' },
+                { color: isDark ? '#FFD8D4' : palette.danger },
               ]}
             >
               {t('auth.google_unavailable')}
@@ -98,7 +188,7 @@ const SignInScreen = ({
         >
           <View style={styles.buttonIcon}>
             {signingIn ? (
-              <ActivityIndicator size="small" color="#4A1A7A" />
+              <ActivityIndicator size="small" color={palette.primary} />
             ) : (
               <GoogleIcon size={18} />
             )}
@@ -107,10 +197,6 @@ const SignInScreen = ({
             {signingIn ? t('auth.connecting') : t('auth.sign_in_google')}
           </Text>
         </TouchableOpacity>
-
-        <Text style={[styles.terms, { color: isDark ? '#8f9bb5' : '#7b86a5' }]}>
-          {t('login.terms')}
-        </Text>
       </View>
     </View>
   );
@@ -127,20 +213,39 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
   },
+  languageButtonShell: {
+    position: 'absolute',
+    right: 18,
+    minWidth: 76,
+    minHeight: 40,
+    borderWidth: 1,
+    borderRadius: radius.pill,
+    overflow: 'hidden',
+    zIndex: 2,
+  },
+  languageButton: {
+    minHeight: 40,
+    paddingHorizontal: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  languageButtonPressed: {
+    opacity: 0.72,
+  },
+  languageButtonText: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
   card: {
     width: '100%',
     maxWidth: 460,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: radius.lg,
     paddingHorizontal: 32,
     paddingVertical: 38,
     alignItems: 'center',
     gap: 24,
-    shadowColor: '#000000',
-    shadowOpacity: 0.12,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 14 },
-    elevation: 12,
+    ...shadow.raised,
   },
   header: {
     alignItems: 'center',
@@ -168,7 +273,7 @@ const styles = StyleSheet.create({
   warning: {
     width: '100%',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: radius.md,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
@@ -180,14 +285,14 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     minHeight: 52,
-    borderRadius: 8,
-    backgroundColor: '#4A1A7A',
+    borderRadius: radius.md,
+    backgroundColor: palette.primary,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
     paddingHorizontal: 18,
-    shadowColor: '#4A1A7A',
+    shadowColor: palette.primary,
     shadowOpacity: 0.24,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
@@ -200,12 +305,12 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#ffffff',
+    backgroundColor: palette.white,
     alignItems: 'center',
     justifyContent: 'center',
   },
   buttonText: {
-    color: '#ffffff',
+    color: palette.white,
     fontSize: 16,
     fontWeight: '800',
   },

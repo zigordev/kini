@@ -7,6 +7,7 @@ export function convertMatchToResponseDto(match: FutPoolMatch) {
     awayTeam: match.awayTeam,
     poolOrder: match.poolOrder,
     results: match.results,
+    officialResults: match.officialResults,
     success: match.success,
     elige8: match.elige8,
     full15: match.full15,

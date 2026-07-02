@@ -69,7 +69,7 @@ describe('FutPoolMatchRepository', () => {
       expect(result).toEqual(mockMatch);
       expect(typeormRepository.findOne).toHaveBeenCalledWith({
         where: { id: 'match-123' },
-        relations: { futPool: true },
+        relations: { futPool: true, user: true },
       });
     });
 

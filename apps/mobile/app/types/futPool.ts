@@ -27,8 +27,13 @@ export type SuccessesByUser = {
   backgroundColor: string;
 };
 
+export type FutPoolStatus = 'programmed' | 'active' | 'closed';
+
 type FutPoolSnapshot = {
   id: string;
+  name?: string | null;
+  availablePoolId?: string | null;
+  teamId?: string | null;
   date: string;
   matches: any[];
   results?: SelectionState;
@@ -36,6 +41,7 @@ type FutPoolSnapshot = {
   doubles: number;
   triples: number;
   active: boolean;
+  status?: FutPoolStatus;
   successes: number;
   description?: string;
   earning?: number;

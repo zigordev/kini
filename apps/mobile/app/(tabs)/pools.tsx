@@ -9,48 +9,115 @@ import React, {
 import {
   ActivityIndicator,
   Animated,
-  Dimensions,
   Easing,
   Platform,
   ScrollView,
+  Switch,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import PoolDetailsModal, {
-  MatchFormEntry,
-  MatchUserOption,
-  PoolDetailsField,
-  PoolDetailsFormValues,
-} from '../components/pool/PoolDetailsModal';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import type { Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import type { ICarouselInstance } from 'react-native-reanimated-carousel';
-import Carousel from 'react-native-reanimated-carousel';
 import FutPoolCard from '../components/futPoolCard/FutPoolCard';
+import { useTeams } from '../contexts/TeamContext';
+import { useTheme } from '../contexts/ThemeContext';
 import useAuth from '../hooks/useAuth';
 import useFutPool from '../hooks/useFutPool';
-import styles from '../index.styles';
+import { createStyles } from '../index.styles';
 import SignInScreen from '../components/SignInScreen';
 import {
-  createPool,
-  updatePoolDetails,
+  checkPoolResults,
   updatePoolDoubles,
   updatePoolElige8,
+  updatePoolTriples,
 } from '../services/futPool.service';
 import { updateMatch } from '../services/futPoolMatch.service';
 import realtime from '../services/realtime.service';
-import FutPoolSnapshot, { OptionValue, SPLIT_SUFFIXES } from '../types/futPool';
+import FutPoolSnapshot, {
+  FutPoolStatus,
+  OptionValue,
+  SPLIT_SUFFIXES,
+} from '../types/futPool';
 import showErrorToast, { showToast } from '../utils/toast';
 
 const DOUBLES_MIN = 0;
 const DOUBLES_MAX = 8;
-const SCREEN_WIDTH = Dimensions.get('window').width;
-const SCREEN_HEIGHT = Dimensions.get('window').height;
-const CAROUSEL_HEIGHT = Math.max(480, SCREEN_HEIGHT - 160);
-const DEFAULT_MATCH_USER_COLOR = '#4A1A7A';
+const TRIPLES_MIN = 0;
+const TRIPLES_MAX = 8;
+const DEFAULT_MATCH_USER_COLOR = '#D71920';
+const BACKGROUND_REFRESH_MS = 15 * 60 * 1000;
+
+let UIStepper: any = null;
+if (Platform.OS !== 'web') {
+  try {
+    UIStepper = require('react-native-ui-stepper').default;
+  } catch {
+    UIStepper = null;
+  }
+}
+
+const getPoolStatus = (
+  pool: FutPoolSnapshot | null | undefined,
+): FutPoolStatus => {
+  if (!pool) {
+    return 'programmed';
+  }
+
+  if (pool.status) {
+    return pool.status;
+  }
+
+  return pool.active ? 'programmed' : 'closed';
+};
+
+const getPoolOutcomeStats = (pool: FutPoolSnapshot | null | undefined) => {
+  const matches = Array.isArray(pool?.matches) ? pool.matches : [];
+  const total = Math.max(matches.length, 15);
+
+  if (matches.length === 0) {
+    const successes = typeof pool?.successes === 'number' ? pool.successes : 0;
+    const pending = Math.max(0, total - successes);
+    return {
+      successes,
+      failures: 0,
+      resolved: successes,
+      pending,
+      successRate: successes > 0 ? 100 : 0,
+      total,
+      elige8Successes: 0,
+    };
+  }
+
+  const successes = matches.filter(
+    (match: any) => match?.success === true,
+  ).length;
+  const failures = matches.filter(
+    (match: any) => match?.success === false,
+  ).length;
+  const resolved = successes + failures;
+  const pending = Math.max(0, total - resolved);
+  const elige8Successes = matches.filter(
+    (match: any) => match?.elige8 && match?.success === true,
+  ).length;
+  const successRate =
+    resolved > 0 ? Math.round((successes / resolved) * 100) : 0;
+
+  return {
+    successes,
+    failures,
+    resolved,
+    pending,
+    successRate,
+    total,
+    elige8Successes,
+  };
+};
+
 const normalizeDate = (source: Date | string | null | undefined) => {
   if (!source) {
     const fallback = new Date();
@@ -97,7 +164,12 @@ const normalizeDate = (source: Date | string | null | undefined) => {
 };
 
 export default function PoolsScreen() {
-  const { t } = useTranslation();
+  const router = useRouter();
+  const params = useLocalSearchParams<{ create?: string }>();
+  const { t, i18n } = useTranslation();
+  const { isDark } = useTheme();
+  const styles = useMemo(() => createStyles(isDark), [isDark]);
+  const { selectedTeam, loading: teamsLoading } = useTeams();
   const {
     user,
     loading: authLoading,
@@ -114,6 +186,14 @@ export default function PoolsScreen() {
   const [animateSeed, setAnimateSeed] = useState(0);
 
   const isAuthenticated = Boolean(user);
+  const teamReady =
+    !isAuthenticated || (!teamsLoading && Boolean(selectedTeam));
+
+  useEffect(() => {
+    if (isAuthenticated && !teamsLoading && !selectedTeam) {
+      router.replace('/teams' as Href);
+    }
+  }, [isAuthenticated, router, selectedTeam, teamsLoading]);
 
   const {
     loading: poolsLoading,
@@ -124,15 +204,14 @@ export default function PoolsScreen() {
     updatePoolSnapshot,
     setActivePool,
     loadPoolByIndex,
-  } = useFutPool({ enabled: isAuthenticated });
+    loadAllPools,
+  } = useFutPool({
+    enabled: isAuthenticated && teamReady,
+    teamId: selectedTeam?.id,
+  });
   const [activeIndex, setActiveIndex] = useState(0);
-  const [editVisible, setEditVisible] = useState(false);
-  const [creationVisible, setCreationVisible] = useState(false);
-  const [updatingPool, setUpdatingPool] = useState(false);
-  const [creatingPool, setCreatingPool] = useState(false);
-  const [finalizingPool, setFinalizingPool] = useState(false);
-
-  const carouselRef = useRef<ICarouselInstance | null>(null);
+  const [poolSelectorOpen, setPoolSelectorOpen] = useState(false);
+  const [poolSelectorLoading, setPoolSelectorLoading] = useState(false);
 
   // Animation refs (must be declared before any early returns)
   const gloveScale = useRef(new Animated.Value(1)).current;
@@ -192,6 +271,23 @@ export default function PoolsScreen() {
     return virtual;
   }, [pools, totalPools]);
 
+  const loadedPoolItems = useMemo(
+    () =>
+      virtualPools
+        .map((pool, index) => ({ pool, index }))
+        .filter(
+          (
+            item,
+          ): item is { pool: FutPoolSnapshot; index: number } =>
+            Boolean(item.pool),
+        ),
+    [virtualPools],
+  );
+  const poolSelectorItems = useMemo(
+    () => [...loadedPoolItems].sort((a, b) => b.index - a.index),
+    [loadedPoolItems],
+  );
+
   useEffect(() => {
     if (!isAuthenticated) {
       setActiveIndex(0);
@@ -214,13 +310,6 @@ export default function PoolsScreen() {
     if (!activePool && pools.length > 0) {
       setActiveIndex(latestIndex);
       setActivePool(pools[0]); // First loaded pool is the latest
-      requestAnimationFrame(() => {
-        // @ts-ignore: type from library accepts object with index
-        carouselRef.current?.scrollTo?.({
-          index: latestIndex,
-          animated: false,
-        });
-      });
       return;
     }
 
@@ -230,13 +319,6 @@ export default function PoolsScreen() {
       );
       if (resolvedIndex >= 0 && resolvedIndex !== activeIndex) {
         setActiveIndex(resolvedIndex);
-        requestAnimationFrame(() => {
-          // @ts-ignore: type from library accepts object with index
-          carouselRef.current?.scrollTo?.({
-            index: resolvedIndex,
-            animated: false,
-          });
-        });
       }
     }
   }, [
@@ -249,26 +331,16 @@ export default function PoolsScreen() {
     virtualPools,
   ]);
 
-  // Calculate header successes for the glove animation
-  // Rule: count successes among the first 14 matches; include the full15 match ONLY if the first 14 are all success
+  const activeOutcomeStats = useMemo(
+    () => getPoolOutcomeStats(activePool),
+    [activePool],
+  );
+
+  // Calculate header successes for the glove animation.
+  // Full-15 only contributes after the first 14 matches are all correct.
   const headerSuccesses = useMemo(() => {
-    const list = Array.isArray(activePool?.matches) ? activePool!.matches : [];
-    if (list.length === 0) {
-      return typeof activePool?.successes === 'number'
-        ? activePool.successes
-        : 0;
-    }
-
-    const nonFull15 = list.filter((m: any) => !m?.full15);
-    const full15Match = list.find((m: any) => m?.full15);
-
-    const baseSuccesses = nonFull15.reduce(
-      (acc: number, m: any) => acc + (m?.success === true ? 1 : 0),
-      0,
-    );
-    const includeFull15 = baseSuccesses === 14 && full15Match?.success === true;
-    return includeFull15 ? baseSuccesses + 1 : baseSuccesses;
-  }, [activePool?.matches, activePool?.successes]);
+    return activeOutcomeStats.successes;
+  }, [activeOutcomeStats.successes]);
 
   // Animate successes badge value from 0 to headerSuccesses in whole units over 3s
   useEffect(() => {
@@ -328,25 +400,25 @@ export default function PoolsScreen() {
             toValue: 1.28,
             duration: 140,
             easing: Easing.out(Easing.ease),
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           Animated.spring(gloveScale, {
             toValue: 1,
             friction: 3,
             tension: 140,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           Animated.timing(gloveScale, {
             toValue: 1.12,
             duration: 110,
             easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
           Animated.spring(gloveScale, {
             toValue: 1,
             friction: 4,
             tension: 120,
-            useNativeDriver: true,
+            useNativeDriver: Platform.OS !== 'web',
           }),
         ]).start();
       };
@@ -354,35 +426,6 @@ export default function PoolsScreen() {
     }
     lastHeaderSuccessesRef.current = headerSuccesses;
   }, [headerSuccesses, gloveScale]);
-
-  // Handle lazy loading when navigating to a new pool
-  const handleSnapToItem = useCallback(
-    async (index: number) => {
-      if (index !== activeIndex) {
-        setActiveIndex(index);
-
-        // Check if the pool at this index is already loaded
-        const pool = virtualPools[index];
-
-        if (pool) {
-          // Pool is already loaded
-          setActivePool(pool);
-        } else {
-          // Pool is not loaded yet, fetch it
-          // Convert virtual index to page index (0-based for loadPoolByIndex)
-          // virtualIndex 0 = oldest = page totalPools (1-indexed) = index totalPools-1 (0-indexed)
-          // virtualIndex totalPools-1 = latest = page 1 (1-indexed) = index 0 (0-indexed)
-          const pageIndex = totalPools - 1 - index;
-          const loadedPool = await loadPoolByIndex(pageIndex);
-
-          if (loadedPool) {
-            setActivePool(loadedPool);
-          }
-        }
-      }
-    },
-    [activeIndex, virtualPools, totalPools, loadPoolByIndex, setActivePool],
-  );
 
   const handleSignIn = async () => {
     try {
@@ -413,6 +456,26 @@ export default function PoolsScreen() {
     }
   };
 
+  const handleChangeTriples = async (value: number) => {
+    const normalizedValue = Math.max(TRIPLES_MIN, Math.min(TRIPLES_MAX, value));
+
+    if (!activePool?.id || (activePool.triples ?? 0) === normalizedValue) {
+      return;
+    }
+
+    try {
+      await updatePoolTriples(activePool.id, normalizedValue);
+      const updatedPool: FutPoolSnapshot = {
+        ...activePool,
+        triples: normalizedValue,
+      };
+      updatePoolSnapshot(updatedPool);
+    } catch (caughtError) {
+      console.error('Failed to update triples', caughtError);
+      showErrorToast(caughtError);
+    }
+  };
+
   const handleChangeElige8 = async (value: boolean) => {
     if (!activePool?.id) {
       return;
@@ -431,37 +494,31 @@ export default function PoolsScreen() {
     }
   };
 
-  const handleChangeMatchSuccess = async (matchId: string, value: boolean) => {
+  const refreshPoolResults = useCallback(async () => {
     if (!activePool?.id) {
       return;
     }
 
-    // Success changes are allowed for any user - no validation needed
-
     try {
-      const updatedMatch = await updateMatch(matchId, { success: value });
-
-      if (!Array.isArray(activePool.matches)) {
-        return;
-      }
-
-      const updatedMatches = activePool.matches.map((match) =>
-        String(match?.id ?? match?.matchId) === matchId
-          ? { ...match, success: value }
-          : match,
-      );
-
-      const updatedPool: FutPoolSnapshot = {
-        ...activePool,
-        matches: updatedMatches,
-        successes: updatedMatch.futPool.successes,
-      };
+      const updatedPool = await checkPoolResults(activePool.id);
       updatePoolSnapshot(updatedPool);
     } catch (caughtError) {
-      console.error('Error updating match success', caughtError);
-      showErrorToast(caughtError);
+      console.error('Failed to check official results', caughtError);
     }
-  };
+  }, [activePool?.id, updatePoolSnapshot]);
+
+  useEffect(() => {
+    if (!activePool?.id) {
+      return undefined;
+    }
+
+    void refreshPoolResults();
+    const intervalId = setInterval(() => {
+      void refreshPoolResults();
+    }, BACKGROUND_REFRESH_MS);
+
+    return () => clearInterval(intervalId);
+  }, [activePool?.id, refreshPoolResults]);
 
   const handleChangeMatchElige8 = async (matchId: string, value: boolean) => {
     if (!activePool?.id) {
@@ -614,12 +671,13 @@ export default function PoolsScreen() {
     }
   };
 
-  const goToIndex = async (index: number, animated = Platform.OS !== 'web') => {
+  const goToIndex = async (index: number) => {
     if (index < 0 || index >= totalPools) {
       return;
     }
 
     setActiveIndex(index);
+    setPoolSelectorOpen(false);
 
     // Check if pool is already loaded
     const pool = virtualPools[index];
@@ -633,411 +691,38 @@ export default function PoolsScreen() {
         setActivePool(loadedPool);
       }
     }
-    // @ts-ignore: carousel instance scrollTo accepts object with index
-    carouselRef.current?.scrollTo?.({ index, animated });
   };
 
-  const creationInitialValues = useMemo<PoolDetailsFormValues>(
-    () => ({
-      description: '',
-      doubles: 0,
-      triples: 0,
-      elige8: false,
-      active: true,
-      date: normalizeDate(new Date()),
-      earning: 0,
-    }),
-    [],
-  );
-
-  const buildEmptyMatchEntries = useCallback(
-    (): MatchFormEntry[] =>
-      Array.from({ length: 15 }, (_, index) => ({
-        order: index + 1,
-        homeTeam: '',
-        awayTeam: '',
-        userId: null,
-      })),
-    [],
-  );
-
-  const creationMatchInitialValues = useMemo<MatchFormEntry[]>(
-    () => buildEmptyMatchEntries(),
-    [buildEmptyMatchEntries],
-  );
-
-  const buildMatchesDescription = useCallback(
-    (pool: FutPoolSnapshot | null | undefined) => {
-      if (!pool?.matches || !Array.isArray(pool.matches)) {
-        return '';
-      }
-
-      return pool.matches
-        .map((match: any, index: number) => {
-          const order =
-            typeof match?.poolOrder === 'number' ? match.poolOrder : index + 1;
-          const home = match?.homeTeam
-            ? String(match.homeTeam)
-            : 'Equipo local';
-          const away = match?.awayTeam
-            ? String(match.awayTeam)
-            : 'Equipo visitante';
-          return `${order}. ${home} - ${away}`;
-        })
-        .join('\n');
-    },
-    [],
-  );
-
-  const editInitialValues = useMemo<PoolDetailsFormValues | null>(() => {
-    if (!activePool) {
-      return null;
+  const handleTogglePoolSelector = async () => {
+    const nextOpen = !poolSelectorOpen;
+    setPoolSelectorOpen(nextOpen);
+    if (!nextOpen || totalPools === 0 || pools.length >= totalPools) {
+      return;
     }
 
-    const baseDate = activePool.date
-      ? normalizeDate(activePool.date)
-      : normalizeDate(new Date());
-    return {
-      description: buildMatchesDescription(activePool),
-      doubles: typeof activePool.doubles === 'number' ? activePool.doubles : 0,
-      triples: typeof activePool.triples === 'number' ? activePool.triples : 0,
-      elige8: Boolean(activePool.elige8),
-      active: Boolean(activePool.active),
-      date: baseDate,
-      earning:
-        typeof activePool.earning === 'number'
-          ? activePool.earning
-          : Number((activePool as Record<string, unknown>).earning ?? 0) || 0,
-    };
-  }, [activePool, buildMatchesDescription]);
-
-  const editMatchInitialValues = useMemo<MatchFormEntry[]>(() => {
-    if (!Array.isArray(activePool?.matches)) {
-      return buildEmptyMatchEntries();
+    setPoolSelectorLoading(true);
+    try {
+      await loadAllPools();
+    } finally {
+      setPoolSelectorLoading(false);
     }
-    const base = buildEmptyMatchEntries();
-    const usersMap = new Map<string, MatchUserOption>();
+  };
 
-    const sortedMatches = [...activePool!.matches].sort((a: any, b: any) => {
-      const aOrder = Number(a?.poolOrder ?? a?.order ?? 0);
-      const bOrder = Number(b?.poolOrder ?? b?.order ?? 0);
-      return aOrder - bOrder;
-    });
-
-    sortedMatches.forEach((match: any, index) => {
-      const rawOrder = Number(match?.poolOrder ?? match?.order ?? index + 1);
-      const order = Number.isFinite(rawOrder)
-        ? Math.min(Math.max(rawOrder, 1), 15)
-        : index + 1;
-      const entry = base[order - 1];
-      entry.id = match?.id;
-      entry.homeTeam = String(match?.homeTeam ?? '');
-      entry.awayTeam = String(match?.awayTeam ?? '');
-      const userId = match?.user?.id ?? match?.userId ?? null;
-      entry.userId = userId ? String(userId) : null;
-      if (entry.userId) {
-        const option = usersMap.get(entry.userId);
-        const fallbackName =
-          match?.user?.name ??
-          match?.user?.fullName ??
-          match?.user?.displayName;
-        entry.userName = option?.name ?? fallbackName ?? entry.userName;
-      } else {
-        entry.userName = undefined;
-      }
-    });
-
-    return base;
-  }, [activePool?.matches, buildEmptyMatchEntries]);
-
-  const handleOpenCreation = useCallback(() => {
-    setCreationVisible(true);
-  }, []);
-
-  const handleCloseCreation = useCallback(() => {
-    setCreationVisible(false);
-  }, []);
-
-  const handleCreatePool = useCallback(
-    async (values: PoolDetailsFormValues) => {
-      try {
-        setCreatingPool(true);
-
-        // Transform matches for the API
-        const matches =
-          values.matches
-            ?.filter((match) => match.homeTeam.trim() || match.awayTeam.trim())
-            .map((match) => ({
-              order: match.order,
-              homeTeam: match.homeTeam.trim(),
-              awayTeam: match.awayTeam.trim(),
-              userId: match.userId || undefined,
-            })) || [];
-
-        await createPool({
-          doubles: values.doubles,
-          triples: values.triples,
-          elige8: values.elige8,
-          active: values.active,
-          date: `${values.date.getFullYear()}-${String(values.date.getMonth() + 1).padStart(2, '0')}-${String(values.date.getDate()).padStart(2, '0')}`,
-          earning: values.earning,
-          matches: matches,
-        });
-        setCreationVisible(false);
-        showToast('Quiniela creada', 'success');
-      } catch (error) {
-        console.error('Failed to create pool', error);
-        showErrorToast(error);
-      } finally {
-        setCreatingPool(false);
-      }
-    },
-    [showErrorToast, showToast],
-  );
-
-  const handleCloseEdit = useCallback(() => {
-    if (!updatingPool) {
-      setEditVisible(false);
+  useEffect(() => {
+    if (params.create === '1') {
+      router.replace('/create-pool' as Href);
     }
-  }, [updatingPool]);
+  }, [params.create, router]);
 
-  const handleEditFieldChange = useCallback(
-    async (field: PoolDetailsField, value: any) => {
-      if (!activePool?.id) {
-        return;
-      }
-
-      const payload: Record<string, unknown> = {};
-
-      switch (field) {
-        case 'doubles': {
-          const next = Number(value);
-          if (!Number.isFinite(next) || next === activePool.doubles) {
-            return;
-          }
-          payload.doubles = next;
-          break;
-        }
-        case 'triples': {
-          const next = Number(value);
-          if (!Number.isFinite(next) || next === (activePool.triples ?? 0)) {
-            return;
-          }
-          payload.triples = next;
-          break;
-        }
-        case 'elige8': {
-          const next = Boolean(value);
-          if (next === Boolean(activePool.elige8)) {
-            return;
-          }
-          payload.elige8 = next;
-          break;
-        }
-        case 'active': {
-          const next = Boolean(value);
-          if (next === Boolean(activePool.active)) {
-            return;
-          }
-          payload.active = next;
-          break;
-        }
-        case 'date': {
-          if (!(value instanceof Date)) {
-            return;
-          }
-          const currentDate = normalizeDate(activePool.date);
-          const nextDate = normalizeDate(value);
-          if (currentDate.getTime() === nextDate.getTime()) {
-            return;
-          }
-          payload.date = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}-${String(nextDate.getDate()).padStart(2, '0')}`;
-          break;
-        }
-        case 'description': {
-          const next = typeof value === 'string' ? value : String(value ?? '');
-          const currentDescription = (activePool as Record<string, unknown>)
-            ?.description;
-          if (
-            typeof currentDescription === 'string' &&
-            currentDescription === next
-          ) {
-            return;
-          }
-          payload.description = next;
-          break;
-        }
-        case 'earning': {
-          const currentValue =
-            typeof activePool.earning === 'number'
-              ? activePool.earning
-              : Number((activePool as Record<string, unknown>).earning ?? 0) ||
-                0;
-          const next = Number(value);
-          if (!Number.isFinite(next) || next === currentValue) {
-            return;
-          }
-          payload.earning = next;
-          break;
-        }
-        default:
-          return;
-      }
-
-      setUpdatingPool(true);
-      try {
-        const response = await updatePoolDetails(activePool.id, payload);
-
-        const mergedPool: FutPoolSnapshot = {
-          ...activePool,
-          ...(payload.doubles !== undefined
-            ? { doubles: payload.doubles as number }
-            : {}),
-          ...(payload.triples !== undefined
-            ? { triples: payload.triples as number }
-            : {}),
-          ...(payload.elige8 !== undefined
-            ? { elige8: payload.elige8 as boolean }
-            : {}),
-          ...(payload.active !== undefined
-            ? { active: payload.active as boolean }
-            : {}),
-          ...(payload.date !== undefined
-            ? { date: payload.date as string }
-            : {}),
-          ...(payload.earning !== undefined
-            ? { earning: payload.earning as number }
-            : {}),
-          ...(payload.description !== undefined
-            ? { description: payload.description as string }
-            : {}),
-        };
-
-        if (response && typeof response === 'object') {
-          const updated = response as Record<string, unknown>;
-          if (typeof updated.doubles === 'number') {
-            mergedPool.doubles = updated.doubles;
-          }
-          if (typeof updated.triples === 'number') {
-            mergedPool.triples = updated.triples;
-          }
-          if (typeof updated.elige8 === 'boolean') {
-            mergedPool.elige8 = updated.elige8;
-          }
-          if (typeof updated.active === 'boolean') {
-            mergedPool.active = updated.active;
-          }
-          if (updated.date) {
-            mergedPool.date = updated.date as string;
-          }
-          if (typeof updated.earning === 'number') {
-            mergedPool.earning = updated.earning;
-          }
-          if (typeof updated.description === 'string') {
-            mergedPool.description = updated.description;
-          }
-        }
-
-        updatePoolSnapshot(mergedPool);
-        setActivePool(mergedPool);
-      } catch (error) {
-        console.error('Failed to update pool field', error);
-        showErrorToast(error);
-        if (activePool) {
-          setActivePool({ ...activePool });
-        }
-      } finally {
-        setUpdatingPool(false);
-      }
-    },
-    [activePool, setActivePool, showErrorToast, updatePoolSnapshot],
-  );
-
-  const handleSubmitEdit = useCallback(
-    async (values: PoolDetailsFormValues) => {
-      if (!activePool?.id) {
-        return;
-      }
-
-      setUpdatingPool(true);
-      try {
-        const payload = {
-          description: values.description,
-          doubles: values.doubles,
-          triples: values.triples,
-          elige8: values.elige8,
-          active: values.active,
-          date: values.date.toISOString(),
-          earning: values.earning,
-        };
-
-        await updatePoolDetails(activePool.id, payload);
-
-        const updatedPool: FutPoolSnapshot = {
-          ...activePool,
-          doubles: values.doubles,
-          triples: values.triples,
-          elige8: values.elige8,
-          active: values.active,
-          date: values.date.toISOString(),
-          description: values.description,
-          earning: values.earning,
-        };
-
-        updatePoolSnapshot(updatedPool);
-        setActivePool(updatedPool);
-        setEditVisible(false);
-        showToast('Quiniela actualizada', 'success');
-      } catch (error) {
-        console.error('Failed to update pool details', error);
-        showErrorToast(error);
-      } finally {
-        setUpdatingPool(false);
-      }
-    },
-    [activePool, setActivePool, showErrorToast, showToast, updatePoolSnapshot],
-  );
-
-  const handleFinalizePool = useCallback(
-    async (earningValue: number) => {
-      if (!activePool?.id) {
-        return;
-      }
-
-      setFinalizingPool(true);
-      try {
-        const payload = {
-          earning: earningValue,
-          active: false,
-        };
-
-        await updatePoolDetails(activePool.id, payload);
-
-        const updatedPool: FutPoolSnapshot = {
-          ...activePool,
-          earning: earningValue,
-          active: false,
-        };
-
-        updatePoolSnapshot(updatedPool);
-        setActivePool(updatedPool);
-        setEditVisible(false);
-        showToast('Quiniela finalizada', 'success');
-      } catch (error) {
-        console.error('Failed to finalize pool', error);
-        showErrorToast(error);
-      } finally {
-        setFinalizingPool(false);
-      }
-    },
-    [activePool, setActivePool, showErrorToast, showToast, updatePoolSnapshot],
-  );
-
-  if (authLoading) {
+  if (
+    authLoading ||
+    (isAuthenticated && teamsLoading) ||
+    (isAuthenticated && !selectedTeam)
+  ) {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2d6cdf" />
+          <ActivityIndicator size="large" color="#D71920" />
           <Text style={styles.loadingText}>{t('status.preparing')}</Text>
         </View>
       </SafeAreaView>
@@ -1057,46 +742,6 @@ export default function PoolsScreen() {
     );
   }
 
-  const renderFutPoolCard = (item: FutPoolSnapshot | null) => {
-    if (!item) {
-      // Pool is not loaded yet, show loading indicator
-      return (
-        <View style={styles.carouselItem}>
-          <View style={styles.carouselInner}>
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#2d6cdf" />
-              <Text style={styles.loadingText}>
-                {t('pools.loading_single')}
-              </Text>
-            </View>
-          </View>
-        </View>
-      );
-    }
-
-    const successesCount = item.successes;
-
-    return (
-      <View style={styles.carouselItem}>
-        <View style={styles.carouselInner}>
-          <FutPoolCard
-            matches={item.matches}
-            active={item.active}
-            doubles={item.doubles}
-            elige8={Boolean(item.elige8)}
-            successes={successesCount}
-            currentUserId={user?.id}
-            onChangeDoubles={handleChangeDoubles}
-            onChangeElige8={handleChangeElige8}
-            onChangeMatchSuccess={handleChangeMatchSuccess}
-            onChangeMatchElige8={handleChangeMatchElige8}
-            onChangeMatchResults={handleChangeMatchResults}
-          />
-        </View>
-      </View>
-    );
-  };
-
   const dateDMY = (() => {
     const currentPool = virtualPools[activeIndex] ?? activePool ?? null;
     if (!currentPool?.date) {
@@ -1112,16 +757,441 @@ export default function PoolsScreen() {
     return `${dd}/${mm}/${yyyy}`;
   })();
 
-  const mainContent = (
-    <View style={styles.container}>
+  const selectedPool = virtualPools[activeIndex] ?? activePool ?? null;
+  const selectedMatches = Array.isArray(selectedPool?.matches)
+    ? selectedPool.matches
+    : [];
+  const selectedOutcomeStats = getPoolOutcomeStats(selectedPool);
+  const resolvedMatches = selectedOutcomeStats.resolved;
+  const pendingMatches = selectedOutcomeStats.pending;
+  const assignedToMe = selectedMatches.filter((match: any) => {
+    const assignedId = match?.user?.id ?? match?.userId;
+    return assignedId && user?.id && String(assignedId) === String(user.id);
+  }).length;
+  const selectedSuccesses = selectedOutcomeStats.successes;
+  const selectedFailures = selectedOutcomeStats.failures;
+  const selectedTotalMatches = selectedOutcomeStats.total;
+  const selectedElige8Successes = selectedOutcomeStats.elige8Successes;
+
+  const renderOutcomeSummary = (web = false) => (
+    <View style={[styles.poolOutcomeSummary, web && styles.webPoolOutcomeStats]}>
+      <View style={styles.poolOutcomeCounter}>
+        <Ionicons name="checkmark-circle" size={14} color="#157F3B" />
+        <Text
+          style={[styles.poolOutcomeSummaryText, styles.poolOutcomePositive]}
+        >
+          {selectedSuccesses}/{selectedTotalMatches}
+        </Text>
+      </View>
+      <View style={styles.poolOutcomeCounter}>
+        <Ionicons name="close-circle" size={14} color="#D71920" />
+        <Text
+          style={[styles.poolOutcomeSummaryText, styles.poolOutcomeNegative]}
+        >
+          {selectedFailures}/{selectedTotalMatches}
+        </Text>
+      </View>
+      <View style={styles.poolOutcomeCounter}>
+        <Ionicons name="time-outline" size={14} color="#A96A00" />
+        <Text style={[styles.poolOutcomeSummaryText, styles.poolOutcomePending]}>
+          {pendingMatches}/{selectedTotalMatches}
+        </Text>
+      </View>
+      {selectedPool?.elige8 ? (
+        <View style={styles.poolOutcomeCounter}>
+          <Text
+            style={[styles.poolOutcomeCounterPrefix, styles.poolOutcomeElige8]}
+          >
+            E8
+          </Text>
+          <Text
+            style={[styles.poolOutcomeSummaryText, styles.poolOutcomeElige8]}
+          >
+            {selectedElige8Successes}/8
+          </Text>
+        </View>
+      ) : null}
+    </View>
+  );
+
+  const formatPoolDate = (pool: FutPoolSnapshot | null | undefined) => {
+    if (!pool?.date) {
+      return t('pools.pool_fallback');
+    }
+    const dateObj = new Date(pool.date);
+    if (Number.isNaN(dateObj.getTime())) {
+      return t('pools.pool_fallback');
+    }
+    return new Intl.DateTimeFormat(i18n.language, {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(dateObj);
+  };
+
+  const renderPoolEditor = (pool: FutPoolSnapshot | null) => {
+    if (!pool) {
+      return (
+        <View style={styles.webEmptyState}>
+          <Ionicons name="calendar-outline" size={32} color="#D71920" />
+          <Text style={styles.webEmptyStateTitle}>
+            {t('pools.loading_single')}
+          </Text>
+        </View>
+      );
+    }
+
+    return (
+      <FutPoolCard
+        matches={pool.matches}
+        active={getPoolStatus(pool) === 'programmed'}
+        elige8Enabled={Boolean(pool.elige8)}
+        currentUserId={user?.id}
+        onChangeMatchElige8={handleChangeMatchElige8}
+        onChangeMatchResults={handleChangeMatchResults}
+      />
+    );
+  };
+
+  const renderPoolConfigControls = (
+    pool: FutPoolSnapshot | null,
+    compact = false,
+  ) => {
+    const canEdit = Boolean(
+      activePool?.id && getPoolStatus(pool) === 'programmed',
+    );
+    const doubles = pool?.doubles ?? 0;
+    const triples = pool?.triples ?? 0;
+    const elige8 = Boolean(pool?.elige8);
+    const useNativeStepper = Platform.OS !== 'web' && UIStepper;
+
+    return (
+      <View
+        style={[
+          styles.inlineConfigPanel,
+          compact && styles.inlineConfigPanelCompact,
+        ]}
+      >
+        <View style={styles.inlineStepper}>
+          <Text style={styles.inlineConfigLabel}>{t('fields.doubles')}</Text>
+          {useNativeStepper ? (
+            <View
+              style={[
+                styles.inlineNativeStepper,
+                !canEdit && styles.inlineStepperButtonDisabled,
+              ]}
+            >
+              <UIStepper
+                value={doubles}
+                onValueChange={(value: number) => handleChangeDoubles(value)}
+                minimumValue={DOUBLES_MIN}
+                maximumValue={DOUBLES_MAX}
+                steps={1}
+                disabled={!canEdit}
+                style={{ minWidth: 132 }}
+              />
+              <Text style={styles.inlineStepperValue}>{doubles}</Text>
+            </View>
+          ) : (
+            <View style={styles.inlineStepperShell}>
+              <TouchableOpacity
+                activeOpacity={canEdit ? 0.75 : 1}
+                disabled={!canEdit || doubles <= DOUBLES_MIN}
+                onPress={() => handleChangeDoubles(doubles - 1)}
+                style={[
+                  styles.inlineStepperButton,
+                  (!canEdit || doubles <= DOUBLES_MIN) &&
+                    styles.inlineStepperButtonDisabled,
+                ]}
+              >
+                <Text style={styles.inlineStepperButtonText}>-</Text>
+              </TouchableOpacity>
+              <Text style={styles.inlineStepperValue}>{doubles}</Text>
+              <TouchableOpacity
+                activeOpacity={canEdit ? 0.75 : 1}
+                disabled={!canEdit || doubles >= DOUBLES_MAX}
+                onPress={() => handleChangeDoubles(doubles + 1)}
+                style={[
+                  styles.inlineStepperButton,
+                  (!canEdit || doubles >= DOUBLES_MAX) &&
+                    styles.inlineStepperButtonDisabled,
+                ]}
+              >
+                <Text style={styles.inlineStepperButtonText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.inlineStepper}>
+          <Text style={styles.inlineConfigLabel}>{t('fields.triples')}</Text>
+          {useNativeStepper ? (
+            <View
+              style={[
+                styles.inlineNativeStepper,
+                !canEdit && styles.inlineStepperButtonDisabled,
+              ]}
+            >
+              <UIStepper
+                value={triples}
+                onValueChange={(value: number) => handleChangeTriples(value)}
+                minimumValue={TRIPLES_MIN}
+                maximumValue={TRIPLES_MAX}
+                steps={1}
+                disabled={!canEdit}
+                style={{ minWidth: 132 }}
+              />
+              <Text style={styles.inlineStepperValue}>{triples}</Text>
+            </View>
+          ) : (
+            <View style={styles.inlineStepperShell}>
+              <TouchableOpacity
+                activeOpacity={canEdit ? 0.75 : 1}
+                disabled={!canEdit || triples <= TRIPLES_MIN}
+                onPress={() => handleChangeTriples(triples - 1)}
+                style={[
+                  styles.inlineStepperButton,
+                  (!canEdit || triples <= TRIPLES_MIN) &&
+                    styles.inlineStepperButtonDisabled,
+                ]}
+              >
+                <Text style={styles.inlineStepperButtonText}>-</Text>
+              </TouchableOpacity>
+              <Text style={styles.inlineStepperValue}>{triples}</Text>
+              <TouchableOpacity
+                activeOpacity={canEdit ? 0.75 : 1}
+                disabled={!canEdit || triples >= TRIPLES_MAX}
+                onPress={() => handleChangeTriples(triples + 1)}
+                style={[
+                  styles.inlineStepperButton,
+                  (!canEdit || triples >= TRIPLES_MAX) &&
+                    styles.inlineStepperButtonDisabled,
+                ]}
+              >
+                <Text style={styles.inlineStepperButtonText}>+</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+
+        {Platform.OS !== 'web' ? (
+          <View
+            style={[
+              styles.inlineSwitchGroup,
+              !canEdit && styles.inlineToggleDisabled,
+            ]}
+          >
+            <Text style={styles.inlineSwitchLabel}>Elige8</Text>
+            <Switch
+              value={elige8}
+              disabled={!canEdit}
+              onValueChange={handleChangeElige8}
+              thumbColor={
+                Platform.OS === 'android'
+                  ? elige8
+                    ? '#0A70B5'
+                    : '#EEF3F2'
+                  : undefined
+              }
+              trackColor={{ false: '#B9C7C6', true: '#8CBFE2' }}
+            />
+          </View>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={canEdit ? 0.75 : 1}
+            disabled={!canEdit}
+            onPress={() => handleChangeElige8(!elige8)}
+            style={[
+              styles.inlineToggle,
+              elige8 && styles.inlineToggleActive,
+              !canEdit && styles.inlineToggleDisabled,
+            ]}
+          >
+            <Text
+              style={[
+                styles.inlineToggleText,
+                elige8 && styles.inlineToggleTextActive,
+              ]}
+            >
+              Elige8
+            </Text>
+          </TouchableOpacity>
+        )}
+      </View>
+    );
+  };
+
+  const renderPoolStatusPill = (
+    pool: FutPoolSnapshot | null | undefined,
+    compact = false,
+  ) => {
+    const status = getPoolStatus(pool);
+    const isProgrammed = status === 'programmed';
+    const isActivePool = status === 'active';
+    const isClosed = status === 'closed';
+    const iconColor = isProgrammed
+      ? '#A96A00'
+      : isActivePool
+        ? '#157F3B'
+        : '#FFFFFF';
+
+    return (
+      <View
+        style={[
+          styles.webStatusPill,
+          isProgrammed
+            ? styles.webStatusPillProgrammed
+            : isActivePool
+              ? styles.webStatusPillActive
+              : styles.webStatusPillClosed,
+          compact && styles.webStatusPillCompact,
+        ]}
+      >
+        <Ionicons
+          name={
+            isProgrammed
+              ? 'time-outline'
+              : isClosed
+                ? 'lock-closed-outline'
+                : 'lock-open-outline'
+          }
+          size={compact ? 12 : 13}
+          color={iconColor}
+        />
+        <Text
+          style={[
+            styles.webStatusPillText,
+            isProgrammed
+              ? styles.webStatusPillTextProgrammed
+              : isActivePool
+                ? styles.webStatusPillTextActive
+                : styles.webStatusPillTextClosed,
+          ]}
+        >
+          {t(`status.${status}`)}
+        </Text>
+      </View>
+    );
+  };
+
+  const renderWebWorkspace = () => (
+    <ScrollView
+      style={styles.webScroll}
+      contentContainerStyle={styles.webWorkspace}
+    >
       {poolsLoading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2d6cdf" />
+        <View style={styles.webLoadingPanel}>
+          <ActivityIndicator size="large" color="#D71920" />
           <Text style={styles.loadingText}>{t('pools.loading')}</Text>
         </View>
       ) : (
         <>
-          {/* Top controls: date, successes badge, and config button */}
+          <View style={styles.webWorkspaceHero}>
+            <View style={styles.webHeroActions}>
+            </View>
+          </View>
+
+          <View style={styles.webMainPanel}>
+            <View style={styles.webPoolSelector}>
+              <TouchableOpacity
+                onPress={handleTogglePoolSelector}
+                activeOpacity={0.78}
+                style={styles.webPoolSelectorButton}
+              >
+                <Ionicons name="calendar-outline" size={18} color="#D71920" />
+                <View style={styles.webPoolSelectorCopy}>
+                  <Text style={styles.webPoolSelectorLabel}>
+                    {t('pools.pool_selector_label')}
+                  </Text>
+                  <Text style={styles.webPoolSelectorValue}>
+                    {formatPoolDate(selectedPool)}
+                  </Text>
+                </View>
+                {poolSelectorLoading ? (
+                  <ActivityIndicator size="small" color="#D71920" />
+                ) : (
+                  <Ionicons
+                    name={poolSelectorOpen ? 'chevron-up' : 'chevron-down'}
+                    size={18}
+                    color="#5F6B7A"
+                  />
+                )}
+              </TouchableOpacity>
+
+              {poolSelectorOpen ? (
+                <ScrollView style={styles.webPoolSelectorMenu}>
+                  {poolSelectorItems.map(({ pool, index }) => {
+                    const activeHistoryItem = index === activeIndex;
+                    const poolOutcomeStats = getPoolOutcomeStats(pool);
+                    return (
+                      <TouchableOpacity
+                        key={pool.id}
+                        onPress={() => goToIndex(index)}
+                        activeOpacity={0.72}
+                        style={[
+                          styles.webPoolSelectorItem,
+                          activeHistoryItem &&
+                            styles.webPoolSelectorItemActive,
+                        ]}
+                      >
+                        <View style={styles.webPoolSelectorItemMain}>
+                          <Text
+                            style={[
+                              styles.webPoolSelectorItemDate,
+                              activeHistoryItem &&
+                                styles.webPoolSelectorItemDateActive,
+                            ]}
+                          >
+                            {formatPoolDate(pool)}
+                          </Text>
+                          {renderPoolStatusPill(pool, true)}
+                        </View>
+                        <View style={styles.webPoolSelectorScore}>
+                          <Ionicons name="trophy" size={13} color="#157F3B" />
+                          <Text style={styles.webPoolSelectorScoreText}>
+                            {poolOutcomeStats.successes}
+                          </Text>
+                        </View>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              ) : null}
+            </View>
+
+              <View style={styles.webPanelHeader}>
+                <View style={styles.webPoolHeaderMain}>
+                  <Text style={styles.webPanelTitle}>
+                    {formatPoolDate(selectedPool)}
+                  </Text>
+                  {renderOutcomeSummary(true)}
+                </View>
+                {renderPoolStatusPill(selectedPool)}
+              </View>
+              <View style={styles.webInlineConfigBar}>
+                {renderPoolConfigControls(selectedPool)}
+              </View>
+              <View style={styles.webPoolCardFrame}>
+                {renderPoolEditor(selectedPool)}
+              </View>
+            </View>
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
+        </>
+      )}
+    </ScrollView>
+  );
+
+  const mainContent = (
+    <View style={styles.container}>
+      {poolsLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#D71920" />
+          <Text style={styles.loadingText}>{t('pools.loading')}</Text>
+        </View>
+      ) : (
+        <>
+          {/* Top controls: date, result summary, and compact config */}
           {activePool && (
             <View style={styles.poolControls}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1136,7 +1206,7 @@ export default function PoolsScreen() {
                     <Ionicons
                       name="trophy"
                       size={14}
-                      color="#ffffff"
+                      color="#FFFFFF"
                       style={styles.poolSuccessesIcon}
                     />
                     <Text style={styles.poolSuccessesGloveTextLarge}>
@@ -1148,20 +1218,19 @@ export default function PoolsScreen() {
               {dateDMY && (
                 <View style={styles.poolDateContainer}>
                   <Text style={styles.poolDate}>{dateDMY}</Text>
+                  {renderOutcomeSummary()}
                 </View>
               )}
               <View style={styles.rightControls}>
-                <TouchableOpacity
-                  onPress={() => setEditVisible(true)}
-                  activeOpacity={0.8}
-                  style={{ marginLeft: 8, padding: 8 }}
-                  accessibilityLabel={t('pools.settings_accessibility')}
-                >
-                  <Ionicons name="settings-outline" size={30} color="#4A1A7A" />
-                </TouchableOpacity>
+                {renderPoolStatusPill(selectedPool)}
               </View>
             </View>
           )}
+          {activePool ? (
+            <View style={styles.mobileConfigPanel}>
+              {renderPoolConfigControls(selectedPool, true)}
+            </View>
+          ) : null}
           {totalPools > 1 && (
             <View style={styles.paginationDots}>
               {virtualPools.map((_, index) => (
@@ -1180,16 +1249,9 @@ export default function PoolsScreen() {
               ))}
             </View>
           )}
-          <Carousel
-            ref={carouselRef}
-            width={SCREEN_WIDTH}
-            height={CAROUSEL_HEIGHT}
-            data={virtualPools}
-            loop={false}
-            defaultIndex={Math.max(totalPools - 1, 0)}
-            onSnapToItem={handleSnapToItem}
-            renderItem={({ item }) => renderFutPoolCard(item)}
-          />
+          <View style={styles.mobilePoolFrame}>
+            {renderPoolEditor(selectedPool)}
+          </View>
           {error && <Text style={styles.errorText}>{error}</Text>}
         </>
       )}
@@ -1198,51 +1260,7 @@ export default function PoolsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      {Platform.OS === 'web' ? (
-        <ScrollView
-          style={styles.webScroll}
-          contentContainerStyle={styles.webScrollContent}
-        >
-          {mainContent}
-        </ScrollView>
-      ) : (
-        mainContent
-      )}
-      <TouchableOpacity
-        style={styles.floatingActionButton}
-        onPress={handleOpenCreation}
-        activeOpacity={0.85}
-        accessibilityLabel={t('pools.create_accessibility')}
-      >
-        <Ionicons name="add" size={28} color="#ffffff" />
-      </TouchableOpacity>
-      <PoolDetailsModal
-        visible={creationVisible}
-        title={t('pools.create_title')}
-        confirmLabel={t('actions.create')}
-        initialValues={creationInitialValues}
-        submitting={creatingPool}
-        mode="create"
-        onClose={handleCloseCreation}
-        onSubmit={handleCreatePool}
-        matchInitialValues={creationMatchInitialValues}
-      />
-      {activePool && editInitialValues && (
-        <PoolDetailsModal
-          visible={editVisible}
-          title={t('pools.edit_title')}
-          confirmLabel={t('actions.save')}
-          initialValues={editInitialValues}
-          submitting={updatingPool}
-          finalizing={finalizingPool}
-          mode="edit"
-          onClose={handleCloseEdit}
-          onSubmit={handleSubmitEdit}
-          onFinalize={handleFinalizePool}
-          matchInitialValues={editMatchInitialValues}
-          onFieldChange={handleEditFieldChange}
-        />
-      )}
+      {Platform.OS === 'web' ? renderWebWorkspace() : mainContent}
     </SafeAreaView>
   );
 }

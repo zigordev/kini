@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AvailablePoolsModule } from './available-pools/available-pools.module';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
 import { FutPoolMatchModule } from './fut-pool-match/fut-pool-match.module';
@@ -8,6 +10,7 @@ import { FutPoolModule } from './fut-pool/fut-pool.module';
 import { LogsModule } from './logs/logs.module';
 import { NotificationModule } from './notifications/notification.module';
 import { RumModule } from './rum/rum.module';
+import { TeamsModule } from './teams/teams.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -16,6 +19,7 @@ import { UsersModule } from './users/users.module';
       isGlobal: true,
       envFilePath: ['.env'],
     }),
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -49,9 +53,11 @@ import { UsersModule } from './users/users.module';
     UsersModule,
     AuthModule,
     EventsModule,
+    TeamsModule,
     NotificationModule,
     RumModule,
     LogsModule,
+    AvailablePoolsModule,
   ],
 })
 export class AppModule {}

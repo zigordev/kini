@@ -210,6 +210,60 @@ describe('GoogleAuthGuard', () => {
       );
     });
 
+    it('should use configured callback URL for Android emulator host', () => {
+      const mockRequest = {
+        query: {},
+        session: {},
+        headers: { host: '10.0.2.2:3012' },
+      } as unknown as Request;
+
+      const context = {
+        switchToHttp: jest.fn().mockReturnValue({
+          getRequest: jest.fn().mockReturnValue(mockRequest),
+        }),
+      } as unknown as ExecutionContext;
+
+      jest
+        .spyOn(
+          Object.getPrototypeOf(GoogleAuthGuard.prototype),
+          'getAuthenticateOptions',
+        )
+        .mockReturnValue({});
+
+      const options = guard.getAuthenticateOptions(context);
+
+      expect(options.callbackURL).toBe(
+        'http://localhost:3012/auth/google/callback',
+      );
+    });
+
+    it('should use configured callback URL for private network hosts', () => {
+      const mockRequest = {
+        query: {},
+        session: {},
+        headers: { host: '192.168.1.138:3012' },
+      } as unknown as Request;
+
+      const context = {
+        switchToHttp: jest.fn().mockReturnValue({
+          getRequest: jest.fn().mockReturnValue(mockRequest),
+        }),
+      } as unknown as ExecutionContext;
+
+      jest
+        .spyOn(
+          Object.getPrototypeOf(GoogleAuthGuard.prototype),
+          'getAuthenticateOptions',
+        )
+        .mockReturnValue({});
+
+      const options = guard.getAuthenticateOptions(context);
+
+      expect(options.callbackURL).toBe(
+        'http://localhost:3012/auth/google/callback',
+      );
+    });
+
     it('should handle x-forwarded-proto header', () => {
       const mockRequest = {
         query: {},

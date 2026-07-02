@@ -96,16 +96,20 @@ export class GoogleAuthGuard extends AuthGuard('google') {
   }
 
   private resolveCallbackUrl(request: Request): string | undefined {
-    const callbackUr = this.configService.get<string>('GOOGLE_CALLBACK_URL');
+    const callbackUrl = this.configService.get<string>('GOOGLE_CALLBACK_URL');
 
     const hostHeader = this.extractStringParam(request.headers?.host);
     if (!hostHeader) {
-      return callbackUr;
+      return callbackUrl;
+    }
+
+    if (this.isLocalOrPrivateHost(hostHeader)) {
+      return callbackUrl;
     }
 
     let callbackPath = '/auth/google/callback';
     try {
-      callbackPath = new URL(callbackUr).pathname || callbackPath;
+      callbackPath = new URL(callbackUrl).pathname || callbackPath;
     } catch {
       callbackPath = '/auth/google/callback';
     }
@@ -113,6 +117,38 @@ export class GoogleAuthGuard extends AuthGuard('google') {
     const protocol = this.resolveRequestProtocol(request) ?? 'http';
 
     return `${protocol}://${hostHeader}${callbackPath}`;
+  }
+
+  private isLocalOrPrivateHost(hostHeader: string): boolean {
+    const host = hostHeader.split(':')[0]?.toLowerCase();
+
+    if (!host) {
+      return false;
+    }
+
+    if (host === 'localhost' || host === '127.0.0.1' || host === '::1') {
+      return true;
+    }
+
+    if (host === '10.0.2.2') {
+      return true;
+    }
+
+    if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(host)) {
+      return true;
+    }
+
+    if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(host)) {
+      return true;
+    }
+
+    const match = /^172\.(\d{1,3})\.\d{1,3}\.\d{1,3}$/.exec(host);
+    if (!match) {
+      return false;
+    }
+
+    const secondOctet = Number(match[1]);
+    return secondOctet >= 16 && secondOctet <= 31;
   }
 
   private resolveRequestProtocol(request: Request): string | undefined {

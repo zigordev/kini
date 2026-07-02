@@ -20,6 +20,8 @@ describe('UsersService', () => {
     backgroundColor: '#FFFFFF',
     notificationsEnabled: true,
     language: 'en',
+    theme: 'light',
+    activeTeamId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   } as User;

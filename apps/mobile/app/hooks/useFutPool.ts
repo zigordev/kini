@@ -6,10 +6,12 @@ import showErrorToast, { resolveErrorMessage } from '../utils/toast';
 
 interface UseFutPoolOptions {
   enabled?: boolean;
+  teamId?: string;
 }
 
 const useFutPool = (options: UseFutPoolOptions = {}) => {
   const enabled = options.enabled ?? true;
+  const teamId = options.teamId;
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pools, setPools] = useState<FutPoolSnapshot[]>([]);
@@ -31,6 +33,7 @@ const useFutPool = (options: UseFutPoolOptions = {}) => {
         limit: 1,
         sortBy: 'date',
         sortOrder: 'desc',
+        teamId,
       });
 
       if (!response || !response.data || response.data.length === 0) {
@@ -59,7 +62,7 @@ const useFutPool = (options: UseFutPoolOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [enabled]);
+  }, [enabled, teamId]);
 
   // Load a specific pool by page number (counting from the latest)
   const loadPoolByIndex = useCallback(
@@ -76,6 +79,7 @@ const useFutPool = (options: UseFutPoolOptions = {}) => {
           limit: 1,
           sortBy: 'date',
           sortOrder: 'desc',
+          teamId,
         });
 
         if (!response || !response.data || response.data.length === 0) {
@@ -104,8 +108,48 @@ const useFutPool = (options: UseFutPoolOptions = {}) => {
         return null;
       }
     },
-    [enabled, totalPools],
+    [enabled, teamId, totalPools],
   );
+
+  const loadAllPools = useCallback(async () => {
+    if (!enabled || totalPools <= 0) {
+      return [];
+    }
+
+    try {
+      const response = await featchPools({
+        page: 1,
+        limit: totalPools,
+        sortBy: 'date',
+        sortOrder: 'desc',
+        teamId,
+      });
+
+      if (!response || !response.data || response.data.length === 0) {
+        return [];
+      }
+
+      const sortedPools = [...response.data].sort((a, b) => {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      });
+
+      loadedPoolIds.current.clear();
+      poolsMapRef.current.clear();
+      for (const pool of sortedPools) {
+        loadedPoolIds.current.add(pool.id);
+        poolsMapRef.current.set(pool.id, pool);
+      }
+
+      setTotalPools(response.meta.total);
+      setPools(sortedPools);
+      setError(null);
+      return sortedPools;
+    } catch (caughtError) {
+      console.error('Failed to load pool history:', caughtError);
+      showErrorToast(caughtError);
+      return [];
+    }
+  }, [enabled, teamId, totalPools]);
 
   useEffect(() => {
     if (!enabled) {
@@ -189,7 +233,7 @@ const useFutPool = (options: UseFutPoolOptions = {}) => {
       realtime.offPoolUpdated(handlePool);
       realtime.offMatchUpdated(handleMatch);
     };
-  }, [enabled, load]);
+  }, [enabled, load, teamId]);
 
   const updatePoolSnapshot = useCallback((updated: FutPoolSnapshot) => {
     setPools((previous) =>
@@ -214,6 +258,7 @@ const useFutPool = (options: UseFutPoolOptions = {}) => {
     refresh: load,
     updatePoolSnapshot,
     loadPoolByIndex,
+    loadAllPools,
   };
 };
 

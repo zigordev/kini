@@ -29,11 +29,27 @@ export class CreateMatchDto {
   awayTeam: string;
 
   @ApiProperty({ format: 'uuid' })
+  @IsOptional()
   @IsUUID()
-  userId: string;
+  userId?: string | null;
 }
 
 export class CreateFutPoolDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  teamId?: string;
+
+  @ApiPropertyOptional({ format: 'uuid' })
+  @IsOptional()
+  @IsUUID()
+  availablePoolId?: string;
+
   @ApiProperty({ default: 6 })
   @IsInt()
   doubles: number;

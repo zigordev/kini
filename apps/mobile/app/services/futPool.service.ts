@@ -10,6 +10,7 @@ interface FetchPoolsOptions {
   limit?: number;
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
+  teamId?: string;
 }
 
 interface PaginatedPoolsResponse {
@@ -33,12 +34,16 @@ export const featchPools = async (
       limit = 1,
       sortBy = 'date',
       sortOrder = 'desc',
+      teamId,
     } = options;
     const url = new URL(FUT_POOLS_ENDPOINT);
     url.searchParams.set('page', String(page));
     url.searchParams.set('limit', String(limit));
     url.searchParams.set('sortBy', sortBy);
     url.searchParams.set('sortOrder', sortOrder);
+    if (teamId) {
+      url.searchParams.set('teamId', teamId);
+    }
 
     const response = await fetch(url.toString(), {
       headers: {
@@ -65,8 +70,13 @@ export const featchPools = async (
   }
 };
 
-export const fetchStats = async (): Promise<Stats> => {
-  const response = await fetch(`${FUT_POOLS_ENDPOINT}/stats`, {
+export const fetchStats = async (teamId?: string): Promise<Stats> => {
+  const url = new URL(`${FUT_POOLS_ENDPOINT}/stats`);
+  if (teamId) {
+    url.searchParams.set('teamId', teamId);
+  }
+
+  const response = await fetch(url.toString(), {
     headers: {
       Accept: 'application/json',
     },
@@ -148,6 +158,7 @@ export const updatePoolElige8 = async (poolId: string, elige8: boolean) => {
 };
 
 type UpdatePoolDetailsPayload = {
+  name?: string | null;
   description?: string;
   doubles?: number;
   triples?: number;
@@ -165,6 +176,8 @@ type CreateMatchPayload = {
 };
 
 type CreatePoolPayload = {
+  name?: string | null;
+  teamId?: string;
   doubles: number;
   triples?: number;
   elige8?: boolean;
@@ -217,4 +230,24 @@ export const createPool = async (payload: CreatePoolPayload) => {
     console.error('Failed to create pool:', error);
     throw error;
   }
+};
+
+export const checkPoolResults = async (
+  poolId: string,
+): Promise<FutPoolSnapshot> => {
+  const response = await fetch(
+    resolveApiUrl(
+      `/available-pools/team-pools/${encodeURIComponent(poolId)}/check-results`,
+    ),
+    {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+      },
+      credentials: 'include',
+    },
+  );
+
+  await throwForErrorResponse(response);
+  return (await response.json()) as FutPoolSnapshot;
 };

@@ -1,7 +1,7 @@
 name: kini-ci
 
 services:
-  postgres:
+  kini_db:
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: kini
@@ -15,14 +15,14 @@ services:
       timeout: 3s
       retries: 20
 
-  api:
+  kini_api:
     build:
       context: ../apps/api
       dockerfile: Dockerfile.dev
     environment:
       NODE_ENV: test
       PORT: 3000
-      DATABASE_HOST: postgres
+      DATABASE_HOST: kini_db
       DATABASE_PORT: 5432
       DATABASE_USER: kini
       DATABASE_PASSWORD: kini
@@ -42,9 +42,13 @@ services:
       GOOGLE_CLIENT_SECRET: ci-google-client-secret
       GOOGLE_CALLBACK_URL: http://localhost:3012/auth/google/callback
       GOOGLE_MOBILE_REDIRECT_URI: kini://auth/callback
+      FRONTEND_URL: http://localhost:8081
+      NOTIFICATIONS_KAFKA_BROKERS: platform-redpanda:9092
+      NOTIFICATIONS_EMAIL_TOPIC: notification.email.requested.v1
+      EDUARDO_LOSILLA_SYNC_ENABLED: 'false'
     ports:
       - '3012:3000'
     depends_on:
-      postgres:
+      kini_db:
         condition: service_healthy
     command: ['npm', 'run', 'start:dev']

@@ -58,6 +58,17 @@ export class User {
   })
   language: string | null;
 
+  @Column({ type: 'varchar', length: 16, nullable: true })
+  @ApiProperty({
+    required: false,
+    description: 'Preferred theme mode',
+  })
+  theme: string | null;
+
+  @Column({ name: 'active_team_id', type: 'uuid', nullable: true })
+  @ApiProperty({ format: 'uuid', required: false, nullable: true })
+  activeTeamId: string | null;
+
   @CreateDateColumn({ name: 'created_at' })
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;

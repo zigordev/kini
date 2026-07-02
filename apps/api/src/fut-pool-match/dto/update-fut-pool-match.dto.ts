@@ -16,6 +16,12 @@ export class UpdateFutPoolMatchDto {
   @IsEnum(ALL_RESULTS, { each: true })
   results?: AllResults[];
 
+  @ApiPropertyOptional({ enum: ALL_RESULTS, isArray: true })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(ALL_RESULTS, { each: true })
+  officialResults?: AllResults[];
+
   @ApiPropertyOptional({ default: false })
   @IsOptional()
   @IsBoolean()

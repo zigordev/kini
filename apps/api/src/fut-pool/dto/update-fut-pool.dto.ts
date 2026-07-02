@@ -5,9 +5,15 @@ import {
   IsInt,
   IsNumber,
   IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class UpdateFutPoolDto {
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  name?: string | null;
+
   @ApiPropertyOptional({ default: false })
   @IsOptional()
   @IsBoolean()

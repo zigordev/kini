@@ -21,8 +21,18 @@ read_env_var_from_file() {
   printf '%s' "${line#*=}"
 }
 
-pull_tolgee_messages() {
+sync_tolgee_messages() {
   local project_id="$1"
+  echo "Pushing local translations to Tolgee..."
+  OPENBAO_ADDR="$OPENBAO_LOCAL_ADDR" \
+  OPENBAO_TOKEN="$openbao_token" \
+  OPENBAO_KV_MOUNT="$OPENBAO_KV_MOUNT" \
+  OPENBAO_SECRET_PATH="$OPENBAO_SECRET_PATH" \
+  OPENBAO_REQUIRED_KEYS="TOLGEE_API_KEY" \
+  TOLGEE_API_URL="$TOLGEE_LOCAL_ADDR" \
+  TOLGEE_PROJECT_ID="$project_id" \
+    node apps/api/scripts/openbao-run.mjs -- npm run i18n:push -w @kini/mobile
+
   echo "Pulling Tolgee snapshots for local messages..."
   OPENBAO_ADDR="$OPENBAO_LOCAL_ADDR" \
   OPENBAO_TOKEN="$openbao_token" \
@@ -32,6 +42,25 @@ pull_tolgee_messages() {
   TOLGEE_API_URL="$TOLGEE_LOCAL_ADDR" \
   TOLGEE_PROJECT_ID="$project_id" \
     node apps/api/scripts/openbao-run.mjs -- npm run i18n:pull -w @kini/mobile
+}
+
+sync_api_dependencies() {
+  echo "Synchronizing API dependencies when the lockfile changes..."
+  docker compose --env-file "${APP_ENV_FILE}" -f docker/compose.app.local.yml run \
+    --build \
+    --rm \
+    --no-deps \
+    --entrypoint sh \
+    kini_api \
+    -lc '
+      set -eu
+      lock_hash="$(sha256sum package-lock.json | awk "{print \$1}")"
+      marker="node_modules/.kini-package-lock.sha256"
+      if [ ! -f "$marker" ] || [ "$(cat "$marker")" != "$lock_hash" ]; then
+        npm ci
+        printf "%s" "$lock_hash" > "$marker"
+      fi
+    '
 }
 
 if [[ ! -f "${APP_ENV_FILE}" ]]; then
@@ -148,7 +177,9 @@ export POSTGRES_PASSWORD="$postgres_password"
 
 docker network create platform_ops_shared >/dev/null 2>&1 || true
 if [ -n "$tolgee_project_id" ]; then
-  pull_tolgee_messages "$tolgee_project_id"
+  sync_tolgee_messages "$tolgee_project_id"
 fi
 
-docker compose --env-file "${APP_ENV_FILE}" -f docker/compose.app.local.yml up -d --build
+sync_api_dependencies
+
+docker compose --env-file "${APP_ENV_FILE}" -f docker/compose.app.local.yml up -d --build --remove-orphans

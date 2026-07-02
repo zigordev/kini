@@ -74,6 +74,8 @@ describe('UsersController', () => {
         textColor: '#000000',
         backgroundColor: '#FFFFFF',
         language: 'en',
+        theme: 'light',
+        activeTeamId: null,
         createdAt: new Date(),
         updatedAt: new Date(),
       };

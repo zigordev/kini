@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FutPoolMatch } from 'src/fut-pool-match/entities/fut-pool-match.entity';
 import { User } from 'src/users/user.entity';
-import { FindOptionsOrder, Repository } from 'typeorm';
+import { FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
 import { CreateFutPoolDto } from './dto/create-fut-pool.dto';
 import { FutPoolQueryDto } from './dto/fut-pool-query.dto';
 import {
@@ -52,8 +52,9 @@ export class FutPoolRepository {
     };
   }
 
-  async getStats(): Promise<StatsDto> {
+  async getStats(teamId?: string): Promise<StatsDto> {
     const pools = await this.repository.find({
+      where: teamId ? { teamId } : undefined,
       relations: { matches: { user: true } },
       order: { date: 'ASC', matches: { poolOrder: 'ASC' } },
     });
@@ -156,6 +157,9 @@ export class FutPoolRepository {
     const matchesByUser = new Map<string, FutPoolMatch[]>();
 
     for (const match of matches) {
+      if (!match.user?.id) {
+        continue;
+      }
       const userMatches = matchesByUser.get(match.user.id) ?? [];
       userMatches.push(match);
       matchesByUser.set(match.user.id, userMatches);
@@ -369,13 +373,14 @@ export class FutPoolRepository {
   async findById(poolId: string): Promise<FutPool | null> {
     return this.repository.findOne({
       where: { id: poolId },
+      relations: { availablePool: true },
     });
   }
 
   async updatePool(poolId: string, update: UpdateFutPoolDto): Promise<FutPool> {
     const pool = await this.repository.findOne({
       where: { id: poolId },
-      relations: { matches: true },
+      relations: { availablePool: true, matches: true },
     });
 
     if (!pool) {
@@ -419,6 +424,12 @@ export class FutPoolRepository {
       pool.date = new Date(nextUpdate.date);
       delete nextUpdate.date;
     }
+    if (nextUpdate.name !== undefined) {
+      nextUpdate.name = nextUpdate.name.trim();
+      if (!nextUpdate.name) {
+        nextUpdate.name = null;
+      }
+    }
 
     Object.assign(pool, nextUpdate);
 
@@ -432,6 +443,7 @@ export class FutPoolRepository {
     const computedCost = baseCost * Math.pow(2, doubles) * Math.pow(3, triples);
 
     const pool = this.repository.create({
+      name: payload.name?.trim() || null,
       doubles: doubles,
       triples: triples,
       elige8: payload.elige8 ?? false,
@@ -439,6 +451,8 @@ export class FutPoolRepository {
       active: payload.active ?? true,
       cost: computedCost,
       earning: payload.earning ?? null,
+      teamId: payload.teamId ?? null,
+      availablePoolId: payload.availablePoolId ?? null,
     });
 
     const savedPool = await this.repository.save(pool);
@@ -457,9 +471,6 @@ export class FutPoolRepository {
             'Away team is required for all matches',
           );
         }
-        if (!match.userId) {
-          throw new BadRequestException('User ID is required for all matches');
-        }
       }
 
       const matchRepository =
@@ -475,6 +486,7 @@ export class FutPoolRepository {
           futPoolId: savedPool.id,
           userId: matchData.userId || null,
           results: [],
+          officialResults: [],
           success: null,
           elige8: false,
           full15: index === payload.matches.length - 1, // Last match has full15 = true
@@ -497,12 +509,12 @@ export class FutPoolRepository {
     // Return the pool with matches
     return this.repository.findOne({
       where: { id: savedPool.id },
-      relations: { matches: { user: true } },
+      relations: { availablePool: true, matches: { user: true } },
     });
   }
 
   private async loadPools(query: FutPoolQueryDto): Promise<LoadedPoolsResult> {
-    const { page, limit, sortBy, sortOrder } = query;
+    const { page, limit, sortBy, sortOrder, teamId } = query;
     const skip = (page - 1) * limit;
 
     const order: FindOptionsOrder<FutPool> = {
@@ -513,7 +525,10 @@ export class FutPoolRepository {
       sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
 
     const [items, total] = await this.repository.findAndCount({
-      relations: { matches: { user: true } },
+      where: teamId
+        ? ({ teamId } satisfies FindOptionsWhere<FutPool>)
+        : undefined,
+      relations: { availablePool: true, matches: { user: true } },
       order,
       skip,
       take: limit,
@@ -525,16 +540,36 @@ export class FutPoolRepository {
   private toResponseDto(entity: FutPool): FutPoolResponseDto {
     return {
       id: entity.id,
+      name: entity.name,
+      availablePoolId: entity.availablePoolId,
       doubles: entity.doubles,
       triples: entity.triples,
       elige8: entity.elige8,
       date: entity.date,
       active: entity.active,
+      status: this.getPoolStatus(entity),
       cost: entity.cost,
       earning: entity.earning,
+      teamId: entity.teamId,
       matches: entity.matches?.map(convertMatchToResponseDto) || [],
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
     };
+  }
+
+  private getPoolStatus(entity: FutPool): 'programmed' | 'active' | 'closed' {
+    if (!entity.active) {
+      return 'closed';
+    }
+
+    const deadline = new Date(entity.availablePool?.closingDate ?? entity.date);
+    if (!entity.availablePool?.closingDate) {
+      deadline.setHours(23, 59, 59, 999);
+    }
+    const deadlineTime = deadline.getTime();
+
+    return Number.isFinite(deadlineTime) && deadlineTime <= Date.now()
+      ? 'active'
+      : 'programmed';
   }
 }

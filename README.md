@@ -80,6 +80,9 @@ Keep non-secret OAuth and translation values in `docker/.env.app.local`, includi
 - `GOOGLE_CALLBACK_URL`
 - `GOOGLE_MOBILE_REDIRECT_URI`
 - `TOLGEE_PROJECT_ID`
+- `EDUARDO_LOSILLA_SYNC_ENABLED` (optional, defaults to `true`)
+- `EDUARDO_LOSILLA_QUINIELA_TICKET_URL` (optional published ticket source URL)
+- `EDUARDO_LOSILLA_QUINIELA_RESULTS_URL` (optional completed-results source URL)
 - `EXPO_WEB_PORT`
 
-Translations are authored in local Tolgee from `platform-ops`. After changing translations there, rerun `npm run local:up` to refresh the tracked `apps/mobile/app/locales/*.json` snapshots before committing them.
+Translations are authored in local Tolgee from `platform-ops`. `npm run local:up` first uploads local translation changes, then refreshes the tracked `apps/mobile/app/locales/*.json` snapshots before starting the app.

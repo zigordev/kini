@@ -183,9 +183,7 @@ export const AuthProvider = ({ children }: PropsWithChildren): ReactElement => {
             fallbackNativeRedirectUri)
           : mobileRedirectUri && mobileRedirectUri.length > 0
             ? mobileRedirectUri
-            : envRedirectUri && envRedirectUri.length > 0
-              ? envRedirectUri
-              : fallbackNativeRedirectUri;
+            : fallbackNativeRedirectUri;
 
       const loginUrl = new URL(resolveApiUrl('/auth/google'));
       loginUrl.searchParams.set('redirect_uri', redirectUri);

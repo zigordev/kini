@@ -7,6 +7,7 @@ type FutPoolMatch = {
   awayTeam: string;
   poolOrder: number;
   results: OptionValue[];
+  officialResults: OptionValue[];
   success: boolean;
   elige8: boolean;
   double: boolean;
