@@ -1,15 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import {
   FutPoolMatch,
   Result,
 } from '../fut-pool-match/entities/fut-pool-match.entity';
 import { FutPool } from '../fut-pool/entities/fut-pool.entity';
+import { EmailNotificationPublisher } from './email-notification.publisher';
 import { NotificationProducer } from './notification.producer';
 import { NotifierService } from './notifier.service';
 
 describe('NotifierService', () => {
   let service: NotifierService;
   let producer: jest.Mocked<NotificationProducer>;
+  let emailPublisher: jest.Mocked<EmailNotificationPublisher>;
 
   const mockPool: FutPool = {
     id: 'pool-123',
@@ -35,6 +38,19 @@ describe('NotifierService', () => {
             emit: jest.fn(),
           },
         },
+        {
+          provide: EmailNotificationPublisher,
+          useValue: {
+            buildTeamInvitationEvent: jest.fn(),
+            publishEmail: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('http://localhost:19006'),
+          },
+        },
       ],
     }).compile();
 
@@ -42,6 +58,19 @@ describe('NotifierService', () => {
     producer = module.get(
       NotificationProducer,
     ) as jest.Mocked<NotificationProducer>;
+    emailPublisher = module.get(
+      EmailNotificationPublisher,
+    ) as jest.Mocked<EmailNotificationPublisher>;
+    emailPublisher.buildTeamInvitationEvent.mockReturnValue({
+      messageId: 'message-123',
+      idempotencyKey: 'kini:team:team-123:invite:invitee@example.com',
+      sourceApp: 'kini',
+      channel: 'email',
+      templateId: 'kini.team-invitation',
+      recipient: { email: 'invitee@example.com' },
+      data: {},
+      requestedAt: '2026-06-25T00:00:00.000Z',
+    });
   });
 
   it('should be defined', () => {
@@ -209,6 +238,44 @@ describe('NotifierService', () => {
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('usuario de Old User a New User'),
+        }),
+      );
+    });
+  });
+
+  describe('sendTeamInvitation', () => {
+    it('should emit in-app notification and publish email event', async () => {
+      const invitation = {
+        to: 'invitee@example.com',
+        teamId: 'team-123',
+        teamName: 'My Team',
+        inviterEmail: 'owner@example.com',
+        inviterName: 'Owner',
+        acceptUrl: 'http://localhost:19006/teams/team-123/accept',
+        locale: 'en',
+      };
+
+      await service.sendTeamInvitation(invitation);
+
+      expect(producer.emit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'team',
+          title: 'Invitación a equipo',
+          teamId: 'team-123',
+          details: expect.objectContaining({
+            to: 'invitee@example.com',
+            teamName: 'My Team',
+            acceptUrl: 'http://localhost:19006/teams/team-123/accept',
+          }),
+        }),
+      );
+      expect(emailPublisher.buildTeamInvitationEvent).toHaveBeenCalledWith(
+        invitation,
+      );
+      expect(emailPublisher.publishEmail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          templateId: 'kini.team-invitation',
+          recipient: { email: 'invitee@example.com' },
         }),
       );
     });

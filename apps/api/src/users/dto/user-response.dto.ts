@@ -32,6 +32,16 @@ export class UserResponseDto {
   })
   language: string | null;
 
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    description: 'Preferred theme mode',
+  })
+  theme: string | null;
+
+  @ApiProperty({ format: 'uuid', required: false, nullable: true })
+  activeTeamId: string | null;
+
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: Date;
 

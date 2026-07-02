@@ -41,6 +41,8 @@ export class AuthService {
       textColor: user.textColor,
       backgroundColor: user.backgroundColor,
       language: user.language,
+      theme: user.theme,
+      activeTeamId: user.activeTeamId,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };

@@ -5,9 +5,10 @@ import { EventsGateway } from '../events/events.gateway';
 import { NotificationToken } from './notification-token.entity';
 
 export interface NotificationPayload {
-  type: 'pool' | 'match';
+  type: 'pool' | 'match' | 'team';
   title: string;
   body: string;
+  teamId?: string;
   poolId?: string;
   matchId?: string;
   recipientUserIds: string[];
@@ -33,18 +34,24 @@ export class NotificationProducer {
       where: { active: true },
       relations: ['user'],
     });
+    const recipientIds = new Set(payload.recipientUserIds ?? []);
+    const filteredTokens =
+      recipientIds.size > 0
+        ? activeTokens.filter((token) => recipientIds.has(token.userId))
+        : activeTokens;
 
-    if (!activeTokens.length) {
+    if (!filteredTokens.length) {
       return;
     }
 
-    const messages = activeTokens.map((t) => ({
+    const messages = filteredTokens.map((t) => ({
       to: t.token,
       sound: 'default',
       title: payload.title,
       body: payload.body,
       data: {
         type: payload.type,
+        teamId: payload.teamId,
         poolId: payload.poolId,
         matchId: payload.matchId,
         actorId: payload.actorId,

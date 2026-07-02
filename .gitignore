@@ -2,6 +2,7 @@
 node_modules/
 apps/*/node_modules/
 apps/*/package-lock.json
+!apps/api/package-lock.json
 .npm-cache/
 
 # build output

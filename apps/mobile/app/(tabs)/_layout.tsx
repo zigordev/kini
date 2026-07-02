@@ -1,105 +1,70 @@
 import { Ionicons } from '@expo/vector-icons';
-import * as Haptics from 'expo-haptics';
-import { Slot, Tabs } from 'expo-router';
-import { useTranslation } from 'react-i18next';
+import { Slot } from 'expo-router';
+import {
+  Icon,
+  Label,
+  NativeTabs,
+  VectorIcon,
+} from 'expo-router/unstable-native-tabs';
 import { Platform } from 'react-native';
-import '../i18n';
+import { useTranslation } from 'react-i18next';
 
+import { useTeams } from '../contexts/TeamContext';
+import { useTheme } from '../contexts/ThemeContext';
 import useAuth from '../hooks/useAuth';
+import { palette } from '../theme/design';
 
 export default function TabsLayout() {
-  // For web, render a simple layout with our custom navigation and the routed content.
-  if (Platform.OS === 'web') {
-    // Root layout already renders WebNavigation for web; avoid duplicating it here
+  const { t } = useTranslation();
+  const { user } = useAuth();
+  const { selectedTeam } = useTeams();
+  const { isDark } = useTheme();
+
+  if (Platform.OS === 'web' || !user || !selectedTeam) {
     return <Slot />;
   }
 
-  // Only access auth on native platforms to avoid any web TDZ/cycle issues
-  const { user } = useAuth();
-  const { t, i18n } = useTranslation();
-  const isAuthenticated = Boolean(user);
+  const backgroundColor = isDark ? palette.darkSurface : palette.surface;
+  const inactiveColor = isDark ? palette.darkMuted : palette.inkSubtle;
 
   return (
-    <Tabs
-      key={i18n.language}
-      initialRouteName="pools"
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: Platform.OS === 'ios' ? '#4A1A7A' : '#4A1A7A', // Brand purple
-        tabBarInactiveTintColor: Platform.OS === 'ios' ? '#8E8E93' : '#8B7BC7', // More purple, less pink
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: Platform.OS === 'ios' ? '500' : '600',
-          marginTop: Platform.OS === 'ios' ? 2 : 0,
-        },
-        tabBarStyle: {
-          display: isAuthenticated ? 'flex' : 'none',
-        },
-        tabBarIconStyle: {
-          marginTop: Platform.OS === 'ios' ? 2 : 0,
-        },
+    <NativeTabs
+      backgroundColor={backgroundColor}
+      iconColor={{ default: inactiveColor, selected: palette.primary }}
+      labelStyle={{
+        default: { color: inactiveColor, fontSize: 11, fontWeight: '600' },
+        selected: { color: palette.primary, fontSize: 11, fontWeight: '700' },
       }}
+      tintColor={palette.primary}
     >
-      <Tabs.Screen
-        name="pools"
-        options={{
-          tabBarLabel: t('tabs.pools'),
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'trophy' : 'trophy-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-        listeners={{
-          tabPress: () => {
-            if (Platform.OS === 'ios') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }
-          },
-        }}
-      />
-      <Tabs.Screen
-        name="stats"
-        options={{
-          tabBarLabel: t('tabs.stats'),
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'stats-chart' : 'stats-chart-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-        listeners={{
-          tabPress: () => {
-            if (Platform.OS === 'ios') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }
-          },
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarLabel: t('tabs.profile'),
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons
-              name={focused ? 'person-circle' : 'person-circle-outline'}
-              size={size}
-              color={color}
-            />
-          ),
-        }}
-        listeners={{
-          tabPress: () => {
-            if (Platform.OS === 'ios') {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            }
-          },
-        }}
-      />
-    </Tabs>
+      <NativeTabs.Trigger name="available-pools">
+        <Label>{t('mobile_tabs.available_pools')}</Label>
+        <Icon
+          src={<VectorIcon family={Ionicons} name="calendar-outline" />}
+          selectedColor={palette.primary}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="pools">
+        <Label>{t('mobile_tabs.pools')}</Label>
+        <Icon
+          src={<VectorIcon family={Ionicons} name="document-text-outline" />}
+          selectedColor={palette.primary}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="stats">
+        <Label>{t('tabs.stats')}</Label>
+        <Icon
+          src={<VectorIcon family={Ionicons} name="bar-chart-outline" />}
+          selectedColor={palette.primary}
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="profile">
+        <Label>{t('tabs.profile')}</Label>
+        <Icon
+          src={<VectorIcon family={Ionicons} name="person-outline" />}
+          selectedColor={palette.primary}
+        />
+      </NativeTabs.Trigger>
+    </NativeTabs>
   );
 }

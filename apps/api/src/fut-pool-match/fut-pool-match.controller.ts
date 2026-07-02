@@ -5,6 +5,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiOkResponse,
@@ -12,12 +13,14 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { FutPoolMatchResponseDto } from './dto/fut-pool-match-response.dto';
 import { UpdateFutPoolMatchDto } from './dto/update-fut-pool-match.dto';
 import { FutPoolMatchService } from './fut-pool-match.service';
 
 @Controller('fut-pool-match')
 @ApiTags('Pool match')
+@UseGuards(AuthenticatedGuard)
 export class FutPoolMatchController {
   constructor(private readonly futPoolMatchService: FutPoolMatchService) {}
 

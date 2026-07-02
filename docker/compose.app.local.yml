@@ -8,7 +8,7 @@ x-logging: &default-logging
     labels: 'com.docker.compose.project,com.docker.compose.service'
 
 services:
-  postgres:
+  kini_db:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
@@ -25,8 +25,12 @@ services:
       timeout: 3s
       retries: 20
     logging: *default-logging
+    networks:
+      default:
+        aliases:
+          - kini-postgres
 
-  api:
+  kini_api:
     build:
       context: ../apps/api
       dockerfile: Dockerfile.dev
@@ -34,7 +38,7 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      DATABASE_HOST: postgres
+      DATABASE_HOST: kini-postgres
       DATABASE_PORT: 5432
       DATABASE_USER: ${POSTGRES_USER:-kini}
       DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
@@ -51,6 +55,12 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:?GOOGLE_CALLBACK_URL is required}
       GOOGLE_MOBILE_REDIRECT_URI: ${GOOGLE_MOBILE_REDIRECT_URI:-kini://auth/callback}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:19006}
+      NOTIFICATIONS_KAFKA_BROKERS: ${NOTIFICATIONS_KAFKA_BROKERS:-platform-redpanda:9092}
+      NOTIFICATIONS_EMAIL_TOPIC: ${NOTIFICATIONS_EMAIL_TOPIC:-notification.email.requested.v1}
+      EDUARDO_LOSILLA_SYNC_ENABLED: ${EDUARDO_LOSILLA_SYNC_ENABLED:-true}
+      EDUARDO_LOSILLA_QUINIELA_TICKET_URL: ${EDUARDO_LOSILLA_QUINIELA_TICKET_URL:-https://www.eduardolosilla.es/quiniela/boletos}
+      EDUARDO_LOSILLA_QUINIELA_RESULTS_URL: ${EDUARDO_LOSILLA_QUINIELA_RESULTS_URL:-https://www.eduardolosilla.es/quiniela/ayudas/escrutinio}
       OPENBAO_ADDR: http://openbao:8200
       OPENBAO_TOKEN: ${OPENBAO_TOKEN:?OPENBAO_TOKEN is required}
       OPENBAO_KV_MOUNT: kv
@@ -58,11 +68,11 @@ services:
       OPENBAO_REQUIRED_KEYS: SESSION_SECRET,SESSION_COOKIE_SECRET,GOOGLE_CLIENT_SECRET
     volumes:
       - ../apps/api:/app
-      - api-node-modules:/app/node_modules
+      - kini-api-node-modules:/app/node_modules
     ports:
       - '3012:3000'
     depends_on:
-      postgres:
+      kini_db:
         condition: service_healthy
     command:
       ['node', 'scripts/openbao-run.mjs', '--', 'npm', 'run', 'start:dev']
@@ -73,7 +83,7 @@ services:
         aliases:
           - kini-api
 
-  mobile:
+  kini_mobile:
     build:
       context: ../apps/mobile
       dockerfile: Dockerfile.dev
@@ -86,15 +96,15 @@ services:
       EXPO_PUBLIC_AUTH_CALLBACK_URL: ${EXPO_PUBLIC_AUTH_CALLBACK_URL:-http://localhost:3012/auth/google/callback}
     volumes:
       - ../apps/mobile:/app
-      - mobile-node-modules:/app/node_modules
-      - mobile-expo:/app/.expo
+      - kini-mobile-node-modules:/app/node_modules
+      - kini-mobile-expo:/app/.expo
     ports:
       - '${EXPO_WEB_PORT:-19006}:8081'
       - '19000:19000'
       - '19001:19001'
       - '19002:19002'
     depends_on:
-      - api
+      - kini_api
     stdin_open: true
     tty: true
     logging: *default-logging
@@ -106,6 +116,6 @@ networks:
 
 volumes:
   app-local-pgdata:
-  api-node-modules:
-  mobile-node-modules:
-  mobile-expo:
+  kini-api-node-modules:
+  kini-mobile-node-modules:
+  kini-mobile-expo:

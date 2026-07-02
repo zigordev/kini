@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
 import { FutPool } from '../fut-pool/entities/fut-pool.entity';
 import { NotifierService } from '../notifications/notifier.service';
+import { TeamsService } from '../teams/teams.service';
 import { FutPoolMatch, Result } from './entities/fut-pool-match.entity';
 import { FutPoolMatchRepository } from './fut-pool-match.repository';
 import { FutPoolMatchService } from './fut-pool-match.service';
@@ -11,6 +12,7 @@ describe('FutPoolMatchService', () => {
   let repository: jest.Mocked<FutPoolMatchRepository>;
   let events: jest.Mocked<EventsGateway>;
   let notifier: jest.Mocked<NotifierService>;
+  let teams: jest.Mocked<TeamsService>;
 
   const mockPool: FutPool = {
     id: 'pool-123',
@@ -43,6 +45,7 @@ describe('FutPoolMatchService', () => {
           provide: FutPoolMatchRepository,
           useValue: {
             findById: jest.fn(),
+            isPoolPredictionsComplete: jest.fn(),
             update: jest.fn(),
           },
         },
@@ -56,6 +59,13 @@ describe('FutPoolMatchService', () => {
           provide: NotifierService,
           useValue: {
             notifyMatchUpdated: jest.fn(),
+            notifyPoolPredictionsCompleted: jest.fn(),
+          },
+        },
+        {
+          provide: TeamsService,
+          useValue: {
+            listActiveMemberUsers: jest.fn(),
           },
         },
       ],
@@ -67,6 +77,10 @@ describe('FutPoolMatchService', () => {
     ) as jest.Mocked<FutPoolMatchRepository>;
     events = module.get(EventsGateway) as jest.Mocked<EventsGateway>;
     notifier = module.get(NotifierService) as jest.Mocked<NotifierService>;
+    teams = module.get(TeamsService) as jest.Mocked<TeamsService>;
+
+    repository.isPoolPredictionsComplete.mockResolvedValue(false);
+    teams.listActiveMemberUsers.mockResolvedValue([]);
   });
 
   it('should be defined', () => {

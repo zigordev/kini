@@ -1,10 +1,12 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Button, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useTheme } from '../contexts/ThemeContext';
 import useAuth from '../hooks/useAuth';
-import styles from '../index.styles';
+import { createStyles } from '../index.styles';
+import { palette } from '../theme/design';
 import showErrorToast from '../utils/toast';
 
 export default function AuthCallbackScreen() {
@@ -15,6 +17,8 @@ export default function AuthCallbackScreen() {
     mobile_token?: string;
   }>();
   const { refresh } = useAuth();
+  const { isDark } = useTheme();
+  const styles = useMemo(() => createStyles(isDark), [isDark]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,7 +55,7 @@ export default function AuthCallbackScreen() {
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#2d6cdf" />
+          <ActivityIndicator size="large" color="#D71920" />
           <Text style={styles.loadingText}>Verificando sesión...</Text>
         </View>
       </SafeAreaView>
@@ -65,13 +69,11 @@ export default function AuthCallbackScreen() {
         <Text style={styles.authSubtitle}>
           {error ?? 'No pudimos validar tu sesión.'}
         </Text>
-        <TouchableOpacity
-          style={styles.authButton}
+        <Button
+          title="Volver al inicio"
           onPress={() => router.replace('/pools')}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.authButtonLabel}>Volver al inicio</Text>
-        </TouchableOpacity>
+          color={palette.primary}
+        />
       </View>
     </SafeAreaView>
   );

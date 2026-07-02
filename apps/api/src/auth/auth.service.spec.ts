@@ -23,6 +23,8 @@ describe('AuthService', () => {
     backgroundColor: '#FFFFFF',
     notificationsEnabled: true,
     language: 'en',
+    theme: 'light',
+    activeTeamId: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   } as User;
@@ -134,6 +136,8 @@ describe('AuthService', () => {
         textColor: '#000000',
         backgroundColor: '#FFFFFF',
         language: 'en',
+        theme: 'light',
+        activeTeamId: null,
         createdAt: mockUser.createdAt,
         updatedAt: mockUser.updatedAt,
       });

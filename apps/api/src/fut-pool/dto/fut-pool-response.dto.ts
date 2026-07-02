@@ -5,6 +5,9 @@ export class FutPoolResponseDto {
   @ApiProperty({ format: 'uuid' })
   id: string;
 
+  @ApiProperty({ required: false, nullable: true })
+  name?: string | null;
+
   @ApiProperty()
   doubles: number;
 
@@ -20,11 +23,20 @@ export class FutPoolResponseDto {
   @ApiProperty({ default: false })
   active: boolean;
 
+  @ApiProperty({ enum: ['programmed', 'active', 'closed'] })
+  status: 'programmed' | 'active' | 'closed';
+
   @ApiProperty({ required: false })
   cost: number;
 
   @ApiProperty({ required: false })
   earning: number;
+
+  @ApiProperty({ format: 'uuid', required: false, nullable: true })
+  teamId?: string | null;
+
+  @ApiProperty({ format: 'uuid', required: false, nullable: true })
+  availablePoolId?: string | null;
 
   @ApiProperty({ type: () => FutPoolMatchResponseDto, isArray: true })
   matches: FutPoolMatchResponseDto[];

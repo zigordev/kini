@@ -1,6 +1,13 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsIn, IsInt, IsOptional, IsPositive, IsString } from 'class-validator';
+import {
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsPositive,
+  IsString,
+  IsUUID,
+} from 'class-validator';
 
 export class FutPoolQueryDto {
   @IsOptional()
@@ -27,4 +34,9 @@ export class FutPoolQueryDto {
   @IsIn(['asc', 'desc'], { message: 'sortOrder must be "asc" or "desc"' })
   @ApiPropertyOptional({ enum: ['asc', 'desc'], default: 'asc' })
   sortOrder: 'asc' | 'desc' = 'asc';
+
+  @IsOptional()
+  @IsUUID()
+  @ApiPropertyOptional({ format: 'uuid' })
+  teamId?: string;
 }

@@ -52,10 +52,12 @@ describe('FutPoolController', () => {
 
       service.findAll.mockResolvedValue(expected);
 
-      const result = await controller.getFutPools(query);
+      const mockRequest = {};
+
+      const result = await controller.getFutPools(query, mockRequest);
 
       expect(result).toEqual(expected);
-      expect(service.findAll).toHaveBeenCalledWith(query);
+      expect(service.findAll).toHaveBeenCalledWith(query, undefined);
     });
   });
 
@@ -110,6 +112,7 @@ describe('FutPoolController', () => {
         elige8: false,
         date: new Date('2024-01-15'),
         active: true,
+        status: 'programmed' as const,
         cost: 3,
         earning: null,
         matches: [],
@@ -157,6 +160,7 @@ describe('FutPoolController', () => {
         elige8: false,
         date: new Date('2024-01-15'),
         active: true,
+        status: 'programmed' as const,
         cost: 6,
         earning: null,
         matches: [],

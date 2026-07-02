@@ -3,7 +3,7 @@ import { fetchStats } from '../services/futPool.service';
 import Stats from '../types/stats';
 import showErrorToast, { resolveErrorMessage } from '../utils/toast';
 
-const useStats = () => {
+const useStats = (teamId?: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [stats, setStats] = useState<Stats>();
@@ -11,7 +11,7 @@ const useStats = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const stats = await fetchStats();
+      const stats = await fetchStats(teamId);
 
       setStats(stats);
 
@@ -24,7 +24,7 @@ const useStats = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [teamId]);
 
   useEffect(() => {
     load();

@@ -20,6 +20,9 @@ export class FutPoolMatchResponseDto {
   @ApiProperty({ type: 'string', isArray: true })
   results: AllResults[];
 
+  @ApiProperty({ type: 'string', isArray: true })
+  officialResults: AllResults[];
+
   @ApiProperty({ nullable: true })
   success: boolean;
 

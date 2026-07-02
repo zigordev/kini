@@ -25,6 +25,6 @@ import { SessionSerializer } from './session.serializer';
     GoogleAuthGuard,
     MobileAuthTokenStore,
   ],
-  exports: [AuthService],
+  exports: [AuthService, AuthenticatedGuard],
 })
 export class AuthModule {}

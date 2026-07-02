@@ -7,6 +7,7 @@
    - `SESSION_COOKIE_SECRET`
    - `GOOGLE_CLIENT_SECRET`
    - `TOLGEE_API_KEY` once the Tolgee project exists
+   - `LOTERIAS_API_KEY` once external Quiniela sync is enabled
 3. Create the Tolgee project and API key if you want `local:up` to pull translation snapshots.
 4. Create a read-only OpenBao policy for `kini`.
 5. Create a `kini` OpenBao token from that policy.
@@ -35,6 +36,18 @@ Add the API key to the existing OpenBao path `kv/kini` without removing the othe
   "TOLGEE_API_KEY": "paste_tolgee_api_key_here"
 }
 ```
+
+## Optional Loterías API Sync
+
+To let Kini fetch available Quiniela pools and check official results, add the provider key to the same OpenBao path:
+
+```json
+{
+  "LOTERIAS_API_KEY": "paste_loterias_api_key_here"
+}
+```
+
+Do not put `LOTERIAS_API_KEY` in `docker/.env.app.local`; the API process receives it from OpenBao through `openbao-run`. The backend sync runs weekly on Monday at 08:00 and can also be triggered from the Available Pools screen. Without this key, the catalog screen still works but no external data is fetched.
 
 Keep the numeric project id in `docker/.env.app.local`:
 

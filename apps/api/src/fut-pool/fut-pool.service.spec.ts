@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
 import { NotifierService } from '../notifications/notifier.service';
+import { TeamsService } from '../teams/teams.service';
 import { FutPool } from './entities/fut-pool.entity';
 import { FutPoolRepository } from './fut-pool.repository';
 import { FutPoolService } from './fut-pool.service';
@@ -10,6 +11,7 @@ describe('FutPoolService', () => {
   let repository: jest.Mocked<FutPoolRepository>;
   let events: jest.Mocked<EventsGateway>;
   let notifier: jest.Mocked<NotifierService>;
+  let teamsService: jest.Mocked<Pick<TeamsService, 'assertMember'>>;
 
   const mockPool: FutPool = {
     id: 'pool-123',
@@ -52,6 +54,12 @@ describe('FutPoolService', () => {
             notifyPoolUpdated: jest.fn(),
           },
         },
+        {
+          provide: TeamsService,
+          useValue: {
+            assertMember: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -61,6 +69,7 @@ describe('FutPoolService', () => {
     ) as jest.Mocked<FutPoolRepository>;
     events = module.get(EventsGateway) as jest.Mocked<EventsGateway>;
     notifier = module.get(NotifierService) as jest.Mocked<NotifierService>;
+    teamsService = module.get(TeamsService);
   });
 
   it('should be defined', () => {
@@ -92,6 +101,39 @@ describe('FutPoolService', () => {
       const result = await service.findAll(query);
 
       expect(result).toEqual(expected);
+      expect(repository.findAll).toHaveBeenCalledWith(query);
+    });
+
+    it('should assert team membership when scoped by team', async () => {
+      const query = {
+        teamId: 'team-123',
+        page: 1,
+        limit: 10,
+        sortBy: 'date',
+        sortOrder: 'desc' as const,
+      };
+      const actor = { id: 'user-123' };
+      const expected = {
+        data: [],
+        meta: {
+          total: 0,
+          page: 1,
+          limit: 10,
+          totalPages: 1,
+          sortBy: 'date',
+          sortOrder: 'desc' as const,
+        },
+      };
+
+      repository.findAll.mockResolvedValue(expected);
+
+      const result = await service.findAll(query, actor);
+
+      expect(result).toEqual(expected);
+      expect(teamsService.assertMember).toHaveBeenCalledWith(
+        'team-123',
+        'user-123',
+      );
       expect(repository.findAll).toHaveBeenCalledWith(query);
     });
   });
@@ -128,6 +170,43 @@ describe('FutPoolService', () => {
 
       expect(result).toEqual(stats);
       expect(repository.getStats).toHaveBeenCalled();
+    });
+
+    it('should assert team membership when calculating team stats', async () => {
+      const stats = {
+        ranking: [],
+        balance: 100,
+        series: [],
+        resultBreakdown: [],
+        rankingTotal: {
+          successes: 0,
+          failures: 0,
+          successesPercentage: 0,
+          doubleSuccesses: 0,
+          doubleFailures: 0,
+          doubleSuccessesPercentage: 0,
+          tripleSuccesses: 0,
+          tripleFailures: 0,
+          tripleSuccessesPercentage: 0,
+          full15Successes: 0,
+          full15Failures: 0,
+          full15SuccessesPercentage: 0,
+          elige8Successes: 0,
+          elige8Failures: 0,
+          elige8SuccessesPercentage: 0,
+        },
+      };
+
+      repository.getStats.mockResolvedValue(stats);
+
+      const result = await service.getStats('team-123', { id: 'user-123' });
+
+      expect(result).toEqual(stats);
+      expect(teamsService.assertMember).toHaveBeenCalledWith(
+        'team-123',
+        'user-123',
+      );
+      expect(repository.getStats).toHaveBeenCalledWith('team-123');
     });
   });
 

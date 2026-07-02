@@ -67,6 +67,15 @@ export class FutPoolMatch {
   @ApiProperty({ type: 'string', isArray: true })
   results: AllResults[];
 
+  @Column({
+    name: 'official_results',
+    type: 'char',
+    array: true,
+    default: [],
+  })
+  @ApiProperty({ type: 'string', isArray: true })
+  officialResults: AllResults[];
+
   @Column({ type: 'boolean', nullable: true, default: null })
   @ApiProperty({ nullable: true })
   success: boolean;
@@ -80,6 +89,7 @@ export class FutPoolMatch {
   full15: boolean;
 
   @ManyToOne(() => User, {
+    nullable: true,
     eager: true,
   })
   @JoinColumn({ name: 'user_id' })
