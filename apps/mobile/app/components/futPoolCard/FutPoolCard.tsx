@@ -1,16 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { memo, useMemo } from 'react';
 import {
-  Platform,
   Pressable,
   ScrollView,
-  Switch,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 
 import { useTranslation } from 'react-i18next';
+import E8Badge from '../E8Badge';
+import E8Toggle from '../E8Toggle';
+import NativeOptionStack from '../NativeOptionStack';
 import { useTheme } from '../../contexts/ThemeContext';
 import { palette } from '../../theme/design';
 import {
@@ -60,37 +60,18 @@ const getSplitSelections = (
       : [];
 };
 
-const getOutcomeStyles = (
+const getOutcomeName = (
   success: unknown,
-  styles: ReturnType<typeof createStyles>,
-) => {
+): 'failure' | 'neutral' | 'success' => {
   if (success === true) {
-    return {
-      row: styles.rowSuccess,
-      matchNumberBadge: styles.matchNumberBadgeSuccess,
-      matchNumberText: styles.matchNumberTextSuccess,
-      optionBoxSelected: styles.optionBoxSelectedSuccess,
-      optionLabelSelected: styles.optionLabelSelectedSuccess,
-    };
+    return 'success';
   }
 
   if (success === false) {
-    return {
-      row: styles.rowFailure,
-      matchNumberBadge: styles.matchNumberBadgeFailure,
-      matchNumberText: styles.matchNumberTextFailure,
-      optionBoxSelected: styles.optionBoxSelectedFailure,
-      optionLabelSelected: styles.optionLabelSelectedFailure,
-    };
+    return 'failure';
   }
 
-  return {
-    row: undefined,
-    matchNumberBadge: styles.matchNumberBadgeNeutral,
-    matchNumberText: styles.matchNumberTextNeutral,
-    optionBoxSelected: styles.optionBoxSelectedNeutral,
-    optionLabelSelected: styles.optionLabelSelectedNeutral,
-  };
+  return 'neutral';
 };
 
 const FutPoolCard = ({
@@ -117,6 +98,11 @@ const FutPoolCard = ({
         <View style={[styles.table, !active && styles.tableDisabled]}>
           <View style={styles.tableHeader}>
             <Text style={styles.tableHeaderTitle}>{t('pools.matches')}</Text>
+            {elige8Enabled ? (
+              <View style={styles.e8HeaderColumn}>
+                <E8Badge />
+              </View>
+            ) : null}
           </View>
           {matches.map((row, index) => {
             const baseRowKey = String(row?.id ?? index + 1);
@@ -124,7 +110,6 @@ const FutPoolCard = ({
             const success = row?.success;
             const matchId = String(row?.id ?? index + 1);
             const isMatchInElige8 = Boolean(row?.elige8);
-            const outcomeStyles = getOutcomeStyles(success, styles);
             const isFull15 =
               Boolean(row?.full15) ||
               Number(row?.poolOrder ?? row?.order) === 15 ||
@@ -135,28 +120,23 @@ const FutPoolCard = ({
               return (
                 <Pressable
                   key={row?.id ?? index}
-                  style={[styles.row, outcomeStyles.row]}
+                  style={styles.row}
                 >
-                  <View
-                    style={[
-                      styles.matchNumberBadge,
-                      outcomeStyles.matchNumberBadge,
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.matchNumberText,
-                        outcomeStyles.matchNumberText,
-                      ]}
-                    >
+                  <View style={styles.matchNumberBadge}>
+                    <Text style={styles.matchNumberText}>
                       {index + 1}
                     </Text>
                   </View>
 
                   <View style={styles.matchInfoContainer}>
-                    <Text style={styles.rowText}>
-                      {row?.homeTeam} - {row?.awayTeam}
-                    </Text>
+                    <View style={styles.teamLines}>
+                      <Text style={styles.rowText} numberOfLines={1}>
+                        {row?.homeTeam}
+                      </Text>
+                      <Text style={styles.rowText} numberOfLines={1}>
+                        {row?.awayTeam}
+                      </Text>
+                    </View>
                     <View style={styles.userInfo}>
                       <Ionicons
                         name="person-outline"
@@ -175,96 +155,42 @@ const FutPoolCard = ({
                   </View>
 
                   <View style={styles.actionsContainer}>
-                    <View style={styles.resultButtonsContainer}>
-                      {REGULAR_OPTIONS.map((option, optionIndex) => {
-                        const isSelected = Array.isArray(results)
-                          ? results.includes(option)
-                          : false;
-
-                        const optionStyles: any[] = [styles.optionBox];
-                        if (optionIndex < REGULAR_OPTIONS.length - 1) {
-                          optionStyles.push(styles.optionSpacing);
+                    <View
+                      style={[
+                        styles.resultButtonsContainer,
+                        elige8Enabled && styles.resultButtonsWithE8Column,
+                      ]}
+                    >
+                      <NativeOptionStack
+                        disabled={!active}
+                        options={[...REGULAR_OPTIONS]}
+                        outcome={getOutcomeName(success)}
+                        selectedOptions={
+                          Array.isArray(results)
+                            ? results.map((value) => String(value))
+                            : []
                         }
-                        if (!active) {
-                          optionStyles.push(styles.optionBoxDisabled);
+                        onSelect={(option) =>
+                          onChangeMatchResults(
+                            matchId,
+                            option as OptionValue,
+                            index,
+                          )
                         }
-                        if (isSelected) {
-                          optionStyles.push(outcomeStyles.optionBoxSelected);
-                        }
-
-                        return (
-                          <TouchableOpacity
-                            key={option}
-                            activeOpacity={active ? 0.8 : 1}
-                            style={optionStyles}
-                            onPress={() =>
-                              onChangeMatchResults(matchId, option, index)
-                            }
-                            disabled={!active}
-                          >
-                            <Text
-                              style={[
-                                styles.optionLabel,
-                                !active && styles.optionLabelDisabled,
-                                isSelected &&
-                                  outcomeStyles.optionLabelSelected,
-                              ]}
-                            >
-                              {option}
-                            </Text>
-                          </TouchableOpacity>
-                        );
-                      })}
+                      />
                     </View>
-                    {elige8Enabled && Platform.OS !== 'web' ? (
-                      <View
-                        style={[
-                          styles.elige8SwitchGroup,
-                          !active && styles.elige8ToggleDisabled,
-                        ]}
-                      >
-                        <Text style={styles.elige8SwitchLabel}>E8</Text>
-                        <Switch
+                    {elige8Enabled ? (
+                      <View style={styles.e8Column}>
+                        <E8Toggle
                           value={isMatchInElige8}
                           disabled={!active}
+                          showBadge={false}
+                          style={styles.elige8SwitchGroup}
                           onValueChange={(value) =>
                             onChangeMatchElige8(matchId, value)
                           }
-                          thumbColor={
-                            Platform.OS === 'android'
-                              ? isMatchInElige8
-                                ? palette.accent
-                                : palette.backgroundSubtle
-                              : undefined
-                          }
-                          trackColor={{
-                            false: palette.borderStrong,
-                            true: '#8CBFE2',
-                          }}
                         />
                       </View>
-                    ) : elige8Enabled ? (
-                      <TouchableOpacity
-                        activeOpacity={active ? 0.75 : 1}
-                        disabled={!active}
-                        onPress={() =>
-                          onChangeMatchElige8(matchId, !isMatchInElige8)
-                        }
-                        style={[
-                          styles.elige8Toggle,
-                          isMatchInElige8 && styles.elige8ToggleActive,
-                          !active && styles.elige8ToggleDisabled,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.elige8ToggleText,
-                            isMatchInElige8 && styles.elige8ToggleTextActive,
-                          ]}
-                        >
-                          E8
-                        </Text>
-                      </TouchableOpacity>
                     ) : null}
                   </View>
                 </Pressable>
@@ -274,24 +200,10 @@ const FutPoolCard = ({
             return (
               <Pressable
                 key={row?.id ?? index}
-                style={[
-                  styles.full15Row,
-                  isLastRow && styles.lastRow,
-                  outcomeStyles.row,
-                ]}
+                style={[styles.full15Row, isLastRow && styles.lastRow]}
               >
-                <View
-                  style={[
-                    styles.matchNumberBadge,
-                    outcomeStyles.matchNumberBadge,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.matchNumberText,
-                      outcomeStyles.matchNumberText,
-                    ]}
-                  >
+                <View style={styles.matchNumberBadge}>
+                  <Text style={styles.matchNumberText}>
                     15
                   </Text>
                 </View>
@@ -324,49 +236,21 @@ const FutPoolCard = ({
                           {entry.label}
                         </Text>
                         <View style={styles.full15OptionsGroup}>
-                          {EXTENDED_OPTIONS.map((option, optionIndex) => {
-                            const isSelected = splitResults.includes(option);
-                            const optionStyles: any[] = [styles.optionBox];
-                            if (optionIndex < EXTENDED_OPTIONS.length - 1) {
-                              optionStyles.push(styles.optionSpacing);
+                          <NativeOptionStack
+                            disabled={!active}
+                            options={[...EXTENDED_OPTIONS]}
+                            outcome={getOutcomeName(success)}
+                            selectedOptions={splitResults}
+                            style={styles.full15OptionStack}
+                            onSelect={(option) =>
+                              onChangeMatchResults(
+                                matchId,
+                                option as OptionValue,
+                                index,
+                                entry.splitIndex,
+                              )
                             }
-                            if (!active) {
-                              optionStyles.push(styles.optionBoxDisabled);
-                            }
-                            if (isSelected) {
-                              optionStyles.push(
-                                outcomeStyles.optionBoxSelected,
-                              );
-                            }
-
-                            return (
-                              <TouchableOpacity
-                                key={`${entry.splitIndex}-${option}`}
-                                activeOpacity={active ? 0.8 : 1}
-                                style={optionStyles}
-                                onPress={() =>
-                                  onChangeMatchResults(
-                                    matchId,
-                                    option,
-                                    index,
-                                    entry.splitIndex,
-                                  )
-                                }
-                                disabled={!active}
-                              >
-                                <Text
-                                  style={[
-                                    styles.optionLabel,
-                                    !active && styles.optionLabelDisabled,
-                                    isSelected &&
-                                      outcomeStyles.optionLabelSelected,
-                                  ]}
-                                >
-                                  {option}
-                                </Text>
-                              </TouchableOpacity>
-                            );
-                          })}
+                          />
                         </View>
                       </View>
                     );

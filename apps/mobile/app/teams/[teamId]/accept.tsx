@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Button, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import NativeButton from '../../components/NativeButton';
 import { useTeams } from '../../contexts/TeamContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { createStyles } from '../../index.styles';
@@ -52,10 +53,10 @@ export default function AcceptTeamInvitationScreen() {
         </Text>
         <Text style={styles.authSubtitle}>{message}</Text>
         {done ? (
-          <Button
+          <NativeButton
             title={t('teams.go_to_team')}
             onPress={() => router.replace('/pools')}
-            color={palette.primary}
+            style={styles.authNativeButton}
           />
         ) : null}
       </View>

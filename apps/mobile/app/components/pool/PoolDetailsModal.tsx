@@ -1,5 +1,4 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import React, {
   forwardRef,
   useCallback,
@@ -14,21 +13,24 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Switch,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
+import E8Toggle from '../E8Toggle';
+import NativeDatePicker from '../NativeDatePicker';
+import NativeNumberSelect from '../NativeNumberSelect';
+import NativeSelect from '../NativeSelect';
 import { useTheme } from '../../contexts/ThemeContext';
 import { createStyles } from '../../index.styles';
 import { listUsers } from '../../services/users.service';
 import { palette } from '../../theme/design';
 
 const DOUBLES_MIN = 0;
-const DOUBLES_MAX = 8;
+const DOUBLES_MAX = 14;
 const TRIPLES_MIN = 0;
-const TRIPLES_MAX = 8;
+const TRIPLES_MAX = 9;
 
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
@@ -37,20 +39,6 @@ const normalizeDate = (source: Date) => {
   normalized.setHours(0, 0, 0, 0);
   return normalized;
 };
-
-// Conditional native modules
-let UIStepper: any = null;
-let DateTimePicker: any = null;
-
-if (Platform.OS !== 'web') {
-  try {
-    // @ts-ignore - library ships without types
-    UIStepper = require('react-native-ui-stepper').default;
-    DateTimePicker = require('@react-native-community/datetimepicker').default;
-  } catch (error) {
-    console.warn('Native components not available:', error);
-  }
-}
 
 export type MatchUserOption = {
   id: string;
@@ -194,9 +182,6 @@ const PoolDetailsModal = forwardRef<
   const [elige8, setElige8] = useState(initialValues.elige8);
   const [active, setActive] = useState(initialValues.active);
   const [date, setDate] = useState<Date>(normalizeDate(initialValues.date));
-  const [showNativeDatePicker, setShowNativeDatePicker] = useState(
-    Platform.OS === 'ios',
-  );
   const [matches, setMatches] = useState<MatchFormEntry[]>([]);
 
   const matchesDescription = useMemo(
@@ -212,7 +197,6 @@ const PoolDetailsModal = forwardRef<
       setElige8(initialValues.elige8);
       setActive(initialValues.active);
       setDate(normalizeDate(initialValues.date));
-      setShowNativeDatePicker(Platform.OS === 'ios');
       // Don't override matches here as they will be set by the normalizedMatches effect
 
       // Fetch users when modal opens
@@ -442,49 +426,17 @@ const PoolDetailsModal = forwardRef<
                       </View>
                     </View>
                   </View>
-                ) : DateTimePicker ? (
-                  <View style={styles.creationModalDateNative}>
-                    <TouchableOpacity
-                      onPress={() => setShowNativeDatePicker(true)}
-                      style={styles.creationModalDateButton}
-                      activeOpacity={0.8}
-                    >
-                      <Ionicons
-                        name="calendar-outline"
-                        size={20}
-                        color="#D71920"
-                        style={{ marginRight: 8 }}
-                      />
-                      <Text style={styles.creationModalDateButtonText}>
-                        {dateLabel}
-                      </Text>
-                    </TouchableOpacity>
-                    {showNativeDatePicker && (
-                      <DateTimePicker
-                        value={date}
-                        mode="date"
-                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                        onChange={(_event: any, selectedDate?: Date) => {
-                          if (Platform.OS === 'android') {
-                            setShowNativeDatePicker(false);
-                          }
-                          if (!selectedDate) {
-                            return;
-                          }
-                          const normalized = normalizeDate(selectedDate);
-                          setDate(normalized);
-                        }}
-                      />
-                    )}
-                  </View>
                 ) : (
-                  <View style={styles.creationModalDateFallback}>
-                    <Text style={styles.creationModalDateButtonText}>
-                      {dateLabel}
-                    </Text>
-                    <Text style={styles.creationModalDateFallbackHint}>
-                      {t('pools.update_app_for_date')}
-                    </Text>
+                  <View style={styles.creationModalDateNative}>
+                    <NativeDatePicker
+                      value={date}
+                      label={dateLabel}
+                      onChange={(selectedDate) => {
+                        const normalized = normalizeDate(selectedDate);
+                        setDate(normalized);
+                      }}
+                      style={styles.creationModalNativeButton}
+                    />
                   </View>
                 )}
               </View>
@@ -500,15 +452,14 @@ const PoolDetailsModal = forwardRef<
                 <Text style={styles.creationModalLabel}>
                   {t('fields.doubles')}
                 </Text>
-                {UIStepper ? (
+                {Platform.OS !== 'web' ? (
                   <View style={styles.creationModalNativeStepper}>
-                    <UIStepper
+                    <NativeNumberSelect
+                      title={t('fields.doubles')}
                       value={doubles}
-                      onValueChange={(value: number) => handleSetDoubles(value)}
-                      minimumValue={DOUBLES_MIN}
-                      maximumValue={DOUBLES_MAX}
-                      steps={1}
-                      style={{ minWidth: 140 }}
+                      min={DOUBLES_MIN}
+                      max={DOUBLES_MAX}
+                      onChange={handleSetDoubles}
                     />
                     <Text style={styles.creationModalStepperValue}>
                       {doubles}
@@ -558,15 +509,14 @@ const PoolDetailsModal = forwardRef<
                 <Text style={styles.creationModalLabel}>
                   {t('fields.triples')}
                 </Text>
-                {UIStepper ? (
+                {Platform.OS !== 'web' ? (
                   <View style={styles.creationModalNativeStepper}>
-                    <UIStepper
+                    <NativeNumberSelect
+                      title={t('fields.triples')}
                       value={triples}
-                      onValueChange={(value: number) => handleSetTriples(value)}
-                      minimumValue={TRIPLES_MIN}
-                      maximumValue={TRIPLES_MAX}
-                      steps={1}
-                      style={{ minWidth: 140 }}
+                      min={TRIPLES_MIN}
+                      max={TRIPLES_MAX}
+                      onChange={handleSetTriples}
                     />
                     <Text style={styles.creationModalStepperValue}>
                       {triples}
@@ -609,25 +559,7 @@ const PoolDetailsModal = forwardRef<
               </View>
               <View style={styles.creationModalElige8Group}>
                 <View style={styles.creationModalLabelRow}>
-                  <Text style={styles.creationModalLabel}>Elige</Text>
-                  <Text style={styles.creationModalElige8Badge}>8</Text>
-                </View>
-                <View style={styles.creationModalSwitchColumn}>
-                  <Switch
-                    value={elige8}
-                    onValueChange={handleToggleElige8}
-                    thumbColor={
-                      Platform.OS === 'android'
-                        ? elige8
-                          ? palette.accent
-                          : palette.backgroundSubtle
-                        : undefined
-                    }
-                    trackColor={{
-                      false: palette.borderStrong,
-                      true: palette.accentSoft,
-                    }}
-                  />
+                  <E8Toggle value={elige8} onValueChange={handleToggleElige8} />
                 </View>
               </View>
             </View>
@@ -703,22 +635,21 @@ const PoolDetailsModal = forwardRef<
                       </View>
                     ) : (
                       <View style={styles.userSelectorContainer}>
-                        <Picker
+                        <NativeSelect
+                          title={t('users.select')}
+                          placeholder={t('users.select')}
                           selectedValue={entry.userId ?? ''}
-                          onValueChange={(val) =>
-                            handleChangeUserSelect(index, String(val))
+                          onChange={(value) =>
+                            handleChangeUserSelect(index, value)
                           }
-                          mode="dropdown"
-                        >
-                          <Picker.Item label={t('users.select')} value="" />
-                          {users.map((u) => (
-                            <Picker.Item
-                              key={u.id}
-                              label={u.name}
-                              value={u.id}
-                            />
-                          ))}
-                        </Picker>
+                          options={[
+                            { label: t('users.select'), value: '' },
+                            ...users.map((u) => ({
+                              label: u.name,
+                              value: u.id,
+                            })),
+                          ]}
+                        />
                       </View>
                     )}
                   </View>

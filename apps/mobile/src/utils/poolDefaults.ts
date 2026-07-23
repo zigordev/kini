@@ -12,6 +12,9 @@ export const DEFAULT_POOL_DEFAULTS: PoolDefaults = {
   elige8: false,
 };
 
+const DOUBLES_MAX = 14;
+const TRIPLES_MAX = 9;
+
 const storageKey = (teamId: string) => `kini-pool-defaults:${teamId}`;
 
 const normalizePoolDefaults = (value: unknown): PoolDefaults => {
@@ -23,11 +26,11 @@ const normalizePoolDefaults = (value: unknown): PoolDefaults => {
   return {
     doubles:
       typeof candidate.doubles === 'number'
-        ? Math.max(0, Math.min(8, candidate.doubles))
+        ? Math.max(0, Math.min(DOUBLES_MAX, candidate.doubles))
         : DEFAULT_POOL_DEFAULTS.doubles,
     triples:
       typeof candidate.triples === 'number'
-        ? Math.max(0, Math.min(8, candidate.triples))
+        ? Math.max(0, Math.min(TRIPLES_MAX, candidate.triples))
         : DEFAULT_POOL_DEFAULTS.triples,
     elige8:
       typeof candidate.elige8 === 'boolean'

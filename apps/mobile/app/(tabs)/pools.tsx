@@ -10,11 +10,13 @@ import {
   ActivityIndicator,
   Animated,
   Easing,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Platform,
   ScrollView,
-  Switch,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -23,7 +25,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import type { Href } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import E8Toggle from '../components/E8Toggle';
 import FutPoolCard from '../components/futPoolCard/FutPoolCard';
+import NativeNumberSelect from '../components/NativeNumberSelect';
+import NativePoolConfigButton from '../components/NativePoolConfigButton';
 import { useTeams } from '../contexts/TeamContext';
 import { useTheme } from '../contexts/ThemeContext';
 import useAuth from '../hooks/useAuth';
@@ -46,20 +51,11 @@ import FutPoolSnapshot, {
 import showErrorToast, { showToast } from '../utils/toast';
 
 const DOUBLES_MIN = 0;
-const DOUBLES_MAX = 8;
+const DOUBLES_MAX = 14;
 const TRIPLES_MIN = 0;
-const TRIPLES_MAX = 8;
+const TRIPLES_MAX = 9;
 const DEFAULT_MATCH_USER_COLOR = '#D71920';
 const BACKGROUND_REFRESH_MS = 15 * 60 * 1000;
-
-let UIStepper: any = null;
-if (Platform.OS !== 'web') {
-  try {
-    UIStepper = require('react-native-ui-stepper').default;
-  } catch {
-    UIStepper = null;
-  }
-}
 
 const getPoolStatus = (
   pool: FutPoolSnapshot | null | undefined,
@@ -169,6 +165,8 @@ export default function PoolsScreen() {
   const { t, i18n } = useTranslation();
   const { isDark } = useTheme();
   const styles = useMemo(() => createStyles(isDark), [isDark]);
+  const { width: windowWidth } = useWindowDimensions();
+  const mobilePoolCarouselPageWidth = Math.max(1, Math.round(windowWidth));
   const { selectedTeam, loading: teamsLoading } = useTeams();
   const {
     user,
@@ -195,6 +193,10 @@ export default function PoolsScreen() {
     }
   }, [isAuthenticated, router, selectedTeam, teamsLoading]);
 
+  useEffect(() => {
+    mobilePoolHistoryRequestedRef.current = false;
+  }, [selectedTeam?.id]);
+
   const {
     loading: poolsLoading,
     error,
@@ -216,6 +218,8 @@ export default function PoolsScreen() {
   // Animation refs (must be declared before any early returns)
   const gloveScale = useRef(new Animated.Value(1)).current;
   const lastHeaderSuccessesRef = useRef<number>(0);
+  const mobilePoolCarouselRef = useRef<ScrollView | null>(null);
+  const mobilePoolHistoryRequestedRef = useRef(false);
 
   useEffect(() => {
     const handleNotification = (payload: any) => {
@@ -477,7 +481,7 @@ export default function PoolsScreen() {
   };
 
   const handleChangeElige8 = async (value: boolean) => {
-    if (!activePool?.id) {
+    if (!activePool?.id || Boolean(activePool.elige8) === value) {
       return;
     }
 
@@ -525,7 +529,7 @@ export default function PoolsScreen() {
       return;
     }
 
-    // Elige8 changes are allowed for any user - no validation needed
+    // E8 changes are allowed for any user - no validation needed
 
     try {
       await updateMatch(matchId, { elige8: value });
@@ -709,6 +713,49 @@ export default function PoolsScreen() {
   };
 
   useEffect(() => {
+    if (
+      Platform.OS === 'web' ||
+      !isAuthenticated ||
+      totalPools <= 1 ||
+      pools.length >= totalPools ||
+      poolSelectorLoading ||
+      mobilePoolHistoryRequestedRef.current
+    ) {
+      return;
+    }
+
+    let active = true;
+    mobilePoolHistoryRequestedRef.current = true;
+    setPoolSelectorLoading(true);
+    void loadAllPools().finally(() => {
+      if (active) {
+        setPoolSelectorLoading(false);
+      }
+    });
+
+    return () => {
+      active = false;
+    };
+  }, [
+    isAuthenticated,
+    loadAllPools,
+    poolSelectorLoading,
+    pools.length,
+    totalPools,
+  ]);
+
+  useEffect(() => {
+    if (Platform.OS === 'web' || totalPools <= 1) {
+      return;
+    }
+
+    mobilePoolCarouselRef.current?.scrollTo({
+      x: activeIndex * mobilePoolCarouselPageWidth,
+      animated: true,
+    });
+  }, [activeIndex, mobilePoolCarouselPageWidth, totalPools]);
+
+  useEffect(() => {
     if (params.create === '1') {
       router.replace('/create-pool' as Href);
     }
@@ -758,61 +805,6 @@ export default function PoolsScreen() {
   })();
 
   const selectedPool = virtualPools[activeIndex] ?? activePool ?? null;
-  const selectedMatches = Array.isArray(selectedPool?.matches)
-    ? selectedPool.matches
-    : [];
-  const selectedOutcomeStats = getPoolOutcomeStats(selectedPool);
-  const resolvedMatches = selectedOutcomeStats.resolved;
-  const pendingMatches = selectedOutcomeStats.pending;
-  const assignedToMe = selectedMatches.filter((match: any) => {
-    const assignedId = match?.user?.id ?? match?.userId;
-    return assignedId && user?.id && String(assignedId) === String(user.id);
-  }).length;
-  const selectedSuccesses = selectedOutcomeStats.successes;
-  const selectedFailures = selectedOutcomeStats.failures;
-  const selectedTotalMatches = selectedOutcomeStats.total;
-  const selectedElige8Successes = selectedOutcomeStats.elige8Successes;
-
-  const renderOutcomeSummary = (web = false) => (
-    <View style={[styles.poolOutcomeSummary, web && styles.webPoolOutcomeStats]}>
-      <View style={styles.poolOutcomeCounter}>
-        <Ionicons name="checkmark-circle" size={14} color="#157F3B" />
-        <Text
-          style={[styles.poolOutcomeSummaryText, styles.poolOutcomePositive]}
-        >
-          {selectedSuccesses}/{selectedTotalMatches}
-        </Text>
-      </View>
-      <View style={styles.poolOutcomeCounter}>
-        <Ionicons name="close-circle" size={14} color="#D71920" />
-        <Text
-          style={[styles.poolOutcomeSummaryText, styles.poolOutcomeNegative]}
-        >
-          {selectedFailures}/{selectedTotalMatches}
-        </Text>
-      </View>
-      <View style={styles.poolOutcomeCounter}>
-        <Ionicons name="time-outline" size={14} color="#A96A00" />
-        <Text style={[styles.poolOutcomeSummaryText, styles.poolOutcomePending]}>
-          {pendingMatches}/{selectedTotalMatches}
-        </Text>
-      </View>
-      {selectedPool?.elige8 ? (
-        <View style={styles.poolOutcomeCounter}>
-          <Text
-            style={[styles.poolOutcomeCounterPrefix, styles.poolOutcomeElige8]}
-          >
-            E8
-          </Text>
-          <Text
-            style={[styles.poolOutcomeSummaryText, styles.poolOutcomeElige8]}
-          >
-            {selectedElige8Successes}/8
-          </Text>
-        </View>
-      ) : null}
-    </View>
-  );
 
   const formatPoolDate = (pool: FutPoolSnapshot | null | undefined) => {
     if (!pool?.date) {
@@ -827,6 +819,24 @@ export default function PoolsScreen() {
       month: 'short',
       year: 'numeric',
     }).format(dateObj);
+  };
+
+  const handleMobilePoolCarouselScroll = (
+    event: NativeSyntheticEvent<NativeScrollEvent>,
+  ) => {
+    const nextIndex = Math.max(
+      0,
+      Math.min(
+        totalPools - 1,
+        Math.round(
+          event.nativeEvent.contentOffset.x /
+            mobilePoolCarouselPageWidth,
+        ),
+      ),
+    );
+    if (nextIndex !== activeIndex) {
+      void goToIndex(nextIndex);
+    }
   };
 
   const renderPoolEditor = (pool: FutPoolSnapshot | null) => {
@@ -863,7 +873,7 @@ export default function PoolsScreen() {
     const doubles = pool?.doubles ?? 0;
     const triples = pool?.triples ?? 0;
     const elige8 = Boolean(pool?.elige8);
-    const useNativeStepper = Platform.OS !== 'web' && UIStepper;
+    const useNativeNumberSelect = Platform.OS !== 'web';
 
     return (
       <View
@@ -874,21 +884,20 @@ export default function PoolsScreen() {
       >
         <View style={styles.inlineStepper}>
           <Text style={styles.inlineConfigLabel}>{t('fields.doubles')}</Text>
-          {useNativeStepper ? (
+          {useNativeNumberSelect ? (
             <View
               style={[
                 styles.inlineNativeStepper,
                 !canEdit && styles.inlineStepperButtonDisabled,
               ]}
             >
-              <UIStepper
+              <NativeNumberSelect
+                title={t('fields.doubles')}
                 value={doubles}
-                onValueChange={(value: number) => handleChangeDoubles(value)}
-                minimumValue={DOUBLES_MIN}
-                maximumValue={DOUBLES_MAX}
-                steps={1}
+                min={DOUBLES_MIN}
+                max={DOUBLES_MAX}
                 disabled={!canEdit}
-                style={{ minWidth: 132 }}
+                onChange={handleChangeDoubles}
               />
               <Text style={styles.inlineStepperValue}>{doubles}</Text>
             </View>
@@ -925,21 +934,20 @@ export default function PoolsScreen() {
 
         <View style={styles.inlineStepper}>
           <Text style={styles.inlineConfigLabel}>{t('fields.triples')}</Text>
-          {useNativeStepper ? (
+          {useNativeNumberSelect ? (
             <View
               style={[
                 styles.inlineNativeStepper,
                 !canEdit && styles.inlineStepperButtonDisabled,
               ]}
             >
-              <UIStepper
+              <NativeNumberSelect
+                title={t('fields.triples')}
                 value={triples}
-                onValueChange={(value: number) => handleChangeTriples(value)}
-                minimumValue={TRIPLES_MIN}
-                maximumValue={TRIPLES_MAX}
-                steps={1}
+                min={TRIPLES_MIN}
+                max={TRIPLES_MAX}
                 disabled={!canEdit}
-                style={{ minWidth: 132 }}
+                onChange={handleChangeTriples}
               />
               <Text style={styles.inlineStepperValue}>{triples}</Text>
             </View>
@@ -974,49 +982,11 @@ export default function PoolsScreen() {
           )}
         </View>
 
-        {Platform.OS !== 'web' ? (
-          <View
-            style={[
-              styles.inlineSwitchGroup,
-              !canEdit && styles.inlineToggleDisabled,
-            ]}
-          >
-            <Text style={styles.inlineSwitchLabel}>Elige8</Text>
-            <Switch
-              value={elige8}
-              disabled={!canEdit}
-              onValueChange={handleChangeElige8}
-              thumbColor={
-                Platform.OS === 'android'
-                  ? elige8
-                    ? '#0A70B5'
-                    : '#EEF3F2'
-                  : undefined
-              }
-              trackColor={{ false: '#B9C7C6', true: '#8CBFE2' }}
-            />
-          </View>
-        ) : (
-          <TouchableOpacity
-            activeOpacity={canEdit ? 0.75 : 1}
-            disabled={!canEdit}
-            onPress={() => handleChangeElige8(!elige8)}
-            style={[
-              styles.inlineToggle,
-              elige8 && styles.inlineToggleActive,
-              !canEdit && styles.inlineToggleDisabled,
-            ]}
-          >
-            <Text
-              style={[
-                styles.inlineToggleText,
-                elige8 && styles.inlineToggleTextActive,
-              ]}
-            >
-              Elige8
-            </Text>
-          </TouchableOpacity>
-        )}
+        <E8Toggle
+          value={elige8}
+          disabled={!canEdit}
+          onValueChange={handleChangeElige8}
+        />
       </View>
     );
   };
@@ -1024,6 +994,7 @@ export default function PoolsScreen() {
   const renderPoolStatusPill = (
     pool: FutPoolSnapshot | null | undefined,
     compact = false,
+    centered = false,
   ) => {
     const status = getPoolStatus(pool);
     const isProgrammed = status === 'programmed';
@@ -1045,6 +1016,7 @@ export default function PoolsScreen() {
               ? styles.webStatusPillActive
               : styles.webStatusPillClosed,
           compact && styles.webStatusPillCompact,
+          centered && styles.poolDateStatusPill,
         ]}
       >
         <Ionicons
@@ -1071,6 +1043,40 @@ export default function PoolsScreen() {
           {t(`status.${status}`)}
         </Text>
       </View>
+    );
+  };
+
+  const renderNativePoolConfigButton = (pool: FutPoolSnapshot | null) => {
+    if (Platform.OS === 'web' || !pool) {
+      return null;
+    }
+
+    const canEdit = Boolean(
+      activePool?.id && getPoolStatus(pool) === 'programmed',
+    );
+
+    return (
+      <NativePoolConfigButton
+        disabled={!canEdit}
+        doneTitle={t('actions.done')}
+        doubles={pool.doubles ?? 0}
+        doublesTitle={t('fields.doubles')}
+        elige8={Boolean(pool.elige8)}
+        e8Title="E8"
+        maxDoubles={DOUBLES_MAX}
+        maxTriples={TRIPLES_MAX}
+        minDoubles={DOUBLES_MIN}
+        minTriples={TRIPLES_MIN}
+        style={styles.nativePoolConfigButton}
+        title={t('pools.config')}
+        triples={pool.triples ?? 0}
+        triplesTitle={t('fields.triples')}
+        onChange={(value) => {
+          void handleChangeDoubles(value.doubles);
+          void handleChangeTriples(value.triples);
+          void handleChangeElige8(value.elige8);
+        }}
+      />
     );
   };
 
@@ -1164,9 +1170,8 @@ export default function PoolsScreen() {
                   <Text style={styles.webPanelTitle}>
                     {formatPoolDate(selectedPool)}
                   </Text>
-                  {renderOutcomeSummary(true)}
+                  {renderPoolStatusPill(selectedPool, true)}
                 </View>
-                {renderPoolStatusPill(selectedPool)}
               </View>
               <View style={styles.webInlineConfigBar}>
                 {renderPoolConfigControls(selectedPool)}
@@ -1191,7 +1196,7 @@ export default function PoolsScreen() {
         </View>
       ) : (
         <>
-          {/* Top controls: date, result summary, and compact config */}
+          {/* Top controls: date and status */}
           {activePool && (
             <View style={styles.poolControls}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -1218,40 +1223,40 @@ export default function PoolsScreen() {
               {dateDMY && (
                 <View style={styles.poolDateContainer}>
                   <Text style={styles.poolDate}>{dateDMY}</Text>
-                  {renderOutcomeSummary()}
+                  {renderPoolStatusPill(selectedPool, true, true)}
                 </View>
               )}
-              <View style={styles.rightControls}>
-                {renderPoolStatusPill(selectedPool)}
-              </View>
+              <View style={styles.rightControls} />
             </View>
           )}
-          {activePool ? (
-            <View style={styles.mobileConfigPanel}>
-              {renderPoolConfigControls(selectedPool, true)}
+          {totalPools > 1 && (
+            <ScrollView
+              ref={mobilePoolCarouselRef}
+              horizontal
+              pagingEnabled
+              decelerationRate="fast"
+              showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={handleMobilePoolCarouselScroll}
+              style={styles.mobilePoolEditorCarousel}
+            >
+              {virtualPools.map((pool, index) => (
+                <View
+                  key={pool?.id ?? `pool-page-${index}`}
+                  style={[
+                    styles.mobilePoolEditorPage,
+                    { width: mobilePoolCarouselPageWidth },
+                  ]}
+                >
+                  {renderPoolEditor(pool)}
+                </View>
+              ))}
+            </ScrollView>
+          )}
+          {totalPools <= 1 ? (
+            <View style={styles.mobilePoolFrame}>
+              {renderPoolEditor(selectedPool)}
             </View>
           ) : null}
-          {totalPools > 1 && (
-            <View style={styles.paginationDots}>
-              {virtualPools.map((_, index) => (
-                <TouchableOpacity
-                  key={index}
-                  onPress={() => goToIndex(index)}
-                  activeOpacity={0.7}
-                >
-                  <View
-                    style={[
-                      styles.paginationDot,
-                      index === activeIndex && styles.paginationDotActive,
-                    ]}
-                  />
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-          <View style={styles.mobilePoolFrame}>
-            {renderPoolEditor(selectedPool)}
-          </View>
           {error && <Text style={styles.errorText}>{error}</Text>}
         </>
       )}
@@ -1261,6 +1266,11 @@ export default function PoolsScreen() {
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
       {Platform.OS === 'web' ? renderWebWorkspace() : mainContent}
+      {Platform.OS !== 'web' && activePool ? (
+        <View style={styles.nativePoolConfigButtonSlot}>
+          {renderNativePoolConfigButton(selectedPool)}
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }

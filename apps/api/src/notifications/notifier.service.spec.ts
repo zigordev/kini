@@ -154,7 +154,7 @@ describe('NotifierService', () => {
 
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.stringContaining('elige8 a activado'),
+          body: expect.stringContaining('E8 activado'),
         }),
       );
     });
@@ -217,7 +217,7 @@ describe('NotifierService', () => {
 
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
-          body: expect.stringContaining('elige8 a activado'),
+          body: expect.stringContaining('E8 activado'),
         }),
       );
     });

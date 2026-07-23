@@ -167,7 +167,7 @@ describe('FutPoolRepository', () => {
       expect(result.rankingTotal.tripleSuccesses).toBe(1);
     });
 
-    it('should handle elige8 matches', async () => {
+    it('should handle E8 matches', async () => {
       const elige8Match = {
         ...mockMatch,
         elige8: true,

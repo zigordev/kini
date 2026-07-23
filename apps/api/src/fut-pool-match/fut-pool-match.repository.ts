@@ -107,7 +107,7 @@ export class FutPoolMatchRepository {
       throw new BadRequestException({
         code: 'FUT_POOL_MATCH.ELIGE8_LIMIT',
         params: { max: 8 },
-        message: 'The maximum number of elige8 matches is 8',
+        message: 'The maximum number of E8 matches is 8',
       });
     }
   }

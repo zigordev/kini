@@ -58,7 +58,7 @@ export class NotifierService {
       payload.elige8 !== undefined &&
       payload.elige8 !== oldPool.elige8
     ) {
-      changes.push(`elige8 a ${payload.elige8 ? 'activado' : 'desactivado'}`);
+      changes.push(`E8 ${payload.elige8 ? 'activado' : 'desactivado'}`);
     }
     const changeDescription =
       changes.length > 0 ? ` (${changes.join(', ')})` : '';
@@ -104,9 +104,7 @@ export class NotifierService {
       matchUpdate.elige8 !== undefined &&
       matchUpdate.elige8 !== oldMatch.elige8
     ) {
-      changes.push(
-        `elige8 a ${matchUpdate.elige8 ? 'activado' : 'desactivado'}`,
-      );
+      changes.push(`E8 ${matchUpdate.elige8 ? 'activado' : 'desactivado'}`);
     }
     if (
       oldMatch &&

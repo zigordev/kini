@@ -1,10 +1,11 @@
 import { Stack, useRouter } from 'expo-router';
 import type { Href } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
+import NativeButton from './components/NativeButton';
 import PoolDetailsModal, {
   MatchFormEntry,
   PoolDetailsFormHandle,
@@ -189,32 +190,21 @@ export default function CreatePoolScreen() {
             backgroundColor: isDark ? palette.darkSurface : palette.surface,
           },
           headerLeft: () => (
-            <Pressable onPress={handleClose} disabled={creatingPool}>
-              <Text
-                style={[
-                  styles.nativeHeaderAction,
-                  creatingPool && styles.nativeHeaderActionDisabled,
-                ]}
-              >
-                {t('actions.cancel')}
-              </Text>
-            </Pressable>
+            <NativeButton
+              title={t('actions.cancel')}
+              onPress={handleClose}
+              disabled={creatingPool}
+              variant="secondary"
+              style={styles.nativeHeaderButton}
+            />
           ),
           headerRight: () => (
-            <Pressable
+            <NativeButton
+              title={t('actions.create')}
               onPress={() => formRef.current?.submit()}
               disabled={creatingPool}
-            >
-              <Text
-                style={[
-                  styles.nativeHeaderAction,
-                  styles.nativeHeaderActionPrimary,
-                  creatingPool && styles.nativeHeaderActionDisabled,
-                ]}
-              >
-                {t('actions.create')}
-              </Text>
-            </Pressable>
+              style={styles.nativeHeaderButton}
+            />
           ),
         }}
       />

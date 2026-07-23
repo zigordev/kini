@@ -8,7 +8,7 @@ const createStyles = (isDark = false) =>
     {
       safeArea: {
         flex: 1,
-        backgroundColor: '#F6F7F4',
+        backgroundColor: '#FFFFFF',
         position: 'relative',
       },
       mobileMenuWrapper: {
@@ -20,7 +20,7 @@ const createStyles = (isDark = false) =>
       container: {
         flex: 1,
         height: '100%',
-        backgroundColor: '#F6F7F4',
+        backgroundColor: '#FFFFFF',
         paddingTop: 20,
       },
       authContainer: {
@@ -78,6 +78,10 @@ const createStyles = (isDark = false) =>
         fontSize: 16,
         fontWeight: '600',
         color: '#17202A',
+      },
+      authNativeButton: {
+        width: 190,
+        height: 44,
       },
       sessionHeader: {
         paddingHorizontal: 24,
@@ -165,35 +169,53 @@ const createStyles = (isDark = false) =>
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        marginHorizontal: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        marginHorizontal: 0,
         marginBottom: 14,
         position: 'relative',
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: '#D8E1E1',
-        borderRadius: 12,
-        backgroundColor: '#FFFFFF',
-        shadowColor: '#000000',
-        shadowOpacity: 0.06,
-        shadowRadius: 12,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 4,
+        borderRadius: Platform.OS === 'web' ? 12 : 0,
+        backgroundColor: Platform.OS === 'web' ? '#FFFFFF' : 'transparent',
+        ...(Platform.OS === 'web'
+          ? {
+              shadowColor: '#000000',
+              shadowOpacity: 0.06,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 6 },
+              elevation: 4,
+            }
+          : {}),
       },
       rightControls: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 12,
       },
-      mobileConfigPanel: {
-        marginHorizontal: 8,
-        marginBottom: 12,
+      nativePoolConfigButton: {
+        width: 44,
+        height: 44,
+      },
+      nativePoolConfigButtonSlot: {
+        position: 'absolute',
+        top: Platform.OS === 'web' ? 8 : 64,
+        right: Platform.OS === 'web' ? 12 : 14,
+        zIndex: 25,
+        elevation: 12,
       },
       mobilePoolFrame: {
         flex: 1,
         minHeight: 0,
         marginHorizontal: 0,
-        paddingBottom: 0,
+      },
+      mobilePoolEditorCarousel: {
+        flex: 1,
+        width: '100%',
+      },
+      mobilePoolEditorPage: {
+        flex: 1,
+        minHeight: 0,
       },
       inlineConfigPanel: {
         flexDirection: 'row',
@@ -252,43 +274,6 @@ const createStyles = (isDark = false) =>
         fontWeight: '900',
         textAlign: 'center',
       },
-      inlineToggle: {
-        minHeight: 36,
-        alignSelf: 'flex-end',
-        justifyContent: 'center',
-        paddingHorizontal: 14,
-        borderWidth: 1,
-        borderColor: '#D8E1E1',
-        borderRadius: 8,
-        backgroundColor: '#FFFFFF',
-      },
-      inlineToggleActive: {
-        borderColor: '#0A70B5',
-        backgroundColor: '#E7F2FA',
-      },
-      inlineToggleDisabled: {
-        opacity: 0.55,
-      },
-      inlineToggleText: {
-        color: '#17202A',
-        fontSize: 13,
-        fontWeight: '900',
-      },
-      inlineToggleTextActive: {
-        color: '#0A70B5',
-      },
-      inlineSwitchGroup: {
-        minHeight: 36,
-        alignSelf: 'flex-end',
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-      },
-      inlineSwitchLabel: {
-        color: '#17202A',
-        fontSize: 13,
-        fontWeight: '900',
-      },
       poolDateContainer: {
         position: 'absolute',
         left: 0,
@@ -301,6 +286,9 @@ const createStyles = (isDark = false) =>
         fontWeight: '800',
         color: '#17202A',
         textAlign: 'center',
+      },
+      poolDateStatusPill: {
+        alignSelf: 'center',
       },
       poolOutcomeStats: {
         marginTop: 2,
@@ -326,10 +314,6 @@ const createStyles = (isDark = false) =>
         flexDirection: 'row',
         alignItems: 'center',
         gap: 3,
-      },
-      poolOutcomeCounterPrefix: {
-        fontSize: 11,
-        fontWeight: '900',
       },
       poolOutcomePositive: {
         color: '#157F3B',
@@ -579,37 +563,6 @@ const createStyles = (isDark = false) =>
       carouselButtonLabelDisabled: {
         color: '#A7B1BE',
       },
-      paginationDots: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 8,
-        marginTop: 6,
-        marginBottom: 4,
-      },
-      paginationOverlay: {
-        position: 'absolute',
-        left: 0,
-        right: 0,
-        bottom: 8,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 8,
-        pointerEvents: 'box-none',
-      },
-      paginationDot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-        backgroundColor: '#F4A8AC',
-      },
-      paginationDotActive: {
-        width: 20,
-        height: 8,
-        borderRadius: 6,
-        backgroundColor: '#D71920',
-      },
       floatingActionButton: {
         position: 'absolute',
         right: 24,
@@ -629,33 +582,21 @@ const createStyles = (isDark = false) =>
       },
       creationModalScreenContainer: {
         flex: 1,
-        backgroundColor: '#F7F7F5',
+        backgroundColor: '#FFFFFF',
       },
       creationModalScreenContent: {
         flex: 1,
-        backgroundColor: '#F7F7F5',
+        backgroundColor: '#FFFFFF',
       },
       creationModalScroll: {
         flex: 1,
-        backgroundColor: '#F7F7F5',
+        backgroundColor: '#FFFFFF',
       },
       creationModalScrollContent: {
-        paddingHorizontal: 18,
+        paddingHorizontal: 12,
         paddingTop: 18,
         paddingBottom: 20,
         gap: 14,
-      },
-      nativeHeaderAction: {
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#17202A',
-      },
-      nativeHeaderActionPrimary: {
-        fontWeight: '800',
-        color: '#D71920',
-      },
-      nativeHeaderActionDisabled: {
-        opacity: 0.45,
       },
       creationModalSection: {
         gap: 8,
@@ -678,17 +619,6 @@ const createStyles = (isDark = false) =>
         fontWeight: '800',
         color: '#5F6B7A',
         textTransform: 'uppercase',
-      },
-      creationModalElige8Badge: {
-        minWidth: 24,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 12,
-        backgroundColor: '#0A70B5',
-        color: '#FFFFFF',
-        fontSize: 14,
-        fontWeight: '700',
-        textAlign: 'center',
       },
       creationModalInput: {
         minHeight: 44,
@@ -713,6 +643,11 @@ const createStyles = (isDark = false) =>
       creationModalDateNative: {
         gap: 12,
         alignItems: 'stretch',
+      },
+      creationModalNativeButton: {
+        alignSelf: 'flex-start',
+        minWidth: 156,
+        height: 44,
       },
       creationModalNativeStepper: {
         flexDirection: 'row',
@@ -762,30 +697,6 @@ const createStyles = (isDark = false) =>
       creationModalStepperValue: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#17202A',
-      },
-      creationModalSwitchGroup: {
-        alignItems: 'flex-start',
-        gap: 8,
-        minWidth: 140,
-        padding: 12,
-        borderWidth: 1,
-        borderColor: '#D8E1E1',
-        borderRadius: 8,
-        backgroundColor: '#FFFFFF',
-      },
-      creationModalSwitchColumn: {
-        alignItems: 'flex-start',
-        gap: 8,
-      },
-      creationModalSwitchRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-      },
-      creationModalSwitchLabel: {
-        fontSize: 16,
-        fontWeight: '500',
         color: '#17202A',
       },
       creationModalDateWeb: {
@@ -845,6 +756,10 @@ const createStyles = (isDark = false) =>
       creationModalDateFallbackHint: {
         fontSize: 12,
         color: '#8792A2',
+      },
+      nativeHeaderButton: {
+        width: 96,
+        height: 36,
       },
       matchesSection: {
         marginTop: 4,

@@ -154,7 +154,7 @@ describe('FutPoolMatchRepository', () => {
       const updateDto = { elige8: true };
 
       typeormRepository.findOne.mockResolvedValue(mockMatch);
-      typeormRepository.count.mockResolvedValue(8); // Already 8 elige8 matches
+      typeormRepository.count.mockResolvedValue(8); // Already 8 E8 matches
 
       await expect(repository.update('match-123', updateDto)).rejects.toThrow(
         BadRequestException,

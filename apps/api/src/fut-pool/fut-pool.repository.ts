@@ -119,7 +119,7 @@ export class FutPoolRepository {
     const totalFull15Successes = full15Matches.filter((m) => m.success).length;
     const totalFull15Failures = totalFull15 - totalFull15Successes;
 
-    // Elige8 totals (only non-full15 matches flagged as elige8)
+    // E8 totals (only non-full15 matches flagged as elige8)
     const elige8Matches = nonFull15Matches.filter((m) => Boolean(m.elige8));
     const totalElige8 = elige8Matches.length;
     const totalElige8Successes = elige8Matches.filter((m) => m.success).length;

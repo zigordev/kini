@@ -2,6 +2,7 @@
   "actions": {
     "cancel": "Cancelar",
     "create": "Crear",
+    "done": "Listo",
     "refresh": "Actualizar",
     "save": "Guardar"
   },
@@ -9,7 +10,9 @@
     "connecting": "Conectando...",
     "google_unavailable": "El inicio de sesión con Google no está disponible. Verifica la configuración del servidor.",
     "sign_in_google": "Inicia sesión con Google",
-    "sign_out": "Cerrar sesión"
+    "sign_out": "Cerrar sesión",
+    "sign_out_confirm_message": "Tendrás que iniciar sesión de nuevo para acceder a tus quinielas.",
+    "sign_out_confirm_title": "¿Cerrar sesión?"
   },
   "available_pools": {
     "add_short": "Añadir disponible",
@@ -22,6 +25,7 @@
     "match_count": "{{count}} partidos disponibles",
     "no_matches": "Sin partidos detallados todavía",
     "no_team_selected": "Selecciona un equipo antes de añadir la quiniela.",
+    "play": "Jugar",
     "subtitle": "Quinielas base recuperadas del proveedor externo. Añádelas a un equipo para completar pronósticos, resultados y seguimiento.",
     "sync": "Sincronizar",
     "synced": "Quinielas sincronizadas",
@@ -41,7 +45,7 @@
       "INVALID": "Introduce un correo válido."
     },
     "FUT_POOL_MATCH": {
-      "ELIGE8_LIMIT": "Se permiten como máximo {{max}} partidos Elige8."
+      "ELIGE8_LIMIT": "Se permiten como máximo {{max}} partidos E8."
     },
     "GENERIC": {
       "UNKNOWN": "Ha ocurrido un error. Inténtalo de nuevo."
@@ -92,7 +96,7 @@
     "away_team": "Visitante",
     "full15": "Pleno al 15",
     "home_team": "Local",
-    "remove_elige8": "Quitar Elige8",
+    "remove_elige8": "Quitar E8",
     "success_no": "Fallo ❌",
     "success_yes": "Acierto ✅",
     "update_status_message": "Selecciona una opción:",
@@ -114,8 +118,9 @@
   "pools": {
     "active_pool_subtitle": "Quiniela seleccionada",
     "check_results": "Comprobar resultados",
+    "config": "Configuración quiniela",
     "create_accessibility": "Crear quiniela",
-    "create_title": "Crear quiniela",
+    "create_title": "+ Crear quiniela",
     "created": "Quiniela creada",
     "earning": "Ganancia",
     "edit_title": "Editar quiniela",

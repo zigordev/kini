@@ -1,0 +1,20 @@
+#import <React/RCTViewManager.h>
+
+@interface RCT_EXTERN_MODULE(KiniNativePoolConfigButtonManager, RCTViewManager)
+
+RCT_EXPORT_VIEW_PROPERTY(disabled, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(doneTitle, NSString)
+RCT_EXPORT_VIEW_PROPERTY(doubles, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(doublesTitle, NSString)
+RCT_EXPORT_VIEW_PROPERTY(elige8, BOOL)
+RCT_EXPORT_VIEW_PROPERTY(e8Title, NSString)
+RCT_EXPORT_VIEW_PROPERTY(maxDoubles, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(maxTriples, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(minDoubles, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(minTriples, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(onChange, RCTBubblingEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(title, NSString)
+RCT_EXPORT_VIEW_PROPERTY(triples, NSNumber)
+RCT_EXPORT_VIEW_PROPERTY(triplesTitle, NSString)
+
+@end

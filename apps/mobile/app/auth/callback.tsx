@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Button, Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import NativeButton from '../components/NativeButton';
 import { useTheme } from '../contexts/ThemeContext';
 import useAuth from '../hooks/useAuth';
 import { createStyles } from '../index.styles';
@@ -69,10 +70,10 @@ export default function AuthCallbackScreen() {
         <Text style={styles.authSubtitle}>
           {error ?? 'No pudimos validar tu sesión.'}
         </Text>
-        <Button
+        <NativeButton
           title="Volver al inicio"
           onPress={() => router.replace('/pools')}
-          color={palette.primary}
+          style={styles.authNativeButton}
         />
       </View>
     </SafeAreaView>
