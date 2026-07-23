@@ -4,17 +4,17 @@ import type { Href } from 'expo-router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
-  ActionSheetIOS,
   ActivityIndicator,
-  Alert,
   Platform,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
   useWindowDimensions,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import NativeButton from '../components/NativeButton';
+import NativeGlassIconButton from '../components/NativeGlassIconButton';
+import NativeOptionStack from '../components/NativeOptionStack';
 import SignInScreen from '../components/SignInScreen';
 import { useTeams } from '../contexts/TeamContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -27,9 +27,9 @@ import {
 } from '../services/availablePools.service';
 import { updatePoolDetails } from '../services/futPool.service';
 import { createThemedStyleSheet } from '../theme/createThemedStyleSheet';
-import { palette, radius, shadow } from '../theme/design';
+import { palette, radius } from '../theme/design';
 import { AvailablePool } from '../types/availablePool';
-import { EXTENDED_OPTIONS } from '../types/futPool';
+import { EXTENDED_OPTIONS, REGULAR_OPTIONS } from '../types/futPool';
 import showErrorToast, { showToast } from '../utils/toast';
 import { readPoolDefaults } from '../../src/utils/poolDefaults';
 
@@ -50,13 +50,11 @@ export default function AvailablePoolsScreen() {
     googleAuthEnabled,
     providersLoading,
   } = useAuth();
-  const { teams, selectedTeam, loading: teamsLoading, selectTeam } = useTeams();
+  const { selectedTeam, loading: teamsLoading, selectTeam } = useTeams();
   const [availablePools, setAvailablePools] = useState<AvailablePool[]>([]);
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
-  const [teamPickerPoolId, setTeamPickerPoolId] = useState<string | null>(
-    null,
-  );
   const [updatingResultId, setUpdatingResultId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -91,6 +89,19 @@ export default function AvailablePoolsScreen() {
     }
   }, []);
 
+  const handleManualSync = useCallback(async () => {
+    setSyncing(true);
+    try {
+      setAvailablePools(await syncAvailablePools());
+      showToast(t('available_pools.synced'), 'success');
+    } catch (error) {
+      console.error('Failed to sync available pools', error);
+      showErrorToast(error);
+    } finally {
+      setSyncing(false);
+    }
+  }, [t]);
+
   useEffect(() => {
     if (!user || !selectedTeam) {
       return undefined;
@@ -119,7 +130,6 @@ export default function AvailablePoolsScreen() {
         const defaults = await readPoolDefaults(teamId);
         await updatePoolDetails(createdPool.id, defaults);
         selectTeam(teamId);
-        setTeamPickerPoolId(null);
         showToast(t('available_pools.added'), 'success');
         router.push('/pools' as Href);
       } catch (error) {
@@ -130,55 +140,6 @@ export default function AvailablePoolsScreen() {
       }
     },
     [router, selectTeam, t],
-  );
-
-  const handleOpenTeamPicker = useCallback(
-    (availablePool: AvailablePool) => {
-      if (Platform.OS === 'web') {
-        setTeamPickerPoolId((current) =>
-          current === availablePool.id ? null : availablePool.id,
-        );
-        return;
-      }
-
-      if (!teams.length) {
-        return;
-      }
-
-      if (Platform.OS === 'ios') {
-        const cancelIndex = teams.length;
-        ActionSheetIOS.showActionSheetWithOptions(
-          {
-            title: t('available_pools.select_team'),
-            options: [...teams.map((team) => team.name), t('actions.cancel')],
-            cancelButtonIndex: cancelIndex,
-          },
-          (buttonIndex) => {
-            const team = teams[buttonIndex];
-            if (team) {
-              void handleAddToTeam(availablePool, team.id);
-            }
-          },
-        );
-        return;
-      }
-
-      Alert.alert(
-        t('available_pools.select_team'),
-        undefined,
-        [
-          ...teams.map((team) => ({
-            text: team.name,
-            onPress: () => {
-              void handleAddToTeam(availablePool, team.id);
-            },
-          })),
-          { text: t('actions.cancel'), style: 'cancel' as const },
-        ],
-        { cancelable: true },
-      );
-    },
-    [handleAddToTeam, t, teams],
   );
 
   const handleChangeOfficialResult = useCallback(
@@ -282,25 +243,6 @@ export default function AvailablePoolsScreen() {
           !isWide && styles.contentCompact,
         ]}
       >
-        <View style={[styles.hero, !isWide && styles.heroCompact]}>
-          <View style={[styles.heroActions, !isWide && styles.fullWidth]}>
-            <TouchableOpacity
-              onPress={() => router.push('/create-pool' as Href)}
-              activeOpacity={0.78}
-              style={styles.secondaryButton}
-            >
-              <Ionicons
-                name="add-circle-outline"
-                size={18}
-                color={palette.primary}
-              />
-              <Text style={styles.secondaryButtonText}>
-                {t('pools.create_title')}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {loading ? (
           <View style={styles.loadingCard}>
             <ActivityIndicator size="large" color={palette.primary} />
@@ -333,13 +275,6 @@ export default function AvailablePoolsScreen() {
                 ]}
               >
                 <View style={styles.cardHeader}>
-                  <View style={styles.poolIcon}>
-                    <Ionicons
-                      name="football-outline"
-                      size={22}
-                      color={palette.primary}
-                    />
-                  </View>
                   <View style={styles.cardHeaderCopy}>
                     <Text style={styles.poolName} numberOfLines={1}>
                       {poolName(availablePool)}
@@ -367,7 +302,12 @@ export default function AvailablePoolsScreen() {
                             key={match.order}
                             style={[styles.matchRow, styles.full15MatchRow]}
                           >
-                            <View style={styles.full15MatchHeader}>
+                            <View
+                              style={[
+                                styles.full15MatchHeader,
+                                styles.matchNumberColumn,
+                              ]}
+                            >
                               <Text style={styles.matchNumber}>
                                 {match.order}
                               </Text>
@@ -397,42 +337,25 @@ export default function AvailablePoolsScreen() {
                                   >
                                     {entry.label}
                                   </Text>
-                                  <View style={styles.resultGroup}>
-                                    {EXTENDED_OPTIONS.map((option) => {
-                                      const selected =
-                                        result[entry.splitIndex] === option;
-                                      return (
-                                        <TouchableOpacity
-                                          key={`${entry.splitIndex}-${option}`}
-                                          activeOpacity={0.75}
-                                          disabled={busy}
-                                          onPress={() =>
-                                            handleChangeOfficialResult(
-                                              availablePool,
-                                              match.order,
-                                              option,
-                                              entry.splitIndex,
-                                            )
-                                          }
-                                          style={[
-                                            styles.resultButton,
-                                            selected &&
-                                              styles.resultButtonSelected,
-                                          ]}
-                                        >
-                                          <Text
-                                            style={[
-                                              styles.resultButtonText,
-                                              selected &&
-                                                styles.resultButtonTextSelected,
-                                            ]}
-                                          >
-                                            {option}
-                                          </Text>
-                                        </TouchableOpacity>
-                                      );
-                                    })}
-                                  </View>
+                                  <NativeOptionStack
+                                    disabled={busy}
+                                    options={[...EXTENDED_OPTIONS]}
+                                    outcome="neutral"
+                                    selectedOptions={
+                                      result[entry.splitIndex]
+                                        ? [String(result[entry.splitIndex])]
+                                        : []
+                                    }
+                                    style={styles.full15OptionStack}
+                                    onSelect={(option) =>
+                                      handleChangeOfficialResult(
+                                        availablePool,
+                                        match.order,
+                                        option,
+                                        entry.splitIndex,
+                                      )
+                                    }
+                                  />
                                 </View>
                               ))}
                             </View>
@@ -441,42 +364,35 @@ export default function AvailablePoolsScreen() {
                       }
                       return (
                         <View key={match.order} style={styles.matchRow}>
-                          <Text style={styles.matchNumber}>{match.order}</Text>
-                          <Text style={styles.matchTeams} numberOfLines={1}>
-                            {match.homeTeam} - {match.awayTeam}
-                          </Text>
+                          <View style={styles.matchNumberColumn}>
+                            <Text style={styles.matchNumber}>
+                              {match.order}
+                            </Text>
+                          </View>
+                          <View style={styles.matchTeams}>
+                            <Text style={styles.matchTeamName} numberOfLines={1}>
+                              {match.homeTeam}
+                            </Text>
+                            <Text style={styles.matchTeamName} numberOfLines={1}>
+                              {match.awayTeam}
+                            </Text>
+                          </View>
                           <View style={styles.resultGroup}>
-                            {['1', 'X', '2'].map((option) => {
-                              const selected = result.includes(option);
-                              return (
-                                <TouchableOpacity
-                                  key={option}
-                                  activeOpacity={0.75}
-                                  disabled={busy}
-                                  onPress={() =>
-                                    handleChangeOfficialResult(
-                                      availablePool,
-                                      match.order,
-                                      option,
-                                    )
-                                  }
-                                  style={[
-                                    styles.resultButton,
-                                    selected && styles.resultButtonSelected,
-                                  ]}
-                                >
-                                  <Text
-                                    style={[
-                                      styles.resultButtonText,
-                                      selected &&
-                                        styles.resultButtonTextSelected,
-                                    ]}
-                                  >
-                                    {option}
-                                  </Text>
-                                </TouchableOpacity>
-                              );
-                            })}
+                            <NativeOptionStack
+                              disabled={busy}
+                              options={[...REGULAR_OPTIONS]}
+                              outcome="neutral"
+                              selectedOptions={result.map((value) =>
+                                String(value),
+                              )}
+                              onSelect={(option) =>
+                                handleChangeOfficialResult(
+                                  availablePool,
+                                  match.order,
+                                  option,
+                                )
+                              }
+                            />
                           </View>
                         </View>
                       );
@@ -489,88 +405,38 @@ export default function AvailablePoolsScreen() {
                 </View>
 
                 <View style={styles.assignArea}>
-                  <TouchableOpacity
-                    onPress={() => handleOpenTeamPicker(availablePool)}
-                    activeOpacity={0.78}
-                    style={styles.teamSelectButton}
-                    disabled={!teams.length}
-                  >
-                    <Ionicons
-                      name="add-circle-outline"
-                      size={18}
-                      color={palette.white}
-                    />
-                    <Text style={styles.teamSelectButtonText}>
-                      {t('available_pools.add_to_team')}
-                    </Text>
-                    {Platform.OS === 'web' ? (
-                      <Ionicons
-                        name={
-                          teamPickerPoolId === availablePool.id
-                            ? 'chevron-up'
-                            : 'chevron-down'
-                        }
-                        size={17}
-                        color={palette.white}
-                      />
-                    ) : null}
-                  </TouchableOpacity>
-                  {Platform.OS === 'web' && teamPickerPoolId === availablePool.id && (
-                    <View style={styles.teamMenu}>
-                      <Text style={styles.teamMenuLabel}>
-                        {t('available_pools.select_team')}
-                      </Text>
-                      {teams.map((team) => {
-                        const isAdding =
-                          addingId === `${availablePool.id}:${team.id}`;
-                        return (
-                          <TouchableOpacity
-                            key={team.id}
-                            onPress={() =>
-                              handleAddToTeam(availablePool, team.id)
-                            }
-                            activeOpacity={0.72}
-                            style={styles.teamMenuOption}
-                            disabled={isAdding}
-                          >
-                            <View style={styles.teamMenuOptionIcon}>
-                              {isAdding ? (
-                                <ActivityIndicator
-                                  size="small"
-                                  color={palette.primary}
-                                />
-                              ) : (
-                                <Ionicons
-                                  name="people-outline"
-                                  size={17}
-                                  color={palette.primary}
-                                />
-                              )}
-                            </View>
-                            <Text
-                              style={styles.teamMenuOptionText}
-                              numberOfLines={1}
-                            >
-                              {team.name}
-                            </Text>
-                            {!isAdding && (
-                              <Ionicons
-                                name="arrow-forward"
-                                size={16}
-                                color={palette.inkSubtle}
-                              />
-                            )}
-                          </TouchableOpacity>
-                        );
-                      })}
-                    </View>
-                  )}
+                  <NativeButton
+                    title={t('available_pools.play')}
+                    onPress={() =>
+                      handleAddToTeam(availablePool, selectedTeam?.id)
+                    }
+                    disabled={
+                      !selectedTeam ||
+                      addingId === `${availablePool.id}:${selectedTeam.id}`
+                    }
+                    style={styles.nativeActionButton}
+                  />
                 </View>
               </View>
             ))}
           </View>
         )}
       </ScrollView>
+      <View style={styles.createButtonSlot}>
+        <NativeGlassIconButton
+          key="sync"
+          accessibilityLabel={t('available_pools.sync')}
+          disabled={syncing}
+          iconName="sync"
+          onPress={handleManualSync}
+        />
+        <NativeGlassIconButton
+          key="plus"
+          accessibilityLabel={t('pools.create_accessibility')}
+          iconName="plus"
+          onPress={() => router.push('/create-pool' as Href)}
+        />
+      </View>
     </SafeAreaView>
   );
 }
@@ -581,6 +447,7 @@ const createStyles = (isDark = false) =>
       safeArea: {
         flex: 1,
         backgroundColor: palette.background,
+        position: 'relative',
       },
       scroll: {
         flex: 1,
@@ -589,12 +456,12 @@ const createStyles = (isDark = false) =>
       content: {
         flexGrow: 1,
         paddingHorizontal: 32,
-        paddingTop: Platform.OS === 'web' ? 32 : 20,
-        paddingBottom: 48,
+        paddingTop: Platform.OS === 'web' ? 32 : 64,
+        paddingBottom: Platform.OS === 'web' ? 48 : 128,
         gap: 24,
       },
       contentCompact: {
-        paddingHorizontal: 18,
+        paddingHorizontal: 12,
       },
       hero: {
         flexDirection: 'row',
@@ -632,11 +499,20 @@ const createStyles = (isDark = false) =>
         lineHeight: 23,
         color: palette.inkMuted,
       },
-      heroActions: {
+      createButtonSlot: {
+        position: 'absolute',
+        top: Platform.OS === 'web' ? 28 : 64,
+        right: Platform.OS === 'web' ? 28 : 14,
         flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'flex-end',
+        alignItems: 'center',
         gap: 10,
+        zIndex: 25,
+        elevation: 12,
+      },
+      nativeActionButton: {
+        alignSelf: 'flex-start',
+        minWidth: 156,
+        height: 44,
       },
       fullWidth: {
         width: '100%',
@@ -649,13 +525,9 @@ const createStyles = (isDark = false) =>
         alignItems: 'stretch',
       },
       poolCard: {
-        borderWidth: 1,
-        borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        padding: 14,
+        backgroundColor: 'transparent',
+        padding: 0,
         gap: 12,
-        ...shadow.card,
       },
       poolCardWide: {
         flexBasis: 420,
@@ -668,15 +540,7 @@ const createStyles = (isDark = false) =>
       cardHeader: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
-      },
-      poolIcon: {
-        width: 44,
-        height: 44,
-        borderRadius: radius.md,
-        backgroundColor: palette.primarySoft,
-        alignItems: 'center',
-        justifyContent: 'center',
+        paddingRight: Platform.OS === 'web' ? 0 : 56,
       },
       cardHeaderCopy: {
         flex: 1,
@@ -705,37 +569,26 @@ const createStyles = (isDark = false) =>
         lineHeight: 20,
         color: palette.inkMuted,
       },
-      teamActions: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 10,
-      },
       matchTable: {
-        borderWidth: 1,
-        borderColor: palette.border,
-        borderRadius: radius.md,
-        overflow: 'hidden',
+        width: '100%',
       },
       matchRow: {
         minHeight: 36,
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
+        gap: 8,
         paddingHorizontal: 10,
         paddingVertical: 6,
         borderBottomWidth: 1,
         borderBottomColor: palette.border,
-        backgroundColor: palette.backgroundElevated,
+        backgroundColor: 'transparent',
       },
       full15MatchRow: {
-        flexDirection: 'column',
-        alignItems: 'stretch',
-        gap: 8,
+        alignItems: 'flex-start',
       },
       full15MatchHeader: {
         flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
+        alignItems: 'flex-start',
       },
       full15MatchCopy: {
         flex: 1,
@@ -748,7 +601,8 @@ const createStyles = (isDark = false) =>
         textTransform: 'uppercase',
       },
       full15ResultRows: {
-        marginLeft: 32,
+        flex: 1,
+        minWidth: 0,
         gap: 6,
       },
       full15ResultRow: {
@@ -761,10 +615,13 @@ const createStyles = (isDark = false) =>
         minWidth: 72,
         flex: 1,
         flexShrink: 1,
-        color: palette.inkMuted,
-        fontSize: 11,
-        fontWeight: '800',
-        textTransform: 'uppercase',
+        paddingRight: 10,
+        marginRight: 2,
+        borderRightWidth: 1,
+        borderRightColor: palette.border,
+        color: palette.ink,
+        fontSize: 13,
+        fontWeight: '700',
       },
       matchNumber: {
         width: 22,
@@ -773,8 +630,25 @@ const createStyles = (isDark = false) =>
         fontWeight: '900',
         textAlign: 'center',
       },
+      matchNumberColumn: {
+        width: 34,
+        minHeight: 30,
+        paddingRight: 8,
+        marginRight: 2,
+        borderRightWidth: 1,
+        borderRightColor: palette.border,
+        alignItems: 'center',
+        justifyContent: 'center',
+      },
       matchTeams: {
         flex: 1,
+        gap: 1,
+        paddingRight: 10,
+        marginRight: 2,
+        borderRightWidth: 1,
+        borderRightColor: palette.border,
+      },
+      matchTeamName: {
         color: palette.ink,
         fontSize: 13,
         fontWeight: '700',
@@ -783,123 +657,12 @@ const createStyles = (isDark = false) =>
         flexDirection: 'row',
         gap: 6,
       },
-      resultButton: {
-        width: 28,
-        height: 28,
-        borderRadius: radius.sm,
-        borderWidth: 1,
-        borderColor: palette.borderStrong,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: palette.surface,
-      },
-      resultButtonSelected: {
-        borderColor: '#374151',
-        backgroundColor: '#4B5563',
-      },
-      resultButtonText: {
-        color: palette.ink,
-        fontSize: 12,
-        fontWeight: '800',
-      },
-      resultButtonTextSelected: {
-        color: palette.white,
+      full15OptionStack: {
+        width: Platform.OS === 'android' ? 172 : 144,
       },
       assignArea: {
         alignSelf: 'flex-start',
         maxWidth: '100%',
-      },
-      teamSelectButton: {
-        minHeight: 42,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        paddingHorizontal: 14,
-        paddingVertical: 10,
-        borderRadius: radius.md,
-        backgroundColor: palette.primary,
-      },
-      teamSelectButtonText: {
-        color: palette.white,
-        fontSize: 14,
-        fontWeight: '800',
-      },
-      teamMenu: {
-        width: 272,
-        maxWidth: '100%',
-        marginTop: 8,
-        overflow: 'hidden',
-        borderWidth: 1,
-        borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        ...shadow.raised,
-      },
-      teamMenuLabel: {
-        paddingHorizontal: 14,
-        paddingTop: 12,
-        paddingBottom: 8,
-        color: palette.inkMuted,
-        fontSize: 12,
-        fontWeight: '800',
-      },
-      teamMenuOption: {
-        minHeight: 48,
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 10,
-        paddingHorizontal: 12,
-        borderTopWidth: 1,
-        borderTopColor: palette.border,
-      },
-      teamMenuOptionIcon: {
-        width: 30,
-        height: 30,
-        alignItems: 'center',
-        justifyContent: 'center',
-        borderRadius: radius.sm,
-        backgroundColor: palette.primarySoft,
-      },
-      teamMenuOptionText: {
-        flex: 1,
-        color: palette.ink,
-        fontSize: 14,
-        fontWeight: '700',
-      },
-      primaryButton: {
-        minHeight: 42,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: radius.md,
-        backgroundColor: palette.primary,
-      },
-      primaryButtonText: {
-        color: palette.white,
-        fontSize: 14,
-        fontWeight: '800',
-      },
-      secondaryButton: {
-        minHeight: 42,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: radius.md,
-        borderWidth: 1,
-        borderColor: palette.border,
-        backgroundColor: palette.surface,
-      },
-      secondaryButtonText: {
-        color: palette.ink,
-        fontSize: 14,
-        fontWeight: '700',
       },
       loadingPanel: {
         flex: 1,

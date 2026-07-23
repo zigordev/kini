@@ -1,10 +1,6 @@
 import { useCallback } from 'react';
 import {
-  ActivityIndicator,
-  ActionSheetIOS,
-  Alert,
   Platform,
-  Pressable,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -17,6 +13,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { palette, radius, shadow } from '../theme/design';
 import GoogleIcon from './GoogleIcon';
 import Logo from './Logo';
+import NativeButton from './NativeButton';
+import NativeSelect from './NativeSelect';
 
 type LanguageCode = 'es' | 'en';
 
@@ -57,42 +55,6 @@ const SignInScreen = ({
     [currentLanguage, i18n],
   );
 
-  const openLanguageSelector = useCallback(() => {
-    const options = LANGUAGES.map(
-      (language) => `${language.flag} ${t(language.labelKey)}`,
-    );
-
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          title: t('language.title'),
-          options: [...options, t('actions.cancel')],
-          cancelButtonIndex: options.length,
-        },
-        (buttonIndex) => {
-          const language = LANGUAGES[buttonIndex];
-          if (language) {
-            handleLanguageSelect(language.code);
-          }
-        },
-      );
-      return;
-    }
-
-    Alert.alert(
-      t('language.title'),
-      undefined,
-      [
-        ...LANGUAGES.map((language) => ({
-          text: `${language.flag} ${t(language.labelKey)}`,
-          onPress: () => handleLanguageSelect(language.code),
-        })),
-        { text: t('actions.cancel'), style: 'cancel' as const },
-      ],
-      { cancelable: true },
-    );
-  }, [handleLanguageSelect, t]);
-
   return (
     <View
       style={[
@@ -113,24 +75,17 @@ const SignInScreen = ({
             },
           ]}
         >
-          <Pressable
-            onPress={openLanguageSelector}
-            style={({ pressed }) => [
-              styles.languageButton,
-              pressed && styles.languageButtonPressed,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel={t('nav.language')}
-          >
-            <Text
-              style={[
-                styles.languageButtonText,
-                { color: isDark ? palette.darkInk : palette.primary },
-              ]}
-            >
-              {currentLanguageOption.flag} {currentLanguage.toUpperCase()}
-            </Text>
-          </Pressable>
+          <NativeSelect
+            title={t('language.title')}
+            placeholder={`${currentLanguageOption.flag} ${currentLanguage.toUpperCase()}`}
+            selectedValue={currentLanguage}
+            onChange={(value) => handleLanguageSelect(value as LanguageCode)}
+            options={LANGUAGES.map((language) => ({
+              label: `${language.flag} ${t(language.labelKey)}`,
+              value: language.code,
+            }))}
+            style={styles.languageNativeSelect}
+          />
         </View>
       ) : null}
 
@@ -177,26 +132,31 @@ const SignInScreen = ({
           </View>
         ) : null}
 
-        <TouchableOpacity
-          style={[
-            styles.button,
-            (signingIn || !canUseGoogle) && styles.buttonDisabled,
-          ]}
-          onPress={onSignIn}
-          disabled={signingIn || !canUseGoogle}
-          activeOpacity={0.86}
-        >
-          <View style={styles.buttonIcon}>
-            {signingIn ? (
-              <ActivityIndicator size="small" color={palette.primary} />
-            ) : (
+        {Platform.OS === 'web' ? (
+          <TouchableOpacity
+            style={[
+              styles.button,
+              (signingIn || !canUseGoogle) && styles.buttonDisabled,
+            ]}
+            onPress={onSignIn}
+            disabled={signingIn || !canUseGoogle}
+            activeOpacity={0.86}
+          >
+            <View style={styles.buttonIcon}>
               <GoogleIcon size={18} />
-            )}
-          </View>
-          <Text style={styles.buttonText}>
-            {signingIn ? t('auth.connecting') : t('auth.sign_in_google')}
-          </Text>
-        </TouchableOpacity>
+            </View>
+            <Text style={styles.buttonText}>
+              {signingIn ? t('auth.connecting') : t('auth.sign_in_google')}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <NativeButton
+            title={signingIn ? t('auth.connecting') : t('auth.sign_in_google')}
+            onPress={onSignIn}
+            disabled={signingIn || !canUseGoogle}
+            style={styles.nativeSignInButton}
+          />
+        )}
       </View>
     </View>
   );
@@ -223,18 +183,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     zIndex: 2,
   },
-  languageButton: {
-    minHeight: 40,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+  languageNativeSelect: {
+    width: 122,
+    height: 36,
   },
-  languageButtonPressed: {
-    opacity: 0.72,
-  },
-  languageButtonText: {
-    fontSize: 13,
-    fontWeight: '800',
+  nativeSignInButton: {
+    width: '100%',
+    height: 52,
   },
   card: {
     width: '100%',

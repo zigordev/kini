@@ -17,11 +17,11 @@ const createStyles = (isDark = false) =>
         flexGrow: 1,
         paddingHorizontal: 32,
         paddingTop: Platform.OS === 'web' ? 32 : 20,
-        paddingBottom: 48,
+        paddingBottom: Platform.OS === 'web' ? 48 : 128,
         gap: 24,
       },
       contentCompact: {
-        paddingHorizontal: 18,
+        paddingHorizontal: 12,
       },
       loadingContainer: {
         flex: 1,
@@ -72,13 +72,14 @@ const createStyles = (isDark = false) =>
       },
       balanceCard: {
         minWidth: 240,
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        padding: 18,
+        borderRadius: Platform.OS === 'web' ? radius.md : 0,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.surface : 'transparent',
+        padding: Platform.OS === 'web' ? 18 : 0,
         gap: 8,
-        ...shadow.card,
+        ...(Platform.OS === 'web' ? shadow.card : {}),
       },
       balanceValue: {
         fontSize: 36,
@@ -98,14 +99,15 @@ const createStyles = (isDark = false) =>
         flexGrow: 1,
         flexBasis: 180,
         minHeight: 116,
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        padding: 16,
+        borderRadius: Platform.OS === 'web' ? radius.md : 0,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.surface : 'transparent',
+        padding: Platform.OS === 'web' ? 16 : 0,
         gap: 8,
         justifyContent: 'space-between',
-        ...shadow.card,
+        ...(Platform.OS === 'web' ? shadow.card : {}),
       },
       summaryLabel: {
         fontSize: 12,
@@ -153,11 +155,12 @@ const createStyles = (isDark = false) =>
       leaderCard: {
         flexGrow: 1,
         flexBasis: 220,
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        padding: 16,
+        borderRadius: Platform.OS === 'web' ? radius.md : 0,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.surface : 'transparent',
+        padding: Platform.OS === 'web' ? 16 : 0,
         gap: 10,
       },
       leaderPosition: {
@@ -175,10 +178,11 @@ const createStyles = (isDark = false) =>
         color: palette.inkMuted,
       },
       rankingPanel: {
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
+        borderRadius: Platform.OS === 'web' ? radius.md : 0,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.surface : 'transparent',
         overflow: 'hidden',
       },
       rankingRow: {
@@ -243,16 +247,19 @@ const createStyles = (isDark = false) =>
       breakdownCard: {
         flexGrow: 1,
         flexBasis: 190,
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        padding: 16,
+        borderRadius: Platform.OS === 'web' ? radius.md : 0,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.surface : 'transparent',
+        padding: Platform.OS === 'web' ? 16 : 0,
         gap: 12,
       },
       breakdownCardTotal: {
-        borderColor: palette.primary,
-        backgroundColor: palette.primarySofter,
+        borderColor:
+          Platform.OS === 'web' ? palette.primary : palette.border,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.primarySofter : 'transparent',
       },
       breakdownHeader: {
         flexDirection: 'row',

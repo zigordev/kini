@@ -1,5 +1,5 @@
 import { i18n } from 'i18next';
-import { Platform, ToastAndroid } from 'react-native';
+import { NativeModules, Platform } from 'react-native';
 import '../i18n';
 
 type ToastType = 'error' | 'info' | 'success' | 'warning';
@@ -100,8 +100,8 @@ export const resolveErrorMessage = (error: unknown): string | null => {
 };
 
 export const showToast = (message: string, type: ToastType = 'info') => {
-  if (Platform.OS === 'android') {
-    ToastAndroid.show(message, ToastAndroid.LONG);
+  if (Platform.OS === 'android' || Platform.OS === 'ios') {
+    NativeModules.KiniNativeToast?.show(message, type);
     return;
   }
 

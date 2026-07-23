@@ -41,12 +41,12 @@ export class UserStatsDto {
   @ApiProperty()
   full15SuccessesPercentage: number;
 
-  @ApiProperty({ description: 'Elige8 successful matches' })
+  @ApiProperty({ description: 'E8 successful matches' })
   elige8Successes: number;
 
-  @ApiProperty({ description: 'Elige8 failed matches' })
+  @ApiProperty({ description: 'E8 failed matches' })
   elige8Failures: number;
 
-  @ApiProperty({ description: 'Elige8 success percentage (0..100)' })
+  @ApiProperty({ description: 'E8 success percentage (0..100)' })
   elige8SuccessesPercentage: number;
 }

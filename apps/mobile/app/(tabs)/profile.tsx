@@ -8,17 +8,20 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  ActionSheetIOS,
   Alert,
   Platform,
   Pressable,
   ScrollView,
-  Switch,
   Text,
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import E8Toggle from '../components/E8Toggle';
+import NativeButton from '../components/NativeButton';
+import NativeNumberSelect from '../components/NativeNumberSelect';
+import NativeSegmentedControl from '../components/NativeSegmentedControl';
+import NativeSelect from '../components/NativeSelect';
 import SignInScreen from '../components/SignInScreen';
 import { useTeams } from '../contexts/TeamContext';
 import { ThemeMode, useTheme } from '../contexts/ThemeContext';
@@ -36,20 +39,14 @@ import {
 
 type LanguageCode = 'es' | 'en';
 
+const DOUBLES_MAX = 14;
+const TRIPLES_MAX = 9;
+
 const LANGUAGES: Array<{ code: LanguageCode; labelKey: string; flag: string }> =
   [
     { code: 'es', labelKey: 'language.spanish', flag: '🇪🇸' },
     { code: 'en', labelKey: 'language.english', flag: '🇬🇧' },
   ];
-
-let UIStepper: any = null;
-if (Platform.OS !== 'web') {
-  try {
-    UIStepper = require('react-native-ui-stepper').default;
-  } catch {
-    UIStepper = null;
-  }
-}
 
 export default function ProfileScreen() {
   const { i18n, t } = useTranslation();
@@ -113,7 +110,7 @@ export default function ProfileScreen() {
     [selectTeam],
   );
 
-  const handleSignOut = useCallback(async () => {
+  const performSignOut = useCallback(async () => {
     try {
       await signOut();
     } catch (caughtError) {
@@ -121,6 +118,24 @@ export default function ProfileScreen() {
       showErrorToast(caughtError);
     }
   }, [signOut]);
+
+  const handleSignOut = useCallback(() => {
+    Alert.alert(
+      t('auth.sign_out_confirm_title'),
+      t('auth.sign_out_confirm_message'),
+      [
+        { text: t('actions.cancel'), style: 'cancel' },
+        {
+          text: t('nav.logout'),
+          style: 'destructive',
+          onPress: () => {
+            void performSignOut();
+          },
+        },
+      ],
+      { cancelable: true },
+    );
+  }, [performSignOut, t]);
 
   if (authLoading) {
     return (
@@ -169,15 +184,31 @@ export default function ProfileScreen() {
 
         <View style={[styles.section, styles.selectSectionTop]}>
           <Text style={styles.sectionTitle}>{t('theme.toggle')}</Text>
-          <ProfileSelect
-            iconName={isDark ? 'moon' : 'sunny'}
-            isDark={isDark}
-            options={themeOptions}
-            styles={styles}
-            title={t('theme.toggle')}
-            value={theme}
-            onChange={(value) => setThemeMode(value as ThemeMode)}
-          />
+          {Platform.OS === 'web' ? (
+            <ProfileSelect
+              iconName={isDark ? 'moon' : 'sunny'}
+              isDark={isDark}
+              options={themeOptions}
+              styles={styles}
+              title={t('theme.toggle')}
+              value={theme}
+              onChange={(value) => setThemeMode(value as ThemeMode)}
+            />
+          ) : (
+            <View style={styles.nativeSegmentedRow}>
+              <Ionicons
+                name={isDark ? 'moon' : 'sunny'}
+                size={18}
+                color={palette.primary}
+              />
+              <NativeSegmentedControl
+                options={themeOptions}
+                selectedValue={theme}
+                onChange={(value) => setThemeMode(value as ThemeMode)}
+                style={styles.nativeSegmentedControl}
+              />
+            </View>
+          )}
         </View>
 
         <View style={[styles.section, styles.selectSectionMiddle]}>
@@ -213,6 +244,7 @@ export default function ProfileScreen() {
           <CounterRow
             label={t('fields.doubles')}
             value={defaults.doubles}
+            max={DOUBLES_MAX}
             onChange={(value) =>
               persistDefaults({ ...defaults, doubles: value })
             }
@@ -221,37 +253,28 @@ export default function ProfileScreen() {
           <CounterRow
             label={t('fields.triples')}
             value={defaults.triples}
+            max={TRIPLES_MAX}
             onChange={(value) =>
               persistDefaults({ ...defaults, triples: value })
             }
             styles={styles}
           />
           <View style={styles.settingRow}>
-            <Text style={styles.rowText}>Elige8</Text>
-            <Switch
+            <E8Toggle
               value={defaults.elige8}
               onValueChange={(value) =>
                 void persistDefaults({ ...defaults, elige8: value })
               }
-              thumbColor={
-                Platform.OS === 'android'
-                  ? defaults.elige8
-                    ? palette.accent
-                    : palette.backgroundSubtle
-                  : undefined
-              }
-              trackColor={{
-                false: palette.borderStrong,
-                true: palette.accentSoft,
-              }}
             />
           </View>
         </View>
 
-        <Pressable style={styles.signOutButton} onPress={handleSignOut}>
-          <Ionicons name="log-out-outline" size={18} color={palette.danger} />
-          <Text style={styles.signOutText}>{t('nav.logout')}</Text>
-        </Pressable>
+        <NativeButton
+          title={t('nav.logout')}
+          onPress={handleSignOut}
+          variant="destructive"
+          style={styles.profileNativeButton}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -259,26 +282,27 @@ export default function ProfileScreen() {
 
 const CounterRow = ({
   label,
+  max,
   value,
   onChange,
   styles,
 }: {
   label: string;
+  max: number;
   value: number;
   onChange: (value: number) => void;
   styles: ReturnType<typeof createStyles>;
 }) => (
   <View style={styles.settingRow}>
     <Text style={styles.rowText}>{label}</Text>
-    {Platform.OS !== 'web' && UIStepper ? (
+    {Platform.OS !== 'web' ? (
       <View style={styles.nativeCounter}>
-        <UIStepper
+        <NativeNumberSelect
+          title={label}
           value={value}
-          onValueChange={(nextValue: number) => onChange(nextValue)}
-          minimumValue={0}
-          maximumValue={8}
-          steps={1}
-          style={{ minWidth: 132 }}
+          min={0}
+          max={max}
+          onChange={onChange}
         />
         <Text style={styles.counterValue}>{value}</Text>
       </View>
@@ -293,7 +317,7 @@ const CounterRow = ({
         <Text style={styles.counterValue}>{value}</Text>
         <Pressable
           style={styles.counterButton}
-          onPress={() => onChange(Math.min(8, value + 1))}
+          onPress={() => onChange(Math.min(max, value + 1))}
         >
           <Text style={styles.counterText}>+</Text>
         </Pressable>
@@ -319,46 +343,9 @@ const ProfileSelect = ({
   value: string;
   onChange: (value: string) => void;
 }) => {
-  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const selectedOption =
     options.find((option) => option.value === value) ?? options[0] ?? null;
-
-  const handleNativeOpen = useCallback(() => {
-    if (options.length === 0) {
-      return;
-    }
-
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          title,
-          options: [...options.map((option) => option.label), t('actions.cancel')],
-          cancelButtonIndex: options.length,
-        },
-        (buttonIndex) => {
-          const option = options[buttonIndex];
-          if (option) {
-            onChange(option.value);
-          }
-        },
-      );
-      return;
-    }
-
-    Alert.alert(
-      title,
-      undefined,
-      [
-        ...options.map((option) => ({
-          text: option.label,
-          onPress: () => onChange(option.value),
-        })),
-        { text: t('actions.cancel'), style: 'cancel' as const },
-      ],
-      { cancelable: true },
-    );
-  }, [onChange, options, t, title]);
 
   if (Platform.OS === 'web') {
     return (
@@ -415,26 +402,18 @@ const ProfileSelect = ({
   }
 
   return (
-    <Pressable
-      disabled={options.length === 0}
-      onPress={handleNativeOpen}
-      style={({ pressed }) => [
-        styles.nativeSelectButton,
-        pressed && styles.nativeSelectButtonPressed,
-      ]}
-      accessibilityRole="button"
-      accessibilityLabel={title}
-    >
+    <View style={styles.nativeSelectButton}>
       <Ionicons name={iconName} size={18} color={palette.primary} />
-      <Text style={styles.nativeSelectValue} numberOfLines={1}>
-        {selectedOption?.label ?? ''}
-      </Text>
-      <Ionicons
-        name="chevron-down"
-        size={17}
-        color={isDark ? palette.darkMuted : palette.inkMuted}
+      <NativeSelect
+        title={title}
+        placeholder={selectedOption?.label ?? ''}
+        selectedValue={value}
+        onChange={onChange}
+        options={options}
+        disabled={options.length === 0}
+        style={styles.nativeSelectControl}
       />
-    </Pressable>
+    </View>
   );
 };
 
@@ -447,21 +426,22 @@ const createStyles = (isDark = false) =>
       },
       content: {
         flexGrow: 1,
-        paddingHorizontal: 20,
+        paddingHorizontal: Platform.OS === 'web' ? 20 : 12,
         paddingTop: 24,
-        paddingBottom: 110,
+        paddingBottom: Platform.OS === 'web' ? 48 : 128,
         gap: 14,
       },
       section: {
         position: 'relative',
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        padding: 14,
+        borderRadius: Platform.OS === 'web' ? radius.md : 0,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.surface : 'transparent',
+        padding: Platform.OS === 'web' ? 14 : 0,
         gap: 10,
         overflow: 'visible',
-        ...shadow.card,
+        ...(Platform.OS === 'web' ? shadow.card : {}),
       },
       selectSectionTop: {
         zIndex: 40,
@@ -517,6 +497,27 @@ const createStyles = (isDark = false) =>
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
+      },
+      nativeSelectControl: {
+        flex: 1,
+        minWidth: 0,
+        height: 44,
+      },
+      nativeSegmentedRow: {
+        minHeight: 46,
+        borderWidth: 1,
+        borderColor: palette.border,
+        borderRadius: radius.md,
+        backgroundColor: palette.backgroundElevated,
+        paddingHorizontal: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10,
+      },
+      nativeSegmentedControl: {
+        flex: 1,
+        minWidth: 0,
+        height: 36,
       },
       nativeSelectButtonPressed: {
         opacity: 0.72,
@@ -679,21 +680,9 @@ const createStyles = (isDark = false) =>
         fontWeight: '800',
         textAlign: 'center',
       },
-      signOutButton: {
-        minHeight: 48,
-        borderRadius: radius.md,
-        borderWidth: 1,
-        borderColor: palette.dangerSoft,
-        backgroundColor: palette.surface,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-      },
-      signOutText: {
-        color: palette.danger,
-        fontSize: 15,
-        fontWeight: '800',
+      profileNativeButton: {
+        width: '100%',
+        height: 44,
       },
       loadingPanel: {
         flex: 1,

@@ -1,6 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { ComponentProps, useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Platform, Text, View } from 'react-native';
+import {
+  Animated,
+  Easing,
+  NativeModules,
+  Platform,
+  Text,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { addToastListener } from '../../utils/toast';
@@ -45,6 +52,12 @@ const ToastHost = () => {
         type === 'error' || type === 'success' || type === 'warning'
           ? type
           : 'info';
+
+      if (Platform.OS === 'ios') {
+        NativeModules.KiniNativeToast?.show(nextMessage, toastType);
+        return;
+      }
+
       setToast({ id: Date.now(), message: nextMessage, type: toastType });
 
       if (hideTimeout.current) {
@@ -102,7 +115,7 @@ const ToastHost = () => {
     };
   }, [opacity, translateY]);
 
-  if (Platform.OS === 'android' || !toast) {
+  if (Platform.OS === 'android' || Platform.OS === 'ios' || !toast) {
     return null;
   }
 

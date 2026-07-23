@@ -2,6 +2,7 @@
   "actions": {
     "cancel": "Cancel",
     "create": "Create",
+    "done": "Done",
     "refresh": "Refresh",
     "save": "Save"
   },
@@ -9,7 +10,9 @@
     "connecting": "Connecting...",
     "google_unavailable": "Google Sign-In is unavailable. Check server configuration.",
     "sign_in_google": "Sign in with Google",
-    "sign_out": "Sign out"
+    "sign_out": "Sign out",
+    "sign_out_confirm_message": "You will need to sign in again to access your pools.",
+    "sign_out_confirm_title": "Sign out?"
   },
   "available_pools": {
     "add_short": "Add available",
@@ -22,6 +25,7 @@
     "match_count": "{{count}} available matches",
     "no_matches": "No detailed matches yet",
     "no_team_selected": "Select a team before adding the pool.",
+    "play": "Play",
     "subtitle": "Raw pools retrieved from the external provider. Add one to a team to complete predictions, results, and tracking.",
     "sync": "Sync",
     "synced": "Pools synchronized",
@@ -41,7 +45,7 @@
       "INVALID": "Please enter a valid email."
     },
     "FUT_POOL_MATCH": {
-      "ELIGE8_LIMIT": "A maximum of {{max}} Elige8 matches are allowed."
+      "ELIGE8_LIMIT": "A maximum of {{max}} E8 matches are allowed."
     },
     "GENERIC": {
       "UNKNOWN": "Something went wrong. Please try again."
@@ -92,7 +96,7 @@
     "away_team": "Away",
     "full15": "Full 15",
     "home_team": "Home",
-    "remove_elige8": "Remove Elige8",
+    "remove_elige8": "Remove E8",
     "success_no": "Fail ❌",
     "success_yes": "Success ✅",
     "update_status_message": "Select an option:",
@@ -114,6 +118,7 @@
   "pools": {
     "active_pool_subtitle": "Selected pool",
     "check_results": "Check results",
+    "config": "Pool configuration",
     "create_accessibility": "Create pool",
     "create_title": "Create pool",
     "created": "Pool created",

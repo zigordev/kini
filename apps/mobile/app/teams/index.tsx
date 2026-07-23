@@ -5,7 +5,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
-  Button,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -14,6 +14,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import NativeButton from '../components/NativeButton';
+import NativeSelectionRow from '../components/NativeSelectionRow';
 import SignInScreen from '../components/SignInScreen';
 import { useTeams } from '../contexts/TeamContext';
 import { useTheme } from '../contexts/ThemeContext';
@@ -121,10 +123,9 @@ export default function TeamsScreen() {
               onSubmitEditing={handleCreateTeam}
             />
             <View style={styles.createButtonNative}>
-              <Button
+              <NativeButton
                 title={t('teams.create')}
                 onPress={handleCreateTeam}
-                color={palette.primary}
               />
             </View>
           </View>
@@ -141,7 +142,15 @@ export default function TeamsScreen() {
               {teams.map((team) => {
                 const active = team.id === selectedTeam?.id;
 
-                return (
+                return Platform.OS !== 'web' ? (
+                  <NativeSelectionRow
+                    key={team.id}
+                    title={team.name}
+                    selected={active}
+                    onPress={() => handleSelectTeam(team)}
+                    style={styles.nativeTeamRow}
+                  />
+                ) : (
                   <Pressable
                     key={team.id}
                     onPress={() => handleSelectTeam(team)}
@@ -195,20 +204,21 @@ const createStyles = (isDark = false) =>
       content: {
         flexGrow: 1,
         justifyContent: 'center',
-        paddingHorizontal: 20,
+        paddingHorizontal: Platform.OS === 'web' ? 20 : 12,
         paddingVertical: 28,
       },
       panel: {
         width: '100%',
         maxWidth: 520,
         alignSelf: 'center',
-        borderWidth: 1,
+        borderWidth: Platform.OS === 'web' ? 1 : 0,
         borderColor: palette.border,
-        borderRadius: radius.md,
-        backgroundColor: palette.surface,
-        padding: 16,
+        borderRadius: Platform.OS === 'web' ? radius.md : 0,
+        backgroundColor:
+          Platform.OS === 'web' ? palette.surface : 'transparent',
+        padding: Platform.OS === 'web' ? 16 : 0,
         gap: 14,
-        ...shadow.card,
+        ...(Platform.OS === 'web' ? shadow.card : {}),
       },
       title: {
         fontSize: 24,
@@ -222,6 +232,7 @@ const createStyles = (isDark = false) =>
       },
       createButtonNative: {
         minWidth: 116,
+        height: 44,
       },
       createInput: {
         flex: 1,
@@ -254,6 +265,9 @@ const createStyles = (isDark = false) =>
       },
       list: {
         gap: 8,
+      },
+      nativeTeamRow: {
+        height: 54,
       },
       teamRow: {
         minHeight: 52,
