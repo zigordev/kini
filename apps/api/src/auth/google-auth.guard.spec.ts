@@ -252,4 +252,22 @@ describe('GoogleAuthGuard', () => {
       );
     });
   });
+
+  describe('handleRequest', () => {
+    it('should return the authenticated user', () => {
+      const user = { id: 'user-123' };
+
+      expect(guard.handleRequest(null, user)).toBe(user);
+    });
+
+    it('should allow the callback controller to redirect failed auth', () => {
+      expect(guard.handleRequest(null, false)).toBeUndefined();
+    });
+
+    it('should preserve authentication errors', () => {
+      const error = new Error('OAuth token exchange failed');
+
+      expect(() => guard.handleRequest(error, false)).toThrow(error);
+    });
+  });
 });
