@@ -29,7 +29,7 @@
 .scannerwork/
 ```
 
-#### apps/mobile/.gitignore
+#### apps/ui/.gitignore
 ```gitignore
 # SonarQube  
 .scannerwork/
@@ -93,7 +93,7 @@ env:
 ```bash
 # Both projects properly ignore .scannerwork
 ✅ kini-api: .scannerwork is ignored
-✅ kini-front: .scannerwork is ignored
+✅ kini-web: .scannerwork is ignored
 ```
 
 ## 📋 Team Onboarding Checklist

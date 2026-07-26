@@ -14,7 +14,7 @@ describe('EmailNotificationPublisher', () => {
           useValue: {
             get: jest.fn((key: string, fallback?: string) => {
               const values: Record<string, string> = {
-                FRONTEND_URL: 'http://localhost:19006',
+                FRONTEND_URL: 'http://localhost:3013',
                 NOTIFICATIONS_EMAIL_TOPIC: 'notification.email.requested.v1',
                 NOTIFICATIONS_KAFKA_BROKERS: 'platform-redpanda:9092',
               };
@@ -35,7 +35,7 @@ describe('EmailNotificationPublisher', () => {
       teamName: 'My Team',
       inviterEmail: 'owner@example.com',
       inviterName: 'Owner',
-      acceptUrl: 'http://localhost:19006/teams/team-123/accept',
+      acceptUrl: 'http://localhost:3013/teams/team-123/accept',
       locale: 'en',
     });
 
@@ -52,8 +52,8 @@ describe('EmailNotificationPublisher', () => {
           teamName: 'My Team',
           inviterEmail: 'owner@example.com',
           inviterName: 'Owner',
-          acceptUrl: 'http://localhost:19006/teams/team-123/accept',
-          frontendUrl: 'http://localhost:19006',
+          acceptUrl: 'http://localhost:3013/teams/team-123/accept',
+          frontendUrl: 'http://localhost:3013',
           locale: 'en',
         }),
         metadata: expect.objectContaining({

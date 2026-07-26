@@ -2,7 +2,6 @@
 node_modules/
 apps/*/node_modules/
 apps/*/package-lock.json
-!apps/api/package-lock.json
 .npm-cache/
 
 # build output
@@ -13,18 +12,6 @@ coverage/
 .next/
 web-build/
 *.tsbuildinfo
-
-# Expo / React Native generated state
-apps/mobile/.expo/
-apps/mobile/.metro-health-check*
-apps/mobile/android/.gradle/
-apps/mobile/android/build/
-apps/mobile/ios/build/
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
 
 # local env and secrets
 .env

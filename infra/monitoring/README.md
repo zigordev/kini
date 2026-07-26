@@ -117,9 +117,9 @@ npm install -D sonarqube-scanner
 npx sonar-scanner -Dsonar.login=your_token_here
 ```
 
-**For Kini Frontend:**
+**For Kini Web:**
 ```bash
-cd ../../apps/mobile
+cd ../../apps/ui
 npm install -D sonarqube-scanner
 npx sonar-scanner -Dsonar.login=your_token_here
 ```
@@ -166,7 +166,7 @@ Add to your crontab:
 ```bash
 # Run analysis daily at 2 AM
 0 2 * * * cd /path/to/ki../../apps/api && npx sonar-scanner -Dsonar.login=token
-0 2 * * * cd /path/to/ki../../apps/mobile && npx sonar-scanner -Dsonar.login=token
+0 2 * * * cd /path/to/ki../../apps/ui && npx sonar-scanner -Dsonar.login=token
 ```
 
 ### Option 2: CI/CD Integration
@@ -180,7 +180,7 @@ See [SONARQUBE_SETUP.md](./SONARQUBE_SETUP.md) for GitHub Actions and other CI/C
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 cd apps/api && npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
-cd ../../apps/mobile && npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
+cd ../../apps/ui && npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
 EOF
 
 chmod +x .git/hooks/pre-commit

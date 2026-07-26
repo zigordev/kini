@@ -53,6 +53,50 @@ describe('GoogleStrategy', () => {
     expect(strategy).toBeDefined();
   });
 
+  it('should use a session-bound OAuth state store', async () => {
+    const stateStore = (
+      strategy as unknown as {
+        _stateStore: {
+          store: (
+            request: Request,
+            callback: (error: Error | null, state?: string) => void,
+          ) => void;
+          verify: (
+            request: Request,
+            state: string,
+            callback: (
+              error: Error | null,
+              verified: boolean,
+              info?: { message?: string },
+            ) => void,
+          ) => void;
+        };
+      }
+    )._stateStore;
+    const request = { session: {} } as Request;
+    const state = await new Promise<string>((resolve, reject) => {
+      stateStore.store(request, (error, storedState) => {
+        if (error || !storedState) {
+          reject(error ?? new Error('OAuth state was not generated'));
+          return;
+        }
+        resolve(storedState);
+      });
+    });
+
+    await expect(
+      new Promise<boolean>((resolve, reject) => {
+        stateStore.verify(request, `${state}-mismatch`, (error, verified) => {
+          if (error) {
+            reject(error);
+            return;
+          }
+          resolve(verified);
+        });
+      }),
+    ).resolves.toBe(false);
+  });
+
   describe('authenticate', () => {
     it('should fail when OAuth is not configured', () => {
       const mockRequest = {} as Request;

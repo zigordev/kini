@@ -79,7 +79,7 @@ run_analysis() {
 echo ""
 echo "Select what to analyze:"
 echo "1) Kini API only"
-echo "2) Kini Frontend only"
+echo "2) Kini Web only"
 echo "3) Both projects"
 echo "4) Exit"
 echo ""
@@ -91,14 +91,14 @@ case $choice in
         run_analysis "../../apps/api" "Kini API"
         ;;
     2)
-        install_scanner "../../apps/mobile"
-        run_analysis "../../apps/mobile" "Kini Frontend"
+        install_scanner "../../apps/ui"
+        run_analysis "../../apps/ui" "Kini Web"
         ;;
     3)
         install_scanner "../../apps/api"
-        install_scanner "../../apps/mobile"
+        install_scanner "../../apps/ui"
         run_analysis "../../apps/api" "Kini API"
-        run_analysis "../../apps/mobile" "Kini Frontend"
+        run_analysis "../../apps/ui" "Kini Web"
         ;;
     4)
         echo -e "${YELLOW}👋 Exiting...${NC}"

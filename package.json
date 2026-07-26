@@ -13,22 +13,27 @@
   "scripts": {
     "prepare": "node ./scripts/prepare-husky.mjs",
     "lint": "npm run lint --workspaces --if-present",
-    "format": "prettier --write \".github/**/*.{yml,yaml}\" \"docker/**/*.{yml,yaml}\" \"docs/**/*.md\" \"scripts/**/*.mjs\" \"apps/mobile/tolgee.config.cjs\" \"apps/mobile/app/locales/*.json\" \"README.md\" \"CHANGELOG.md\" \"package.json\" \".release-please-config.json\" \".release-please-manifest.json\"",
-    "format:check": "prettier --check \".github/**/*.{yml,yaml}\" \"docker/**/*.{yml,yaml}\" \"docs/**/*.md\" \"scripts/**/*.mjs\" \"apps/mobile/tolgee.config.cjs\" \"apps/mobile/app/locales/*.json\" \"README.md\" \"CHANGELOG.md\" \"package.json\" \".release-please-config.json\" \".release-please-manifest.json\"",
+    "format": "prettier --write \".github/**/*.{yml,yaml}\" \"docker/**/*.{yml,yaml}\" \"docs/**/*.md\" \"scripts/**/*.mjs\" \"apps/ui/tolgee.config.cjs\" \"apps/ui/messages/*.json\" \"README.md\" \"CHANGELOG.md\" \"package.json\" \".release-please-config.json\" \".release-please-manifest.json\"",
+    "format:check": "prettier --check \".github/**/*.{yml,yaml}\" \"docker/**/*.{yml,yaml}\" \"docs/**/*.md\" \"scripts/**/*.mjs\" \"apps/ui/tolgee.config.cjs\" \"apps/ui/messages/*.json\" \"README.md\" \"CHANGELOG.md\" \"package.json\" \".release-please-config.json\" \".release-please-manifest.json\"",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "test:cov:api": "npm run test:cov -w @kini/api -- --passWithNoTests --watchman=false --ci",
     "test:secrets:gitleaks": "./scripts/precommit-gitleaks.sh",
-    "ci:quality:local": "npm run lint && npm run typecheck && npm run build && npm run test:cov:api",
+    "ci:quality:local": "npm run lint && npm run typecheck && npm run build && npm run test:cov:api && npm run test -w @kini/web",
     "precommit:checks": "npm run test:secrets:gitleaks && npm run ci:quality:local",
-    "i18n:push:local": "node scripts/i18n-sync-local.mjs --once --workspace @kini/mobile",
-    "i18n:watch:local": "node scripts/i18n-sync-local.mjs --watch --workspace @kini/mobile",
+    "i18n:push:local": "node scripts/i18n-sync-local.mjs --once --workspace @kini/web",
+    "i18n:watch:local": "node scripts/i18n-sync-local.mjs --watch --workspace @kini/web",
+    "local:token": "bash ../platform-ops/scripts/provision-local-app-token.sh kini",
     "local:up": "bash ./scripts/local-stack-up.sh",
     "local:down": "bash ./scripts/local-stack-down.sh",
     "local:reset": "bash ./scripts/local-stack-reset.sh",
     "audit": "npm audit --audit-level=high",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
+  },
+  "overrides": {
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.2",

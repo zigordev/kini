@@ -74,24 +74,24 @@ EOF
 npx sonar-scanner
 ```
 
-#### For kini-front (React Native/Expo):
+#### For kini-web (Next.js web):
 
 ```bash
-cd ../../apps/mobile
+cd ../../apps/ui
 
 # Install SonarQube Scanner
 npm install -D sonarqube-scanner
 
 # Create sonar-project.properties
 cat > sonar-project.properties << EOF
-sonar.projectKey=kini-front
-sonar.projectName=Kini Frontend
+sonar.projectKey=kini-web
+sonar.projectName=Kini Web
 sonar.projectVersion=1.0
 sonar.sources=app
 sonar.host.url=http://localhost:9000
 sonar.login=your_sonarqube_token_here
 sonar.typescript.lcov.reportPaths=coverage/lcov.info
-sonar.exclusions=**/node_modules/**,**/dist/**,**/*.spec.ts,**/*.spec.tsx,**/android/**,**/ios/**
+sonar.exclusions=**/node_modules/**,**/dist/**,**/.next/**,**/*.spec.ts,**/*.spec.tsx
 EOF
 
 # Run analysis
@@ -163,7 +163,7 @@ jobs:
 ```bash
 # Add to crontab: Run analysis daily at 2 AM
 0 2 * * * cd /path/../../apps/api && npx sonar-scanner
-0 2 * * * cd /path/../../apps/mobile && npx sonar-scanner
+0 2 * * * cd /path/../../apps/ui && npx sonar-scanner
 ```
 
 ## Troubleshooting
@@ -206,4 +206,3 @@ jobs:
 - [SonarQube Documentation](https://docs.sonarqube.org/latest/)
 - [Prometheus Documentation](https://prometheus.io/docs/)
 - [Grafana Documentation](https://grafana.com/docs/)
-

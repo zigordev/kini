@@ -1,0 +1,256 @@
+{
+  "actions": {
+    "cancel": "Cancelar",
+    "create": "Crear",
+    "done": "Listo",
+    "refresh": "Actualizar",
+    "save": "Guardar"
+  },
+  "auth": {
+    "connecting": "Conectando...",
+    "google_unavailable": "El inicio de sesión con Google no está disponible. Verifica la configuración del servidor.",
+    "sign_in_google": "Inicia sesión con Google",
+    "sign_out": "Cerrar sesión",
+    "sign_out_confirm_message": "Tendrás que iniciar sesión de nuevo para acceder a tus quinielas.",
+    "sign_out_confirm_title": "¿Cerrar sesión?"
+  },
+  "available_pools": {
+    "add_short": "Añadir disponible",
+    "add_to_team": "Añadir al equipo",
+    "added": "Quiniela añadida al equipo",
+    "empty_text": "Sincroniza con el proveedor externo cuando tengas configurada la API key, o espera a la sincronización semanal.",
+    "empty_title": "No hay quinielas disponibles",
+    "eyebrow": "Catálogo",
+    "loading": "Cargando quinielas disponibles...",
+    "match_count": "{{count}} partidos disponibles",
+    "no_matches": "Sin partidos detallados todavía",
+    "no_team_selected": "Selecciona un equipo antes de añadir la quiniela.",
+    "play": "Jugar",
+    "subtitle": "Quinielas base recuperadas del proveedor externo. Añádelas a un equipo para completar pronósticos, resultados y seguimiento.",
+    "sync": "Sincronizar",
+    "synced": "Quinielas sincronizadas",
+    "title": "Próximas quinielas"
+  },
+  "common": {
+    "loading": "Cargando...",
+    "no": "No",
+    "yes": "Sí"
+  },
+  "errors": {
+    "AUTH": {
+      "GOOGLE_UNAVAILABLE": "El inicio de sesión con Google no está disponible. Verifica la configuración del servidor.",
+      "INVALID_CREDENTIALS": "Correo o contraseña inválidos.",
+      "NOT_AUTHENTICATED": "Inicia sesión para continuar."
+    },
+    "EMAIL": {
+      "INVALID": "Introduce un correo válido."
+    },
+    "FUT_POOL_MATCH": {
+      "ELIGE8_LIMIT": "Se permiten como máximo {{max}} partidos E8."
+    },
+    "GENERIC": {
+      "UNKNOWN": "Ha ocurrido un error. Inténtalo de nuevo."
+    },
+    "PASSWORD": {
+      "MIN_LENGTH": "La contraseña debe tener al menos {{min}} caracteres."
+    },
+    "VALIDATION": {
+      "FAILED": "Algunos campos requieren atención."
+    }
+  },
+  "fields": {
+    "active": "Activa",
+    "date": "Fecha",
+    "doubles": "Dobles",
+    "name": "Nombre",
+    "triples": "Triples"
+  },
+  "general_stats": {
+    "balance": "Balance",
+    "empty": "Aún no hay datos comparativos entre equipos.",
+    "failures": "Fallos",
+    "loading": "Cargando comparativa entre equipos...",
+    "players": "jugadores",
+    "ranking_hint": "Equipos ordenados por tasa de acierto en predicciones resueltas.",
+    "ranking_title": "Ranking de equipos",
+    "success_rate": "Tasa de acierto",
+    "successes": "Aciertos",
+    "summary_average": "Tasa media",
+    "summary_leader": "Líder",
+    "summary_predictions": "Predicciones",
+    "summary_teams": "Equipos",
+    "title": "Estadísticas generales"
+  },
+  "language": {
+    "basque": "Euskera",
+    "english": "Inglés",
+    "spanish": "Español",
+    "title": "Idioma"
+  },
+  "login": {
+    "eyebrow": "Gestiona tus porras grupales",
+    "tagline": "Inicia sesión para gestionar quinielas, revisar resultados y mantener todas las asignaciones en un único lugar.",
+    "terms": "El acceso está limitado a miembros aprobados.",
+    "title": "Bienvenido a Kini"
+  },
+  "matches": {
+    "assigned_player": "Persona asignada",
+    "away_team": "Visitante",
+    "edit_denied": "Solo puedes editar los partidos asignados a ti.",
+    "full15": "Pleno al 15",
+    "home_team": "Local",
+    "official_result_label": "Resultado oficial de {{home}} contra {{away}}",
+    "prediction": "Pronóstico",
+    "remove_elige8": "Quitar E8",
+    "success_no": "Fallo ❌",
+    "success_yes": "Acierto ✅",
+    "unassigned": "Sin asignar",
+    "update_status_message": "Selecciona una opción:",
+    "update_status_title": "Actualizar estado"
+  },
+  "mobile_tabs": {
+    "available_pools": "Próximas",
+    "pools": "Quinielas"
+  },
+  "nav": {
+    "language": "Cambiar idioma",
+    "logout": "Cerrar sesión",
+    "user": "Cuenta"
+  },
+  "notifications": {
+    "match_updated": "Partido actualizado",
+    "pool_updated": "Quiniela actualizada"
+  },
+  "pools": {
+    "active_pool_subtitle": "Quiniela seleccionada",
+    "check_results": "Comprobar resultados",
+    "config": "Configuración quiniela",
+    "create_accessibility": "Crear quiniela",
+    "create_title": "+ Crear quiniela",
+    "created": "Quiniela creada",
+    "earning": "Ganancia",
+    "edit_title": "Editar quiniela",
+    "failure_count": "{{count}} fallos",
+    "finalized": "Quiniela finalizada",
+    "history_title": "Historial de quinielas",
+    "inspector_subtitle": "Ajustes de la quiniela seleccionada",
+    "inspector_title": "Ajustes",
+    "loading": "Cargando quinielas...",
+    "loading_single": "Cargando quiniela...",
+    "manual_matches_help": "Completa los 15 partidos o deja toda la lista vacía para añadir los detalles más tarde.",
+    "match_teams_required": "Cada partido necesita equipo local y visitante.",
+    "matches": "Partidos",
+    "metric_assigned_to_me": "Asignadas a mí",
+    "metric_pending": "Pendientes",
+    "metric_success_rate": "Tasa de acierto",
+    "metric_successes": "Aciertos",
+    "name_placeholder": "Nombre de la quiniela",
+    "no_pools": "No se encontraron quinielas disponibles.",
+    "pending_result_count": "{{count}} sin resultado",
+    "pool_fallback": "Quiniela",
+    "pool_selector_label": "Seleccionar quiniela",
+    "results_checked": "Resultados comprobados",
+    "settings_accessibility": "Ajustes de quiniela",
+    "success_count": "{{count}} aciertos",
+    "success_fail_summary": "{{successes}} aciertos · {{failures}} fallos",
+    "team_stats": "Estadísticas del equipo",
+    "update_app_for_date": "Actualiza tu app para seleccionar otra fecha",
+    "updated": "Quiniela actualizada",
+    "workflow_assignments": "{{count}} partidos asignados",
+    "workflow_pending": "{{count}} resultados pendientes",
+    "workflow_successes": "{{count}} aciertos por ahora",
+    "workflow_title": "Flujo de la quiniela",
+    "workspace_subtitle": "Revisa la quiniela seleccionada, ajusta una quiniela desde sus detalles o crea la siguiente quiniela del equipo.",
+    "workspace_title": "Quinielas de {{team}}"
+  },
+  "profile": {
+    "pool_defaults": "Configuración quiniela por defecto",
+    "support_hint": "Si pierdes acceso a tu cuenta, comunícate con el administrador para restablecer tus credenciales.",
+    "team": "Equipo"
+  },
+  "settings": {
+    "receive_notifications": "Recibir notificaciones"
+  },
+  "stats": {
+    "balance_help": "Balance neto actual de este equipo.",
+    "breakdown_help": "Rendimiento por combinación de resultado seleccionada.",
+    "empty": "No hay datos disponibles.",
+    "failures": "Fallos",
+    "loading": "Cargando estadísticas...",
+    "ranking_heading": "Ranking de aciertos",
+    "ranking_help": "Líderes por tasa de acierto en partidos resueltos.",
+    "result_breakdown_heading": "Desglose de resultados (1/X/2)",
+    "subtitle": "Rendimiento a nivel de equipo en todas las quinielas del equipo seleccionado.",
+    "success_rate": "Tasa",
+    "successes": "Aciertos",
+    "summary_balance": "Balance",
+    "summary_best_result": "Mejor resultado",
+    "summary_leader": "Líder",
+    "summary_players": "Jugadores",
+    "summary_success_rate": "Tasa de acierto",
+    "title": "Estadísticas del equipo",
+    "top_performers": "Mejores participantes",
+    "total_predictions": "Total"
+  },
+  "status": {
+    "active": "Activa",
+    "closed": "Cerrada",
+    "preparing": "Preparando tu experiencia...",
+    "programmed": "Programada"
+  },
+  "tabs": {
+    "available_pools": "Quinielas",
+    "general_stats": "Estadísticas generales",
+    "pools": "Quinielas",
+    "profile": "Perfil",
+    "stats": "Estadísticas",
+    "teams": "Equipos"
+  },
+  "teams": {
+    "accept_failed": "No se pudo aceptar la invitación.",
+    "accept_invalid": "Este enlace de invitación no es válido.",
+    "accept_processing": "Aceptando invitación...",
+    "accept_processing_title": "Uniéndote al equipo",
+    "accept_success": "Invitación aceptada.",
+    "accept_title": "Invitación al equipo",
+    "card_text": "Abre el equipo para gestionar sus quinielas, invitar miembros o revisar las estadísticas del equipo.",
+    "card_title": "Espacio del equipo",
+    "create": "Crear equipo",
+    "create_first": "Crear primer equipo",
+    "create_prompt": "Nombre del equipo",
+    "created": "Equipo creado",
+    "created_at": "Creado {{date}}",
+    "current": "Actual",
+    "empty_text": "Crea un equipo para empezar a agrupar quinielas e invitar a las personas que participarán.",
+    "empty_title": "Aún no hay equipos",
+    "eyebrow": "Equipos",
+    "go_to_team": "Ir al equipo",
+    "invite": "Invitar",
+    "invite_prompt": "Email para invitar a {{team}}",
+    "invited": "Invitación enviada a {{email}}",
+    "jackpot": "Bote",
+    "jackpot_loading": "Cargando bote...",
+    "jackpot_not_published": "Aún no publicado",
+    "jackpot_unavailable": "No disponible",
+    "loading": "Cargando equipos...",
+    "open_pools": "Quinielas",
+    "refresh": "Actualizar",
+    "role_admin": "Admin",
+    "role_member": "Miembro",
+    "show_stats": "Estadísticas",
+    "subtitle": "Elige primero un equipo. Las quinielas y estadísticas viven dentro del equipo seleccionado.",
+    "title": "Equipos"
+  },
+  "theme": {
+    "dark": "Oscuro",
+    "light": "Claro",
+    "toggle": "Tema"
+  },
+  "user": {
+    "anonymous": "Usuario"
+  },
+  "users": {
+    "loading": "Cargando usuarios...",
+    "select": "Seleccionar usuario"
+  }
+}

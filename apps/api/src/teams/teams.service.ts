@@ -273,8 +273,7 @@ export class TeamsService {
 
   private teamAcceptUrl(teamId: string): string {
     const frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') ??
-      'http://localhost:19006';
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013';
     return `${frontendUrl.replace(/\/$/, '')}/teams/${teamId}/accept`;
   }
 

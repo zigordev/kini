@@ -48,7 +48,7 @@ describe('NotifierService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockReturnValue('http://localhost:19006'),
+            get: jest.fn().mockReturnValue('http://localhost:3013'),
           },
         },
       ],
@@ -251,7 +251,7 @@ describe('NotifierService', () => {
         teamName: 'My Team',
         inviterEmail: 'owner@example.com',
         inviterName: 'Owner',
-        acceptUrl: 'http://localhost:19006/teams/team-123/accept',
+        acceptUrl: 'http://localhost:3013/teams/team-123/accept',
         locale: 'en',
       };
 
@@ -265,7 +265,7 @@ describe('NotifierService', () => {
           details: expect.objectContaining({
             to: 'invitee@example.com',
             teamName: 'My Team',
-            acceptUrl: 'http://localhost:19006/teams/team-123/accept',
+            acceptUrl: 'http://localhost:3013/teams/team-123/accept',
           }),
         }),
       );

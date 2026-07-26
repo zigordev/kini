@@ -31,7 +31,7 @@ sync_tolgee_messages() {
   OPENBAO_REQUIRED_KEYS="TOLGEE_API_KEY" \
   TOLGEE_API_URL="$TOLGEE_LOCAL_ADDR" \
   TOLGEE_PROJECT_ID="$project_id" \
-    node apps/api/scripts/openbao-run.mjs -- npm run i18n:push -w @kini/mobile
+    node apps/api/scripts/openbao-run.mjs -- npm run i18n:push -w @kini/web
 
   echo "Pulling Tolgee snapshots for local messages..."
   OPENBAO_ADDR="$OPENBAO_LOCAL_ADDR" \
@@ -41,26 +41,7 @@ sync_tolgee_messages() {
   OPENBAO_REQUIRED_KEYS="TOLGEE_API_KEY" \
   TOLGEE_API_URL="$TOLGEE_LOCAL_ADDR" \
   TOLGEE_PROJECT_ID="$project_id" \
-    node apps/api/scripts/openbao-run.mjs -- npm run i18n:pull -w @kini/mobile
-}
-
-sync_api_dependencies() {
-  echo "Synchronizing API dependencies when the lockfile changes..."
-  docker compose --env-file "${APP_ENV_FILE}" -f docker/compose.app.local.yml run \
-    --build \
-    --rm \
-    --no-deps \
-    --entrypoint sh \
-    kini_api \
-    -lc '
-      set -eu
-      lock_hash="$(sha256sum package-lock.json | awk "{print \$1}")"
-      marker="node_modules/.kini-package-lock.sha256"
-      if [ ! -f "$marker" ] || [ "$(cat "$marker")" != "$lock_hash" ]; then
-        npm ci
-        printf "%s" "$lock_hash" > "$marker"
-      fi
-    '
+    node apps/api/scripts/openbao-run.mjs -- npm run i18n:pull -w @kini/web
 }
 
 if [[ ! -f "${APP_ENV_FILE}" ]]; then
@@ -133,7 +114,14 @@ if [ "$secret_code" != "200" ]; then
   echo "OpenBao secret path is not readable with OPENBAO_TOKEN (status=$secret_code): ${OPENBAO_KV_MOUNT}/${OPENBAO_SECRET_PATH}" >&2
   cat "$secret_body_file" >&2 || true
   echo >&2
-  echo "Create/fix the secret path in OpenBao and retry." >&2
+  if [ "$secret_code" = "403" ]; then
+    echo "The token is invalid, expired, revoked, or lacks the kini-local-read policy." >&2
+    echo "Run npm run local:token to install a fresh app token, then retry." >&2
+  elif [ "$secret_code" = "404" ]; then
+    echo "Create the kv/kini secret described in docs/local-first-start.md and retry." >&2
+  else
+    echo "Check the OpenBao response and docs/local-first-start.md, then retry." >&2
+  fi
   exit 1
 fi
 
@@ -179,7 +167,5 @@ docker network create platform_ops_shared >/dev/null 2>&1 || true
 if [ -n "$tolgee_project_id" ]; then
   sync_tolgee_messages "$tolgee_project_id"
 fi
-
-sync_api_dependencies
 
 docker compose --env-file "${APP_ENV_FILE}" -f docker/compose.app.local.yml up -d --build --remove-orphans
