@@ -127,7 +127,7 @@ describe('GoogleStrategy', () => {
 
     beforeEach(() => {
       mockRequest = {
-        logIn: jest.fn((user, callback) => callback()),
+        logIn: jest.fn((_user, _options, callback) => callback()),
       } as any;
     });
 
@@ -147,6 +147,7 @@ describe('GoogleStrategy', () => {
       );
       expect(mockRequest.logIn).toHaveBeenCalledWith(
         mockUser,
+        { session: true, keepSessionInfo: true },
         expect.any(Function),
       );
     });
@@ -169,11 +170,13 @@ describe('GoogleStrategy', () => {
       authService.validateGoogleProfile.mockResolvedValue(mockUser);
 
       const loginError = new Error('Login failed');
-      mockRequest.logIn = jest.fn((user: any, callback: any) => {
-        if (typeof callback === 'function') {
-          callback(loginError);
-        }
-      }) as any;
+      mockRequest.logIn = jest.fn(
+        (_user: any, _options: any, callback: any) => {
+          if (typeof callback === 'function') {
+            callback(loginError);
+          }
+        },
+      ) as any;
 
       await expect(
         strategy.validate(

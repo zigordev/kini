@@ -55,7 +55,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const user = await this.authService.validateGoogleProfile(profile);
 
     await new Promise<void>((resolve, reject) =>
-      request.logIn(user, (error) => {
+      request.logIn(user, { session: true, keepSessionInfo: true }, (error) => {
         if (error) {
           this.logger.error('[GoogleStrategy] request.logIn failed', error);
           reject(error);

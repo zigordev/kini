@@ -78,6 +78,20 @@ export class GoogleAuthGuard extends AuthGuard('google') {
     };
   }
 
+  override handleRequest<TUser = unknown>(
+    error: unknown,
+    user: TUser | false | null,
+  ): TUser | undefined {
+    if (error) {
+      throw error;
+    }
+
+    // OAuth denials and invalid/expired state arrive without a user. Let the
+    // callback controller turn them into the configured frontend redirect
+    // instead of exposing Nest's default JSON 401 response in the browser.
+    return user || undefined;
+  }
+
   private extractStringParam(value: unknown): string | undefined {
     return typeof value === 'string' && value.trim().length > 0
       ? value
