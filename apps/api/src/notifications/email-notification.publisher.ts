@@ -122,7 +122,7 @@ export class EmailNotificationPublisher implements OnModuleDestroy {
 
   private frontendUrl(): string {
     return (
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:19006'
+      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013'
     ).replace(/\/$/, '');
   }
 

@@ -1,0 +1,256 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "create": "Create",
+    "done": "Done",
+    "refresh": "Refresh",
+    "save": "Save"
+  },
+  "auth": {
+    "connecting": "Connecting...",
+    "google_unavailable": "Google Sign-In is unavailable. Check server configuration.",
+    "sign_in_google": "Sign in with Google",
+    "sign_out": "Sign out",
+    "sign_out_confirm_message": "You will need to sign in again to access your pools.",
+    "sign_out_confirm_title": "Sign out?"
+  },
+  "available_pools": {
+    "add_short": "Add available",
+    "add_to_team": "Add to team",
+    "added": "Pool added to team",
+    "empty_text": "Sync with the external provider once the API key is configured, or wait for the weekly sync.",
+    "empty_title": "No available pools",
+    "eyebrow": "Catalog",
+    "loading": "Loading available pools...",
+    "match_count": "{{count}} available matches",
+    "no_matches": "No detailed matches yet",
+    "no_team_selected": "Select a team before adding the pool.",
+    "play": "Play",
+    "subtitle": "Raw pools retrieved from the external provider. Add one to a team to complete predictions, results, and tracking.",
+    "sync": "Sync",
+    "synced": "Pools synchronized",
+    "title": "Upcoming pools"
+  },
+  "common": {
+    "loading": "Loading...",
+    "no": "No",
+    "yes": "Yes"
+  },
+  "errors": {
+    "AUTH": {
+      "GOOGLE_UNAVAILABLE": "Google Sign-In is unavailable. Check server configuration.",
+      "INVALID_CREDENTIALS": "Invalid email or password.",
+      "NOT_AUTHENTICATED": "Please sign in to continue."
+    },
+    "EMAIL": {
+      "INVALID": "Please enter a valid email."
+    },
+    "FUT_POOL_MATCH": {
+      "ELIGE8_LIMIT": "A maximum of {{max}} E8 matches are allowed."
+    },
+    "GENERIC": {
+      "UNKNOWN": "Something went wrong. Please try again."
+    },
+    "PASSWORD": {
+      "MIN_LENGTH": "Password must be at least {{min}} characters."
+    },
+    "VALIDATION": {
+      "FAILED": "Some fields need attention."
+    }
+  },
+  "fields": {
+    "active": "Active",
+    "date": "Date",
+    "doubles": "Doubles",
+    "name": "Name",
+    "triples": "Triples"
+  },
+  "general_stats": {
+    "balance": "Balance",
+    "empty": "No team comparison data yet.",
+    "failures": "Failures",
+    "loading": "Loading team comparison...",
+    "players": "players",
+    "ranking_hint": "Teams ordered by resolved prediction success rate.",
+    "ranking_title": "Team ranking",
+    "success_rate": "Success rate",
+    "successes": "Successes",
+    "summary_average": "Average rate",
+    "summary_leader": "Leader",
+    "summary_predictions": "Predictions",
+    "summary_teams": "Teams",
+    "title": "General stats"
+  },
+  "language": {
+    "basque": "Basque",
+    "english": "English",
+    "spanish": "Spanish",
+    "title": "Language"
+  },
+  "login": {
+    "eyebrow": "Manage your group pools",
+    "tagline": "Sign in to manage pools, review results, and keep every match assignment in one place.",
+    "terms": "Access is limited to approved members.",
+    "title": "Welcome to Kini"
+  },
+  "matches": {
+    "assigned_player": "Assigned player",
+    "away_team": "Away",
+    "edit_denied": "You can only edit matches assigned to you.",
+    "full15": "Full 15",
+    "home_team": "Home",
+    "official_result_label": "Official result for {{home}} versus {{away}}",
+    "prediction": "Prediction",
+    "remove_elige8": "Remove E8",
+    "success_no": "Fail ❌",
+    "success_yes": "Success ✅",
+    "unassigned": "Unassigned",
+    "update_status_message": "Select an option:",
+    "update_status_title": "Update status"
+  },
+  "mobile_tabs": {
+    "available_pools": "Upcoming",
+    "pools": "Pools"
+  },
+  "nav": {
+    "language": "Change language",
+    "logout": "Sign out",
+    "user": "Account"
+  },
+  "notifications": {
+    "match_updated": "Match updated",
+    "pool_updated": "Pool updated"
+  },
+  "pools": {
+    "active_pool_subtitle": "Selected pool",
+    "check_results": "Check results",
+    "config": "Pool configuration",
+    "create_accessibility": "Create pool",
+    "create_title": "Create pool",
+    "created": "Pool created",
+    "earning": "Earning",
+    "edit_title": "Edit pool",
+    "failure_count": "{{count}} failures",
+    "finalized": "Pool finalized",
+    "history_title": "Pool history",
+    "inspector_subtitle": "Settings for the selected pool",
+    "inspector_title": "Configuration",
+    "loading": "Loading pools...",
+    "loading_single": "Loading pool...",
+    "manual_matches_help": "Fill all 15 matches, or leave the complete list empty and add the details later.",
+    "match_teams_required": "Every match needs both a home and an away team.",
+    "matches": "Matches",
+    "metric_assigned_to_me": "Assigned to me",
+    "metric_pending": "Pending",
+    "metric_success_rate": "Success rate",
+    "metric_successes": "Successes",
+    "name_placeholder": "Pool name",
+    "no_pools": "No pools found.",
+    "pending_result_count": "{{count}} no result yet",
+    "pool_fallback": "Pool",
+    "pool_selector_label": "Select pool",
+    "results_checked": "Results checked",
+    "settings_accessibility": "Pool settings",
+    "success_count": "{{count}} successes",
+    "success_fail_summary": "{{successes}} successes · {{failures}} failures",
+    "team_stats": "Team stats",
+    "update_app_for_date": "Update your app to select another date",
+    "updated": "Pool updated",
+    "workflow_assignments": "{{count}} assigned matches",
+    "workflow_pending": "{{count}} pending results",
+    "workflow_successes": "{{count}} successes so far",
+    "workflow_title": "Pool workflow",
+    "workspace_subtitle": "Review the selected pool, adjust one pool from its details, or create the next pool for this team.",
+    "workspace_title": "{{team}} pools"
+  },
+  "profile": {
+    "pool_defaults": "Pool defaults",
+    "support_hint": "If you lose access to your account, contact the administrator to reset your credentials.",
+    "team": "Team"
+  },
+  "settings": {
+    "receive_notifications": "Receive notifications"
+  },
+  "stats": {
+    "balance_help": "Current net balance across this team.",
+    "breakdown_help": "Performance by selected result combination.",
+    "empty": "No data available.",
+    "failures": "Failures",
+    "loading": "Loading stats...",
+    "ranking_heading": "Success ranking",
+    "ranking_help": "Leaders by resolved match success rate.",
+    "result_breakdown_heading": "Result breakdown (1/X/2)",
+    "subtitle": "Team-level performance across all pools in the selected team.",
+    "success_rate": "Rate",
+    "successes": "Successes",
+    "summary_balance": "Balance",
+    "summary_best_result": "Best result",
+    "summary_leader": "Leader",
+    "summary_players": "Players",
+    "summary_success_rate": "Success rate",
+    "title": "Team stats",
+    "top_performers": "Top performers",
+    "total_predictions": "Total"
+  },
+  "status": {
+    "active": "Active",
+    "closed": "Closed",
+    "preparing": "Getting things ready...",
+    "programmed": "Programmed"
+  },
+  "tabs": {
+    "available_pools": "Pools",
+    "general_stats": "General stats",
+    "pools": "Pools",
+    "profile": "Profile",
+    "stats": "Stats",
+    "teams": "Teams"
+  },
+  "teams": {
+    "accept_failed": "The invitation could not be accepted.",
+    "accept_invalid": "This invitation link is not valid.",
+    "accept_processing": "Accepting invitation...",
+    "accept_processing_title": "Joining team",
+    "accept_success": "Invitation accepted.",
+    "accept_title": "Team invitation",
+    "card_text": "Open the team to manage its pools, invite members, or review the team stats.",
+    "card_title": "Team workspace",
+    "create": "Create team",
+    "create_first": "Create first team",
+    "create_prompt": "Team name",
+    "created": "Team created",
+    "created_at": "Created {{date}}",
+    "current": "Current",
+    "empty_text": "Create a team to start grouping pools and inviting the people who will participate.",
+    "empty_title": "No teams yet",
+    "eyebrow": "Teams",
+    "go_to_team": "Go to team",
+    "invite": "Invite",
+    "invite_prompt": "Email to invite to {{team}}",
+    "invited": "Invitation sent to {{email}}",
+    "jackpot": "Jackpot",
+    "jackpot_loading": "Loading jackpot...",
+    "jackpot_not_published": "Not published yet",
+    "jackpot_unavailable": "Unavailable",
+    "loading": "Loading teams...",
+    "open_pools": "Pools",
+    "refresh": "Refresh",
+    "role_admin": "Admin",
+    "role_member": "Member",
+    "show_stats": "Stats",
+    "subtitle": "Choose a team first. Pools and stats live inside the selected team.",
+    "title": "Teams"
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light",
+    "toggle": "Theme"
+  },
+  "user": {
+    "anonymous": "User"
+  },
+  "users": {
+    "loading": "Loading users...",
+    "select": "Select user"
+  }
+}

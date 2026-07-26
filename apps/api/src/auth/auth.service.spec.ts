@@ -160,7 +160,15 @@ describe('AuthService', () => {
 
   describe('getSuccessRedirectUrl', () => {
     beforeEach(() => {
-      configService.get.mockReturnValue('https://default.example.com/success');
+      configService.get.mockImplementation((key: string, fallback?: string) => {
+        const values: Record<string, string> = {
+          AUTH_SUCCESS_REDIRECT_URL: 'https://default.example.com/success',
+          AUTH_FAILURE_REDIRECT_URL: 'https://default.example.com/failure',
+          AUTH_CORS_ORIGINS:
+            'https://custom.example.com,https://app.example.com',
+        };
+        return values[key] ?? fallback;
+      });
     });
 
     it('should build success redirect URL with user ID', () => {
@@ -182,13 +190,13 @@ describe('AuthService', () => {
 
     it('should append additional params', () => {
       const result = service.getSuccessRedirectUrl(mockUser, null, {
-        mobile_token: 'token-123',
-        session_id: 'session-456',
+        source: 'web',
+        next: 'pools',
       });
 
       expect(result).toContain('userId=user-123');
-      expect(result).toContain('mobile_token=token-123');
-      expect(result).toContain('session_id=session-456');
+      expect(result).toContain('source=web');
+      expect(result).toContain('next=pools');
     });
 
     it('should skip empty additional params', () => {
@@ -211,11 +219,53 @@ describe('AuthService', () => {
       expect(result).toContain('https://default.example.com/success');
       expect(result).toContain('userId=user-123');
     });
+
+    it('should reject an untrusted redirect', () => {
+      const result = service.getSuccessRedirectUrl(
+        mockUser,
+        'https://attacker.example/phishing',
+      );
+
+      expect(result).toBe(
+        'https://default.example.com/success?userId=user-123',
+      );
+    });
+
+    it('should reject protocol-relative redirects to an untrusted origin', () => {
+      const result = service.getSuccessRedirectUrl(
+        mockUser,
+        '//attacker.example/phishing',
+      );
+
+      expect(result).toBe(
+        'https://default.example.com/success?userId=user-123',
+      );
+    });
+
+    it('should resolve relative redirects on the configured fallback origin', () => {
+      const result = service.getSuccessRedirectUrl(
+        mockUser,
+        '/auth/callback?next=%2Fpools',
+      );
+
+      expect(result).toContain(
+        'https://default.example.com/auth/callback?next=%2Fpools',
+      );
+      expect(result).toContain('userId=user-123');
+    });
   });
 
   describe('getFailureRedirectUrl', () => {
     beforeEach(() => {
-      configService.get.mockReturnValue('https://default.example.com/failure');
+      configService.get.mockImplementation((key: string, fallback?: string) => {
+        const values: Record<string, string> = {
+          AUTH_SUCCESS_REDIRECT_URL: 'https://default.example.com/success',
+          AUTH_FAILURE_REDIRECT_URL: 'https://default.example.com/failure',
+          AUTH_CORS_ORIGINS:
+            'https://custom.example.com,https://app.example.com',
+        };
+        return values[key] ?? fallback;
+      });
     });
 
     it('should build failure redirect URL with error code', () => {
@@ -255,6 +305,17 @@ describe('AuthService', () => {
 
       expect(result).toContain('https://default.example.com/failure');
       expect(result).toContain('error=error');
+    });
+
+    it('should reject an untrusted failure redirect', () => {
+      const result = service.getFailureRedirectUrl(
+        'auth_failed',
+        'https://attacker.example/phishing',
+      );
+
+      expect(result).toBe(
+        'https://default.example.com/failure?error=auth_failed',
+      );
     });
   });
 });

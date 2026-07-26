@@ -36,9 +36,9 @@ jobs:
       - name: Validate compose manifests
         env:
           POSTGRES_PASSWORD: kini
-          AUTH_CORS_ORIGINS: http://localhost:8081
-          AUTH_SUCCESS_REDIRECT_URL: http://localhost:8081/auth/callback
-          AUTH_FAILURE_REDIRECT_URL: http://localhost:8081/auth/callback
+          AUTH_CORS_ORIGINS: http://localhost:3013
+          AUTH_SUCCESS_REDIRECT_URL: http://localhost:3013/auth/callback
+          AUTH_FAILURE_REDIRECT_URL: http://localhost:3013/auth/callback
           GOOGLE_CLIENT_ID: ci-google-client-id
           GOOGLE_CALLBACK_URL: http://localhost:3012/auth/google/callback
           OPENBAO_TOKEN: ci-openbao-token
@@ -57,6 +57,9 @@ jobs:
 
       - name: API tests with coverage
         run: npm run test:cov:api
+
+      - name: Web tests
+        run: npm run test -w @kini/web
 
       - name: Upload api coverage
         if: always()

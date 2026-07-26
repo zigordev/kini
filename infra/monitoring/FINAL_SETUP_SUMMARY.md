@@ -11,7 +11,7 @@
 
 ### 2. Projects Analyzed
 - ✅ **kini-api** - 50 TypeScript files analyzed
-- ✅ **kini-front** - 47 TypeScript files + 4 YAML files analyzed
+- ✅ **kini-web** - 47 TypeScript files + 4 YAML files analyzed
 
 ### 3. Configuration Files Created
 ```
@@ -29,7 +29,7 @@ apps/api/
 ├── sonar-project.properties                # SonarQube config
 └── package.json                            # Added sonar:scan script
 
-apps/mobile/
+apps/ui/
 ├── sonar-project.properties                # SonarQube config
 └── package.json                            # Added sonar:scan script
 ```
@@ -47,7 +47,7 @@ open http://localhost:9000
 
 # View projects:
 # - kini-api: http://localhost:9000/dashboard?id=kini-api
-# - kini-front: http://localhost:9000/dashboard?id=kini-front
+# - kini-web: http://localhost:9000/dashboard?id=kini-web
 ```
 
 ### Run Analysis Again
@@ -60,8 +60,8 @@ export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api
 npm run sonar:scan
 
-# Analyze kini-front  
-cd apps/mobile
+# Analyze kini-web
+cd apps/ui
 npm run sonar:scan
 ```
 
@@ -118,7 +118,7 @@ source ~/.zshrc
 # After code changes
 export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api && npm run sonar:scan
-cd ../../apps/mobile && npm run sonar:scan
+cd ../../apps/ui && npm run sonar:scan
 
 # View results
 open http://localhost:9000
@@ -131,7 +131,7 @@ crontab -e
 
 # Add:
 0 2 * * * cd apps/api && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
-0 2 * * * cd apps/mobile && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
+0 2 * * * cd apps/ui && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
 ```
 
 ### Option 3: Pre-commit Hook
@@ -140,7 +140,7 @@ cat > ./kini/.git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api && npm run sonar:scan || true
-cd ../../apps/mobile && npm run sonar:scan || true
+cd ../../apps/ui && npm run sonar:scan || true
 EOF
 
 chmod +x ./kini/.git/hooks/pre-commit
@@ -228,4 +228,3 @@ Your static code analysis is now integrated with your monitoring infrastructure!
 - 🔍 Prometheus: http://localhost:9090
 
 **Start here:** Open http://localhost:9000 and explore your code quality metrics!
-

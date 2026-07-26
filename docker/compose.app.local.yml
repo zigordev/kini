@@ -32,8 +32,9 @@ services:
 
   kini_api:
     build:
-      context: ../apps/api
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      target: local
     restart: unless-stopped
     environment:
       NODE_ENV: development
@@ -54,8 +55,7 @@ services:
       SESSION_COOKIE_SAME_SITE: ${SESSION_COOKIE_SAME_SITE:-lax}
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:?GOOGLE_CALLBACK_URL is required}
-      GOOGLE_MOBILE_REDIRECT_URI: ${GOOGLE_MOBILE_REDIRECT_URI:-kini://auth/callback}
-      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:19006}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3013}
       NOTIFICATIONS_KAFKA_BROKERS: ${NOTIFICATIONS_KAFKA_BROKERS:-platform-redpanda:9092}
       NOTIFICATIONS_EMAIL_TOPIC: ${NOTIFICATIONS_EMAIL_TOPIC:-notification.email.requested.v1}
       EDUARDO_LOSILLA_SYNC_ENABLED: ${EDUARDO_LOSILLA_SYNC_ENABLED:-true}
@@ -66,16 +66,19 @@ services:
       OPENBAO_KV_MOUNT: kv
       OPENBAO_SECRET_PATH: kini
       OPENBAO_REQUIRED_KEYS: SESSION_SECRET,SESSION_COOKIE_SECRET,GOOGLE_CLIENT_SECRET
-    volumes:
-      - ../apps/api:/app
-      - kini-api-node-modules:/app/node_modules
     ports:
       - '3012:3000'
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'wget -qO- http://localhost:3000/docs >/dev/null 2>&1']
+      interval: 10s
+      timeout: 4s
+      retries: 12
     depends_on:
       kini_db:
         condition: service_healthy
     command:
-      ['node', 'scripts/openbao-run.mjs', '--', 'npm', 'run', 'start:dev']
+      ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'dist/main.js']
     logging: *default-logging
     networks:
       default:
@@ -83,31 +86,31 @@ services:
         aliases:
           - kini-api
 
-  kini_mobile:
+  kini_web:
     build:
-      context: ../apps/mobile
-      dockerfile: Dockerfile.dev
+      context: ..
+      dockerfile: apps/ui/Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3012}
+        NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:-local}
     restart: unless-stopped
     environment:
-      NODE_ENV: development
-      EXPO_DEVTOOLS_LISTEN_ADDRESS: 0.0.0.0
-      REACT_NATIVE_PACKAGER_HOSTNAME: 0.0.0.0
-      EXPO_PUBLIC_API_BASE_URL: ${EXPO_PUBLIC_API_BASE_URL:-http://localhost:3012}
-      EXPO_PUBLIC_AUTH_CALLBACK_URL: ${EXPO_PUBLIC_AUTH_CALLBACK_URL:-http://localhost:3012/auth/google/callback}
-    volumes:
-      - ../apps/mobile:/app
-      - kini-mobile-node-modules:/app/node_modules
-      - kini-mobile-expo:/app/.expo
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3012}
+      NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:-local}
     ports:
-      - '${EXPO_WEB_PORT:-19006}:8081'
-      - '19000:19000'
-      - '19001:19001'
-      - '19002:19002'
+      - '${WEB_PORT:-3013}:3001'
     depends_on:
-      - kini_api
-    stdin_open: true
-    tty: true
+      kini_api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001 >/dev/null 2>&1']
+      interval: 10s
+      timeout: 4s
+      retries: 12
     logging: *default-logging
+    networks:
+      default:
 
 networks:
   platform_ops_shared:
@@ -116,6 +119,3 @@ networks:
 
 volumes:
   app-local-pgdata:
-  kini-api-node-modules:
-  kini-mobile-node-modules:
-  kini-mobile-expo:

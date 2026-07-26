@@ -26,10 +26,7 @@ async function bootstrap() {
       cookie: {
         maxAge: Number(configService.get<string>('SESSION_COOKIE_MAX_AGE_MS')),
         sameSite: configService.get<string>('SESSION_COOKIE_SAME_SITE') as
-          | boolean
-          | 'lax'
-          | 'strict'
-          | 'none',
+          boolean | 'lax' | 'strict' | 'none',
         httpOnly: true,
         secure: configService.get<string>('SESSION_COOKIE_SECURE') === 'true',
         domain: configService.get<string>('SESSION_COOKIE_DOMAIN') ?? undefined,

@@ -27,6 +27,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL,
       scope: ['profile', 'email'],
       passReqToCallback: true,
+      state: true,
     });
 
     this.isConfigured = configured;

@@ -6,7 +6,7 @@
 Both projects have been analyzed and metrics are available:
 
 - **Kini API**: http://localhost:9000/dashboard?id=kini-api
-- **Kini Frontend**: http://localhost:9000/dashboard?id=kini-front
+- **Kini Web**: http://localhost:9000/dashboard?id=kini-web
 
 ### 2. Running Services ✅
 
@@ -32,7 +32,7 @@ export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api
 npm run sonar:scan
 
-cd apps/mobile
+cd apps/ui
 npm run sonar:scan
 ```
 
@@ -41,7 +41,7 @@ npm run sonar:scan
 cd apps/api
 npx sonar-scanner -Dsonar.token=SONAR_TOKEN_PLACEHOLDER
 
-cd apps/mobile
+cd apps/ui
 npx sonar-scanner -Dsonar.token=SONAR_TOKEN_PLACEHOLDER
 ```
 
@@ -50,7 +50,7 @@ npx sonar-scanner -Dsonar.token=SONAR_TOKEN_PLACEHOLDER
 **In SonarQube UI (Most Detailed):**
 1. Go to http://localhost:9000
 2. Login: admin / (your password)
-3. Click on project name (kini-api or kini-front)
+3. Click on project name (kini-api or kini-web)
 4. View:
    - Bugs, Vulnerabilities, Code Smells
    - Code Coverage
@@ -108,7 +108,7 @@ crontab -e
 
 # Add these lines:
 0 2 * * * cd apps/api && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
-0 2 * * * cd apps/mobile && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
+0 2 * * * cd apps/ui && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
 ```
 
 ### Git Pre-commit Hook
@@ -118,7 +118,7 @@ cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api && npm run sonar:scan
-cd ../../apps/mobile && npm run sonar:scan
+cd ../../apps/ui && npm run sonar:scan
 EOF
 
 chmod +x .git/hooks/pre-commit

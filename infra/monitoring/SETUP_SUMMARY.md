@@ -28,7 +28,7 @@ apps/api/
 ├── sonar-project.properties    ← SonarQube project config
 └── package.json                ← Added sonar:scan scripts
 
-apps/mobile/
+apps/ui/
 ├── sonar-project.properties    ← SonarQube project config
 └── package.json                ← Added sonar:scan scripts
 ```
@@ -78,7 +78,7 @@ cd apps/api
 npm run sonar:install
 npm run sonar:scan
 
-cd ../../apps/mobile
+cd ../../apps/ui
 npm run sonar:install
 npm run sonar:scan
 ```
@@ -160,7 +160,7 @@ npm run sonar:scan      # Run static code analysis
 npm run trivy:scan      # Run security scan
 ```
 
-### kini-front
+### kini-web
 ```bash
 npm run sonar:install   # Install SonarQube scanner
 npm run sonar:scan      # Run static code analysis

@@ -7,7 +7,6 @@ import { AuthService } from './auth.service';
 import { AuthenticatedGuard } from './authenticated.guard';
 import { GoogleAuthGuard } from './google-auth.guard';
 import { GoogleStrategy } from './google.strategy';
-import { MobileAuthTokenStore } from './mobile-auth-token.store';
 import { SessionSerializer } from './session.serializer';
 
 @Module({
@@ -23,7 +22,6 @@ import { SessionSerializer } from './session.serializer';
     SessionSerializer,
     AuthenticatedGuard,
     GoogleAuthGuard,
-    MobileAuthTokenStore,
   ],
   exports: [AuthService, AuthenticatedGuard],
 })

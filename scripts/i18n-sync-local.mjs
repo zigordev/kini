@@ -93,7 +93,7 @@ async function main() {
     '..',
   );
   const envFile = path.join(repoRoot, 'docker/.env.app.local');
-  const localesDir = path.join(repoRoot, 'apps/mobile/app/locales');
+  const localesDir = path.join(repoRoot, 'apps/ui/messages');
 
   if (!existsSync(envFile)) {
     die(

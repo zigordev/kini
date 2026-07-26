@@ -42,8 +42,8 @@ cd apps/api
 npm run sonar:install  # First time only
 npm run sonar:scan
 
-# Kini Frontend
-cd apps/mobile
+# Kini Web
+cd apps/ui
 npm run sonar:install  # First time only
 npm run sonar:scan
 ```
@@ -54,7 +54,7 @@ npm run sonar:scan
 cd apps/api
 npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
 
-cd ../../apps/mobile
+cd ../../apps/ui
 npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
 ```
 
@@ -67,7 +67,7 @@ npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
 
 ### In SonarQube
 1. Go to http://localhost:9000
-2. Click on project name (kini-api or kini-front)
+2. Click on project name (kini-api or kini-web)
 
 ## 🔧 Troubleshooting
 
@@ -101,7 +101,7 @@ docker-compose restart sonarqube
 ```bash
 # Verify sonar-project.properties exists
 ls -la apps/api/sonar-project.properties
-ls -la apps/mobile/sonar-project.properties
+ls -la apps/ui/sonar-project.properties
 
 # Check SonarQube is accessible
 curl http://localhost:9000/api/system/status
@@ -115,7 +115,7 @@ git pull
 # make your changes...
 
 # 2. Run analysis
-npm run sonar:scan  # in kini-api or kini-front
+npm run sonar:scan  # in kini-api or kini-web
 
 # 3. View results in Grafana
 open http://localhost:3001
@@ -132,7 +132,7 @@ crontab -e
 
 # Add these lines:
 0 2 * * * cd apps/api && npm run sonar:scan
-0 2 * * * cd apps/mobile && npm run sonar:scan
+0 2 * * * cd apps/ui && npm run sonar:scan
 ```
 
 ### Git Pre-commit Hook
@@ -141,7 +141,7 @@ crontab -e
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 cd apps/api && npm run sonar:scan
-cd ../../apps/mobile && npm run sonar:scan
+cd ../../apps/ui && npm run sonar:scan
 EOF
 
 chmod +x .git/hooks/pre-commit

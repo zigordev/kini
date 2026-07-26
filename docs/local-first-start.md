@@ -15,7 +15,7 @@
 7. Run `npm run local:up`.
 8. Fill `docker/.env.app.local` if the script created it. It must contain the `kini-local-read` token as `OPENBAO_TOKEN`, non-secret Google values such as `GOOGLE_CLIENT_ID`, and `TOLGEE_PROJECT_ID` once Tolgee is configured.
 9. Rerun `npm run local:up`.
-10. Open the API docs at `http://localhost:3012/docs` and the Expo web entry at `http://localhost:19006`.
+10. Open the API docs at `http://localhost:3012/docs` and the Next.js web app at `http://localhost:3013`.
 
 The app stack uses its own Postgres container, but now depends on `platform-ops` for OpenBao secrets.
 
@@ -67,12 +67,23 @@ After that, edit translations in Tolgee and rerun:
 npm run local:up
 ```
 
-`local:up` pulls Tolgee back into the tracked files under `apps/mobile/app/locales/*.json`.
+`local:up` pulls Tolgee back into the tracked files under
+`apps/ui/messages/*.json`.
 
 ## Create The Local OpenBao Token
 
 Use the OpenBao root token saved during the `platform-ops` bootstrap only to create the narrower app token.
 Do not put the root token in `docker/.env.app.local`.
+
+The recommended path securely prompts for the root token, creates the policy
+and app token, updates the ignored local env file, and verifies access without
+printing either token:
+
+```bash
+npm run local:token
+```
+
+The equivalent manual commands are below.
 
 Create the read-only policy:
 
@@ -106,9 +117,19 @@ Copy the printed token into `docker/.env.app.local`:
 OPENBAO_TOKEN=paste_kini_local_read_token_here
 ```
 
+## Troubleshooting OpenBao Access
+
+`status=403` means the existing `OPENBAO_TOKEN` is invalid, expired, revoked,
+or does not have the `kini-local-read` policy. Run `npm run local:token`, or
+repeat the manual policy and token commands above with the saved OpenBao root
+token. Never put the root token in the app environment file.
+
+`status=404` means the token was accepted but `kv/kini` does not exist. Create
+the secret with the required keys listed at the start of this runbook.
+
 ## Translation Workflow
 
 - Local Tolgee from `platform-ops` is the development authoring source.
-- Tracked snapshots live in `apps/mobile/app/locales/{language}.json`.
+- Tracked snapshots live in `apps/ui/messages/{language}.json`.
 - `npm run i18n:push:local` pushes the tracked snapshots into local Tolgee.
 - `npm run local:up` pulls local Tolgee snapshots back into the tracked files when `TOLGEE_PROJECT_ID` is set.
