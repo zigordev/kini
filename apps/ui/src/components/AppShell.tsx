@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import type { PropsWithChildren } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
@@ -9,6 +9,7 @@ import { useTeams } from '@/contexts/TeamsContext';
 import { AppShell as DsAppShell } from '../../design-system/components/navigation/AppShell.jsx';
 import { Logo } from '../../design-system/components/navigation/Logo.jsx';
 import { Loading } from './Loading';
+import { LanguageButton, ThemeButton, UserButton } from './TopbarUtilities';
 
 // Nav item hrefs match today's routes verbatim, with one deviation: the
 // Teams item drops the inert `?manage=1` query string (confirmed unused by
@@ -38,7 +39,7 @@ function KiniLogo({
       href={href}
       initials="K"
       linkComponent={Link}
-      shape="square"
+      shape="circle"
       style={style}
       wordmark="Kini"
     />
@@ -47,7 +48,6 @@ function KiniLogo({
 
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
-  const router = useRouter();
   const { user, loading, signingIn, googleAuthEnabled, signInWithGoogle } =
     useAuth();
   const { selectedTeam, teams, loading: teamsLoading, select } = useTeams();
@@ -124,19 +124,9 @@ export function AppShell({ children }: PropsWithChildren) {
                 </select>
               </label>
             )}
-            <button
-              className="avatar"
-              onClick={() => router.push('/profile')}
-              title={user.name}
-              type="button"
-            >
-              {user.avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img alt="" src={user.avatarUrl} />
-              ) : (
-                user.name.slice(0, 1).toUpperCase()
-              )}
-            </button>
+            <ThemeButton />
+            <LanguageButton />
+            <UserButton />
           </>
         ),
       }}
