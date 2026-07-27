@@ -2,6 +2,7 @@ import React from 'react';
 import { injectOnce } from '../_shared/injectStyle.js';
 
 injectOnce('ds-sidebar', `
+.ds-sidebar{display:flex;}
 @media (max-width: 1024px) { .ds-sidebar { display: none; } }
 .ds-sidebar-link:hover:not(.ds-sidebar-link-active){background:var(--ds-color-surface-2);color:var(--ds-color-fg);}
 .ds-sidebar-child:hover:not(.ds-sidebar-child-active){background:var(--ds-color-surface-2);color:var(--ds-color-fg);}
@@ -61,7 +62,7 @@ export function Sidebar({ brand, items, activeHref, footer, className = '', styl
     <aside
       className={`ds-sidebar ${className}`.trim()}
       style={{
-        width: 240, display: 'flex', flexDirection: 'column', height: '100%',
+        width: 240, flexDirection: 'column', height: '100%',
         borderRight: '1px solid var(--ds-color-border)', background: 'var(--ds-color-surface)',
         fontFamily: 'var(--ds-font-sans)', ...style,
       }}

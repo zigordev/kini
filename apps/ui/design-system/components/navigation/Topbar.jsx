@@ -7,6 +7,7 @@ injectOnce('ds-topbar', `
   border-bottom:1px solid var(--ds-color-border);}
 .ds-topbar-tabs{display:flex;align-items:center;gap:var(--ds-space-2);overflow-x:auto;scrollbar-width:none;}
 .ds-topbar-tabs::-webkit-scrollbar{display:none;}
+.ds-topbar-brand{display:flex;flex-shrink:0;}
 @media (min-width: 1025px) { .ds-topbar-brand--hide-desktop{display:none;} }
 `);
 
@@ -20,7 +21,7 @@ export function Topbar({
     <header className={`ds-topbar ${className}`.trim()} style={style}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--ds-space-4)', minHeight: 56, padding: '0 var(--ds-space-5)' }}>
         {brand ? (
-          <div className={hideBrandOnDesktop ? 'ds-topbar-brand--hide-desktop' : ''} style={{ display: 'flex', flexShrink: 0 }}>
+          <div className={`ds-topbar-brand ${hideBrandOnDesktop ? 'ds-topbar-brand--hide-desktop' : ''}`.trim()}>
             {brand}
           </div>
         ) : null}
