@@ -1,32 +1,6 @@
 @import '../../design-system/styles.css';
 @import '../../design-system/themes/kini.css';
 
-/* Design-system v0.1.2 bug workaround: Topbar's brand wrapper sets an
-   inline `style={{ display: 'flex' }}` on the same element that carries
-   `.ds-topbar-brand--hide-desktop`, so the component's own
-   `@media (min-width: 1025px) { .ds-topbar-brand--hide-desktop { display: none } }`
-   rule can never win (inline styles beat non-!important stylesheet rules
-   regardless of specificity) — hideBrandOnDesktop is a no-op as shipped,
-   and the brand mark duplicates in both Sidebar and Topbar on desktop.
-   `!important` is the only way to override an inline style from outside,
-   so we do that here rather than forking the shared component. */
-@media (min-width: 1025px) {
-  .ds-topbar-brand--hide-desktop {
-    display: none !important;
-  }
-}
-
-/* Same bug, same fix, for Sidebar: its <aside> carries an inline
-   `style={{ display: 'flex' }}` alongside the `.ds-sidebar` class, so the
-   component's own `@media (max-width: 1024px) { .ds-sidebar { display: none } }`
-   rule can never win either — the Sidebar never actually hides on mobile
-   as shipped, overlapping with BottomNav. Same override strategy. */
-@media (max-width: 1024px) {
-  .ds-sidebar {
-    display: none !important;
-  }
-}
-
 :root {
   color-scheme: light;
   --background: #f5f6f8;
