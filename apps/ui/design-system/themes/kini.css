@@ -1,0 +1,44 @@
+/* Example reskin: matches the real "kini" football-pool app (red primary).
+   Colors only — shape, type, and spacing stay on the shared base tokens
+   from styles.css so every product renders the same component geometry.
+   Load AFTER styles.css and set data-theme="kini" on the root (or just
+   override :root directly if this is the only theme in the project). */
+:root[data-theme="kini"] {
+  --ds-color-bg: #f5f6f8;
+  --ds-color-surface: #ffffff;
+  --ds-color-surface-2: #f0f2f5;
+  --ds-color-surface-3: #e8ebef;
+  --ds-color-border: #dfe2e7;
+  --ds-color-border-strong: #c9cdd4;
+
+  --ds-color-fg: #191a1d;
+  --ds-color-fg-muted: #60656f;
+  --ds-color-fg-subtle: #898e97;
+  --ds-color-fg-faint: #aeb2b9;
+
+  --ds-color-accent: #d71920;
+  --ds-color-accent-hover: #b91218;
+  --ds-color-accent-fg: #ffffff;
+  --ds-color-accent-soft: #fff0f1;
+
+  --ds-color-success: #178044;
+  --ds-color-success-bg: #eaf8f0;
+  --ds-color-warning: #a46800;
+  --ds-color-warning-bg: #fff6df;
+  --ds-color-danger: #b42318;
+  --ds-color-danger-bg: #fff0ee;
+}
+
+:root[data-theme="kini"][data-mode="dark"] {
+  color-scheme: dark;
+  --ds-color-bg: #111214;
+  --ds-color-surface: #191b1f;
+  --ds-color-surface-2: #202329;
+  --ds-color-surface-3: #26292f;
+  --ds-color-border: #30343b;
+  --ds-color-fg: #f4f5f7;
+  --ds-color-fg-muted: #afb4bd;
+  --ds-color-accent: #f14349;
+  --ds-color-accent-hover: #ff5a60;
+  --ds-color-accent-soft: #3a1d20;
+}
