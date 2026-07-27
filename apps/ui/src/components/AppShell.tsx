@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import type { PropsWithChildren } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -36,6 +37,7 @@ function KiniLogo({
     <Logo
       href={href}
       initials="K"
+      linkComponent={Link}
       shape="square"
       style={style}
       wordmark="Kini"
@@ -100,6 +102,7 @@ export function AppShell({ children }: PropsWithChildren) {
       activeHref={activePath}
       brand={<KiniLogo href="/pools" />}
       bottomNavItems={sidebarItems.slice(0, 4)}
+      linkComponent={Link}
       sidebarItems={sidebarItems}
       topbar={{
         utilities: (
