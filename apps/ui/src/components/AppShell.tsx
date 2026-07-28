@@ -65,7 +65,21 @@ export function AppShell({ children }: PropsWithChildren) {
 
   if (!user) {
     return (
-      <main className="login-shell">
+      <main className="login-shell" style={{ position: 'relative' }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            zIndex: 2,
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.35rem',
+          }}
+        >
+          <ThemeButton />
+          <LanguageButton />
+        </div>
         <section className="login-card">
           <KiniLogo style={{ marginBottom: 24 }} />
           <p className="eyebrow">{t('login.eyebrow')}</p>

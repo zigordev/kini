@@ -6,6 +6,7 @@ import { usePreferences } from '@/contexts/PreferencesContext';
 import { usersApi } from '@/lib/api';
 import type { Language, ThemeMode } from '@/types/domain';
 import { Button } from '../../design-system/components/core/Button.jsx';
+import { Flag } from '../../design-system/components/icons/Flag.jsx';
 import { Icon } from '../../design-system/components/icons/Icon.jsx';
 import { Menu, MenuItem } from '../../design-system/components/overlay/Menu.jsx';
 
@@ -65,10 +66,10 @@ export function LanguageButton() {
       {({ close }: { close: () => void }) => (
         <>
           <MenuItem onClick={() => { close(); change('en'); }}>
-            🇬🇧 {t('language.english')}
+            <Flag code="gb" /> {t('language.english')}
           </MenuItem>
           <MenuItem onClick={() => { close(); change('es'); }}>
-            🇪🇸 {t('language.spanish')}
+            <Flag code="es" /> {t('language.spanish')}
           </MenuItem>
         </>
       )}
@@ -120,7 +121,7 @@ export function UserButton() {
               void signOut().then(() => router.replace('/'));
             }}
           >
-            {t('auth.sign_out')}
+            <Icon name="log-out" /> {t('auth.sign_out')}
           </MenuItem>
         </>
       )}
