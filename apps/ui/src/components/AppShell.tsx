@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
 import { AppShell as DsAppShell } from '../../design-system/components/navigation/AppShell.jsx';
+import { Icon } from '../../design-system/components/icons/Icon.jsx';
 import { Logo } from '../../design-system/components/navigation/Logo.jsx';
 import { Loading } from './Loading';
 import { LanguageButton, ThemeButton, UserButton } from './TopbarUtilities';
@@ -20,18 +21,20 @@ import { LanguageButton, ThemeButton, UserButton } from './TopbarUtilities';
 // highlighting for that one tab, since the shared components have no
 // query-string-aware matching and we're not patching them locally.
 const navItems = [
-  { href: '/pools', key: 'tabs.pools', icon: '◫' },
-  { href: '/available-pools', key: 'mobile_tabs.available_pools', icon: '＋' },
-  { href: '/stats', key: 'tabs.stats', icon: '↗' },
-  { href: '/teams', key: 'tabs.teams', icon: '◎' },
-  { href: '/profile', key: 'tabs.profile', icon: '○' },
+  { href: '/pools', key: 'tabs.pools', icon: <Icon name="trophy" /> },
+  { href: '/available-pools', key: 'mobile_tabs.available_pools', icon: <Icon name="list-plus" /> },
+  { href: '/stats', key: 'tabs.stats', icon: <Icon name="trending-up" /> },
+  { href: '/teams', key: 'tabs.teams', icon: <Icon name="users" /> },
+  { href: '/profile', key: 'tabs.profile', icon: <Icon name="user" /> },
 ];
 
 function KiniLogo({
   href,
+  size = 'md',
   style,
 }: {
   href?: string;
+  size?: 'sm' | 'md' | 'lg';
   style?: React.CSSProperties;
 }) {
   return (
@@ -40,6 +43,7 @@ function KiniLogo({
       initials="K"
       linkComponent={Link}
       shape="circle"
+      size={size}
       style={style}
       wordmark="Kini"
     />
@@ -100,7 +104,7 @@ export function AppShell({ children }: PropsWithChildren) {
   return (
     <DsAppShell
       activeHref={activePath}
-      brand={<KiniLogo href="/pools" />}
+      brand={<KiniLogo href="/pools" size="sm" />}
       bottomNavItems={sidebarItems.slice(0, 4)}
       linkComponent={Link}
       sidebarItems={sidebarItems}
