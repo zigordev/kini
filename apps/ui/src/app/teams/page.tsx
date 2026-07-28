@@ -10,6 +10,8 @@ import { useToast } from '@/contexts/ToastContext';
 import { availablePoolsApi } from '@/lib/api';
 import { formatDate } from '@/lib/pools';
 import type { AvailablePoolJackpot, Team } from '@/types/domain';
+import { Button } from '../../../design-system/components/core/Button.jsx';
+import { StatTile } from '../../../design-system/components/data-display/StatTile.jsx';
 
 export default function TeamsPage() {
   const router = useRouter();
@@ -91,33 +93,30 @@ export default function TeamsPage() {
           <h1>{t('teams.title')}</h1>
           <p>{t('teams.subtitle')}</p>
         </div>
-        <button
-          className="button button-secondary"
+        <Button variant="secondary"
           disabled={loading}
           onClick={() => void refresh()}
           type="button"
         >
           {t('teams.refresh')}
-        </button>
+        </Button>
       </header>
 
       <section className="metrics-grid metrics-grid-compact">
-        <article className="metric-card">
-          <span>{t('teams.jackpot')}</span>
-          <strong>
-            {jackpot?.jackpotPublished
+        <StatTile
+          label={t('teams.jackpot')}
+          value={
+            jackpot?.jackpotPublished
               ? (jackpot.jackpotFormatted ?? jackpot.jackpot)
-              : t('teams.jackpot_not_published')}
-          </strong>
-          {jackpot?.drawDate && (
-            <small>{formatDate(jackpot.drawDate, language)}</small>
-          )}
-        </article>
-        <article className="metric-card">
-          <span>{t('tabs.teams')}</span>
-          <strong>{teams.length}</strong>
-          <small>{selectedTeam?.name ?? '—'}</small>
-        </article>
+              : t('teams.jackpot_not_published')
+          }
+          hint={jackpot?.drawDate ? formatDate(jackpot.drawDate, language) : undefined}
+        />
+        <StatTile
+          label={t('tabs.teams')}
+          value={teams.length}
+          hint={selectedTeam?.name ?? '—'}
+        />
       </section>
 
       <section className="panel">
@@ -138,13 +137,12 @@ export default function TeamsPage() {
               value={newTeamName}
             />
           </label>
-          <button
-            className="button button-primary"
+          <Button variant="primary"
             disabled={creating || !newTeamName.trim()}
             type="submit"
           >
             {creating ? t('status.preparing') : t('actions.create')}
-          </button>
+          </Button>
         </form>
       </section>
 
@@ -185,28 +183,25 @@ export default function TeamsPage() {
                   })}
                 </small>
                 <div className="button-row">
-                  <button
-                    className="button button-primary"
+                  <Button variant="primary"
                     onClick={() => void handleOpen(team)}
                     type="button"
                   >
                     {t('teams.open_pools')}
-                  </button>
-                  <button
-                    className="button button-secondary"
+                  </Button>
+                  <Button variant="secondary"
                     onClick={() => void handleOpen(team, '/stats')}
                     type="button"
                   >
                     {t('teams.show_stats')}
-                  </button>
+                  </Button>
                   {team.role === 'admin' && (
-                    <button
-                      className="button button-quiet"
+                    <Button variant="ghost"
                       onClick={() => setInvitingTeam(team)}
                       type="button"
                     >
                       {t('teams.invite')}
-                    </button>
+                    </Button>
                   )}
                 </div>
               </article>
@@ -251,16 +246,15 @@ export default function TeamsPage() {
               />
             </label>
             <div className="button-row button-row-end">
-              <button
-                className="button button-secondary"
+              <Button variant="secondary"
                 onClick={() => setInvitingTeam(null)}
                 type="button"
               >
                 {t('actions.cancel')}
-              </button>
-              <button className="button button-primary" type="submit">
+              </Button>
+              <Button variant="primary" type="submit">
                 {t('teams.invite')}
-              </button>
+              </Button>
             </div>
           </form>
         </div>

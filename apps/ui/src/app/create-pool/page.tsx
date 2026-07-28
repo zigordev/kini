@@ -12,6 +12,7 @@ import { poolsApi, usersApi } from '@/lib/api';
 import { readPoolDefaults } from '@/lib/preferences';
 import { todayInputValue } from '@/lib/pools';
 import type { PoolForm, UserSummary } from '@/types/domain';
+import { Button } from '../../../design-system/components/core/Button.jsx';
 
 interface MatchDraft {
   order: number;
@@ -114,9 +115,9 @@ export default function CreatePoolPage() {
     return (
       <EmptyState
         action={
-          <Link className="button button-primary" href="/teams?manage=1">
+          <Button as={Link} variant="primary" href="/teams?manage=1">
             {t('teams.create_first')}
-          </Link>
+          </Button>
         }
         description={t('teams.empty_text')}
         title={t('teams.empty_title')}
@@ -238,16 +239,15 @@ export default function CreatePoolPage() {
         </div>
 
         <div className="button-row button-row-end sticky-form-actions">
-          <Link className="button button-secondary" href="/pools">
+          <Button as={Link} variant="secondary" href="/pools">
             {t('actions.cancel')}
-          </Link>
-          <button
-            className="button button-primary"
+          </Button>
+          <Button variant="primary"
             disabled={creating}
             type="submit"
           >
             {creating ? t('status.preparing') : t('actions.create')}
-          </button>
+          </Button>
         </div>
       </form>
     </div>

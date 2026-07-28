@@ -23,6 +23,8 @@ import type {
   ResultValue,
   UserSummary,
 } from '@/types/domain';
+import { Button } from '../../../design-system/components/core/Button.jsx';
+import { StatTile } from '../../../design-system/components/data-display/StatTile.jsx';
 
 const backgroundRefreshMs = 15 * 60 * 1000;
 
@@ -241,9 +243,9 @@ function PoolsContent() {
     return (
       <EmptyState
         action={
-          <Link className="button button-primary" href="/teams?manage=1">
+          <Button as={Link} variant="primary" href="/teams?manage=1">
             {t('teams.create_first')}
-          </Link>
+          </Button>
         }
         description={t('teams.empty_text')}
         title={t('teams.empty_title')}
@@ -256,12 +258,12 @@ function PoolsContent() {
       <EmptyState
         action={
           <div className="button-row">
-            <Link className="button button-primary" href="/available-pools">
+            <Button as={Link} variant="primary" href="/available-pools">
               {t('available_pools.add_short')}
-            </Link>
-            <Link className="button button-secondary" href="/create-pool">
+            </Button>
+            <Button as={Link} variant="secondary" href="/create-pool">
               {t('pools.create_title')}
-            </Link>
+            </Button>
           </div>
         }
         description={t('pools.workspace_subtitle')}
@@ -286,50 +288,40 @@ function PoolsContent() {
           <p>{t('pools.workspace_subtitle')}</p>
         </div>
         <div className="button-row">
-          <button
-            className="button button-secondary"
+          <Button variant="secondary"
             disabled={checking}
             onClick={() => void checkResults()}
             type="button"
           >
             {checking ? t('status.preparing') : t('pools.check_results')}
-          </button>
-          <Link className="button button-primary" href="/create-pool">
+          </Button>
+          <Button as={Link} variant="primary" href="/create-pool">
             {t('pools.create_title')}
-          </Link>
+          </Button>
         </div>
       </header>
 
       <section className="metrics-grid">
-        <article className="metric-card">
-          <span>{t('pools.metric_successes')}</span>
-          <strong>{outcome.successes}</strong>
-          <small>
-            {t('pools.metric_success_rate')}: {outcome.successRate}%
-          </small>
-        </article>
-        <article className="metric-card">
-          <span>{t('pools.metric_pending')}</span>
-          <strong>{outcome.pending}</strong>
-          <small>{t('pools.failure_count', { count: outcome.failures })}</small>
-        </article>
-        <article className="metric-card">
-          <span>{t('pools.metric_assigned_to_me')}</span>
-          <strong>{assignedToMe}</strong>
-          <small>
-            {selectedPool.matches.length} {t('pools.matches')}
-          </small>
-        </article>
-        <article className="metric-card">
-          <span>{t('pools.earning')}</span>
-          <strong>
-            {new Intl.NumberFormat(language, {
-              style: 'currency',
-              currency: 'EUR',
-            }).format(selectedPool.earning ?? 0)}
-          </strong>
-          <small>{t(`status.${status}`)}</small>
-        </article>
+        <StatTile
+          label={t('pools.metric_successes')}
+          value={outcome.successes}
+          hint={<>{t('pools.metric_success_rate')}: {outcome.successRate}%</>}
+        />
+        <StatTile
+          label={t('pools.metric_pending')}
+          value={outcome.pending}
+          hint={<>{t('pools.failure_count', { count: outcome.failures })}</>}
+        />
+        <StatTile
+          label={t('pools.metric_assigned_to_me')}
+          value={assignedToMe}
+          hint={<>{selectedPool.matches.length} {t('pools.matches')}</>}
+        />
+        <StatTile
+          label={t('pools.earning')}
+          value={<>{new Intl.NumberFormat(language, { style: 'currency', currency: 'EUR', }).format(selectedPool.earning ?? 0)}</>}
+          hint={<>{t(`status.${status}`)}</>}
+        />
       </section>
 
       <div className="pool-layout">
@@ -461,8 +453,7 @@ function PoolsContent() {
               type="checkbox"
             />
           </label>
-          <button
-            className="button button-primary button-block"
+          <Button variant="primary" style={{ width: '100%' }}
             disabled={saving === `pool:${selectedPool.id}`}
             onClick={() =>
               void updatePool({
@@ -474,7 +465,7 @@ function PoolsContent() {
             type="button"
           >
             {t('actions.save')}
-          </button>
+          </Button>
         </aside>
       </div>
     </div>

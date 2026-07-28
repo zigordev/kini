@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loading } from '@/components/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
+import { Button } from '../../../../design-system/components/core/Button.jsx';
 
 export default function AuthCallbackPage() {
   return (
@@ -44,13 +45,12 @@ function AuthCallbackContent() {
       <section className="page-state">
         <h1>{t('login.title')}</h1>
         <p className="form-error">{error}</p>
-        <button
-          className="button button-primary"
+        <Button variant="primary"
           onClick={() => router.replace('/')}
           type="button"
         >
           {t('actions.done')}
-        </button>
+        </Button>
       </section>
     );
   }
