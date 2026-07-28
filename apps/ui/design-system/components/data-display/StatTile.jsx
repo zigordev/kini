@@ -14,7 +14,7 @@ const DIRECTION = {
   flat: 'var(--ds-color-fg-subtle)',
 };
 
-export function StatTile({ label, value, delta, direction = 'flat', hint, tone = 'default', className = '', style }) {
+export function StatTile({ label, value, delta, direction = 'flat', hint, tone = 'default', valueTone = 'default', className = '', style }) {
   return (
     <div
       className={`ds-stat-tile ${className}`.trim()}
@@ -28,7 +28,10 @@ export function StatTile({ label, value, delta, direction = 'flat', hint, tone =
         {label}
       </span>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-        <span style={{ fontSize: 'var(--ds-text-2xl)', fontWeight: 'var(--ds-weight-bold)', lineHeight: 1, color: 'var(--ds-color-fg)' }}>{value}</span>
+        {/* The value carries the signal in most dashboards (PnL, balance),
+            so it tones independently of the tile's border — a theme whose
+            accent is red would otherwise make "good" and "bad" identical. */}
+        <span style={{ fontSize: 'var(--ds-text-2xl)', fontWeight: 'var(--ds-weight-bold)', lineHeight: 1, color: valueTone === 'default' ? 'var(--ds-color-fg)' : TONE[valueTone] }}>{value}</span>
         {delta != null ? (
           <span style={{ fontSize: 'var(--ds-text-sm)', fontWeight: 'var(--ds-weight-semibold)', color: DIRECTION[direction] }}>{delta}</span>
         ) : null}

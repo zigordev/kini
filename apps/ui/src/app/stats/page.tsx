@@ -109,7 +109,8 @@ export default function StatsPage() {
 
       <section className="metrics-grid">
         <StatTile
-          tone={(stats?.balance ?? 0) < 0 ? 'danger' : 'accent'}
+          tone="accent"
+          valueTone={(stats?.balance ?? 0) < 0 ? 'danger' : 'default'}
           label={t('stats.summary_balance')}
           value={new Intl.NumberFormat(language, {
             style: 'currency',
