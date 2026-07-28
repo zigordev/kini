@@ -114,6 +114,11 @@ export function UserButton() {
               {user.email}
             </div>
           </div>
+          {/* Account settings belong beside Sign out, not as a primary-nav
+              destination competing with it. */}
+          <MenuItem onClick={() => { close(); router.push('/profile'); }}>
+            <Icon name="settings" /> {t('tabs.profile')}
+          </MenuItem>
           <MenuItem
             onClick={() => {
               close();

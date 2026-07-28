@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { PropsWithChildren } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
@@ -12,6 +12,8 @@ import { Button } from '../../design-system/components/core/Button.jsx';
 import { GoogleMark } from '../../design-system/components/icons/GoogleMark.jsx';
 import { Icon } from '../../design-system/components/icons/Icon.jsx';
 import { AppShell as DsAppShell } from '../../design-system/components/navigation/AppShell.jsx';
+import { ScopeSwitcher } from '../../design-system/components/navigation/ScopeSwitcher.jsx';
+import { MenuItem } from '../../design-system/components/overlay/Menu.jsx';
 import { Logo } from '../../design-system/components/navigation/Logo.jsx';
 import { Loading } from './Loading';
 import { LanguageButton, ThemeButton, UserButton } from './TopbarUtilities';
@@ -24,12 +26,15 @@ import { LanguageButton, ThemeButton, UserButton } from './TopbarUtilities';
 // the literal `?manage=1` here would silently break active-state
 // highlighting for that one tab, since the shared components have no
 // query-string-aware matching and we're not patching them locally.
+// Every screen below is team-scoped, so the team is the app's scope, not a
+// destination — it moved into the Sidebar's ScopeSwitcher, taking the
+// "Teams" management page with it (reachable from the switcher's footer).
+// Profile is account settings, so it lives in the account menu next to
+// Sign out rather than competing with it from the primary nav.
 const navItems = [
   { href: '/pools', key: 'tabs.pools', icon: <Icon name="trophy" /> },
   { href: '/available-pools', key: 'mobile_tabs.available_pools', icon: <Icon name="list-plus" /> },
   { href: '/stats', key: 'tabs.stats', icon: <Icon name="trending-up" /> },
-  { href: '/teams', key: 'tabs.teams', icon: <Icon name="users" /> },
-  { href: '/profile', key: 'tabs.profile', icon: <Icon name="user" /> },
 ];
 
 function KiniLogo({
@@ -56,6 +61,7 @@ function KiniLogo({
 
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user, loading, signingIn, googleAuthEnabled, signInWithGoogle } =
     useAuth();
   const { selectedTeam, teams, loading: teamsLoading, select } = useTeams();
@@ -108,29 +114,30 @@ export function AppShell({ children }: PropsWithChildren) {
     <DsAppShell
       activeHref={activePath}
       brand={<KiniLogo href="/pools" size="sm" />}
-      bottomNavItems={sidebarItems.slice(0, 4)}
+      bottomNavItems={sidebarItems}
       linkComponent={Link}
+      scope={
+        <ScopeSwitcher
+          label={t('profile.team')}
+          value={selectedTeam?.name}
+          placeholder={teamsLoading ? t('common.loading') : t('teams.title')}
+          items={teams.map((team) => ({
+            id: team.id,
+            label: team.name,
+            active: team.id === selectedTeam?.id,
+            onSelect: (id: string) => void select(id),
+          }))}
+          footer={({ close }: { close: () => void }) => (
+            <MenuItem onClick={() => { close(); router.push('/teams'); }}>
+              <Icon name="users" /> {t('tabs.teams')}
+            </MenuItem>
+          )}
+        />
+      }
       sidebarItems={sidebarItems}
       topbar={{
         utilities: (
           <>
-            {teams.length > 0 && (
-              <label className="team-switcher">
-                <span className="sr-only">{t('profile.team')}</span>
-                <select
-                  disabled={teamsLoading}
-                  onChange={(event) => void select(event.target.value)}
-                  value={selectedTeam?.id ?? ''}
-                >
-                  {!selectedTeam && <option value="">—</option>}
-                  {teams.map((team) => (
-                    <option key={team.id} value={team.id}>
-                      {team.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            )}
             <ThemeButton />
             <LanguageButton />
             <UserButton />
