@@ -67,6 +67,13 @@ export function AppShell({ children }: PropsWithChildren) {
   const { selectedTeam, teams, loading: teamsLoading, select } = useTeams();
   const { t } = usePreferences();
 
+  // Dev-only design-system preview (see app/dev/preview). Renders outside
+  // the auth gate so the primitives can be inspected without a session; the
+  // route itself 404s in production builds.
+  if (process.env.NODE_ENV !== 'production' && pathname.startsWith('/dev/')) {
+    return <>{children}</>;
+  }
+
   if (pathname === '/auth/callback') {
     return <AuthShell>{children}</AuthShell>;
   }
