@@ -1,0 +1,69 @@
+/* Example reskin: matches the real "kini" football-pool app (red primary).
+   Colors only — shape, type, and spacing stay on the shared base tokens
+   from styles.css so every product renders the same component geometry.
+   Load AFTER styles.css and set data-theme="kini" on the root (or just
+   override :root directly if this is the only theme in the project). */
+:root[data-theme="kini"] {
+  --ds-color-bg: #f5f6f8;
+  --ds-color-surface: #ffffff;
+  --ds-color-surface-2: #f0f2f5;
+  --ds-color-surface-3: #e8ebef;
+  --ds-color-border: #dfe2e7;
+  --ds-color-border-strong: #c9cdd4;
+
+  --ds-color-fg: #191a1d;
+  --ds-color-fg-muted: #60656f;
+  --ds-color-fg-subtle: #898e97;
+  --ds-color-fg-faint: #aeb2b9;
+
+  --ds-color-accent: #d71920;
+  --ds-color-accent-hover: #b91218;
+  --ds-color-accent-fg: #ffffff;
+  --ds-color-accent-soft: #fff0f1;
+
+  --ds-color-success: #178044;
+  --ds-color-success-bg: #eaf8f0;
+  --ds-color-warning: #a46800;
+  --ds-color-warning-bg: #fff6df;
+  --ds-color-danger: #b42318;
+  --ds-color-danger-bg: #fff0ee;
+}
+
+:root[data-theme="kini"][data-mode="dark"] {
+  color-scheme: dark;
+  --ds-color-bg: #111214;
+  --ds-color-surface: #191b1f;
+  --ds-color-surface-2: #202329;
+  --ds-color-surface-3: #26292f;
+  --ds-color-border: #30343b;
+  --ds-color-fg: #f4f5f7;
+  --ds-color-fg-muted: #afb4bd;
+  --ds-color-accent: #f14349;
+  --ds-color-accent-hover: #ff5a60;
+  --ds-color-accent-soft: #3a1d20;
+  /* Semantic colours are brand-neutral (red means danger in every theme),
+     so these mirror tokens/colors.css's dark values verbatim. They must be
+     restated per theme: the generic dark block is `[data-theme="dark"]` — a
+     theme, not a mode — so it never applies alongside a product theme, and
+     without these the light values win and semantic UI renders pale
+     washes on a dark surface. */
+  --ds-color-success: oklch(70% 0.15 155);
+  --ds-color-success-fg: oklch(88% 0.08 155);
+  --ds-color-success-bg: oklch(28% 0.05 155);
+  --ds-color-success-border: oklch(40% 0.08 155);
+
+  --ds-color-warning: oklch(74% 0.14 75);
+  --ds-color-warning-fg: oklch(90% 0.06 85);
+  --ds-color-warning-bg: oklch(30% 0.05 75);
+  --ds-color-warning-border: oklch(42% 0.08 75);
+
+  --ds-color-danger: oklch(68% 0.18 25);
+  --ds-color-danger-fg: oklch(90% 0.06 25);
+  --ds-color-danger-bg: oklch(30% 0.06 25);
+  --ds-color-danger-border: oklch(42% 0.09 25);
+
+  --ds-color-info: oklch(70% 0.13 240);
+  --ds-color-info-fg: oklch(90% 0.05 240);
+  --ds-color-info-bg: oklch(28% 0.05 240);
+  --ds-color-info-border: oklch(40% 0.07 240);
+}

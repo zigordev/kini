@@ -53,7 +53,13 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
   }, [language]);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    // `data-theme` is reserved for the design-system's product-theme
+    // selector (always "kini", set once in layout.tsx — see kini.css's
+    // `:root[data-theme="kini"]`). Light/dark switching uses `data-mode`
+    // instead, matching the design-system's own dark-variant selector
+    // (`:root[data-theme="kini"][data-mode="dark"]`) so the two don't
+    // collide on the same attribute.
+    document.documentElement.dataset.mode = theme;
     window.localStorage.setItem('kini-theme', theme);
   }, [theme]);
 

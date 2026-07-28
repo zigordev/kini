@@ -6,15 +6,58 @@ import type { PropsWithChildren } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
+import { AuthCard } from '../../design-system/components/auth/AuthCard.jsx';
+import { AuthShell } from '../../design-system/components/auth/AuthShell.jsx';
+import { Button } from '../../design-system/components/core/Button.jsx';
+import { GoogleMark } from '../../design-system/components/icons/GoogleMark.jsx';
+import { Icon } from '../../design-system/components/icons/Icon.jsx';
+import { AppShell as DsAppShell } from '../../design-system/components/navigation/AppShell.jsx';
+import { ScopeSwitcher } from '../../design-system/components/navigation/ScopeSwitcher.jsx';
+import { MenuItem } from '../../design-system/components/overlay/Menu.jsx';
+import { Logo } from '../../design-system/components/navigation/Logo.jsx';
 import { Loading } from './Loading';
+import { LanguageButton, ThemeButton, UserButton } from './TopbarUtilities';
 
+// Nav item hrefs match today's routes verbatim, with one deviation: the
+// Teams item drops the inert `?manage=1` query string (confirmed unused by
+// TeamsPage — grep shows no useSearchParams() reads it anywhere) so that the
+// shared Sidebar/BottomNav's plain string-equality active-match
+// (`href === activeHref`) can actually recognize `/teams` as active. Keeping
+// the literal `?manage=1` here would silently break active-state
+// highlighting for that one tab, since the shared components have no
+// query-string-aware matching and we're not patching them locally.
+// Every screen below is team-scoped, so the team is the app's scope, not a
+// destination — it moved into the Sidebar's ScopeSwitcher, taking the
+// "Teams" management page with it (reachable from the switcher's footer).
+// Profile is account settings, so it lives in the account menu next to
+// Sign out rather than competing with it from the primary nav.
 const navItems = [
-  { href: '/pools', key: 'tabs.pools', icon: '◫' },
-  { href: '/available-pools', key: 'mobile_tabs.available_pools', icon: '＋' },
-  { href: '/stats', key: 'tabs.stats', icon: '↗' },
-  { href: '/teams?manage=1', key: 'tabs.teams', icon: '◎' },
-  { href: '/profile', key: 'tabs.profile', icon: '○' },
+  { href: '/pools', key: 'tabs.pools', icon: <Icon name="trophy" /> },
+  { href: '/available-pools', key: 'mobile_tabs.available_pools', icon: <Icon name="list-plus" /> },
+  { href: '/stats', key: 'tabs.stats', icon: <Icon name="trending-up" /> },
 ];
+
+function KiniLogo({
+  href,
+  size = 'md',
+  style,
+}: {
+  href?: string;
+  size?: 'sm' | 'md' | 'lg';
+  style?: React.CSSProperties;
+}) {
+  return (
+    <Logo
+      href={href}
+      initials="K"
+      linkComponent={Link}
+      shape="circle"
+      size={size}
+      style={style}
+      wordmark="Kini"
+    />
+  );
+}
 
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
@@ -25,131 +68,84 @@ export function AppShell({ children }: PropsWithChildren) {
   const { t } = usePreferences();
 
   if (pathname === '/auth/callback') {
-    return <main className="login-shell">{children}</main>;
+    return <AuthShell>{children}</AuthShell>;
   }
 
   if (loading) return <Loading label={t('status.preparing')} />;
 
   if (!user) {
     return (
-      <main className="login-shell">
-        <section className="login-card">
-          <div className="brand-mark" aria-hidden="true">
-            K
-          </div>
-          <p className="eyebrow">{t('login.eyebrow')}</p>
-          <h1>{t('login.title')}</h1>
-          <p className="lead">{t('login.tagline')}</p>
-          <button
-            className="button button-primary button-large"
+      <AuthShell utilities={<><ThemeButton /><LanguageButton /></>}>
+        <AuthCard
+          logo={<KiniLogo />}
+          eyebrow={t('login.eyebrow')}
+          title={t('login.title')}
+          description={t('login.tagline')}
+          error={!googleAuthEnabled ? t('auth.google_unavailable') : null}
+          footer={t('login.terms')}
+        >
+          <Button
+            variant="primary"
+            size="lg"
+            style={{ width: '100%' }}
             disabled={!googleAuthEnabled || signingIn}
             onClick={() =>
               signInWithGoogle(`${pathname}${window.location.search}`)
             }
             type="button"
           >
-            <span className="google-mark" aria-hidden="true">
-              G
-            </span>
+            <GoogleMark />
             {signingIn ? t('auth.connecting') : t('auth.sign_in_google')}
-          </button>
-          {!googleAuthEnabled && (
-            <p className="form-error">{t('auth.google_unavailable')}</p>
-          )}
-          <p className="fine-print">{t('login.terms')}</p>
-        </section>
-      </main>
+          </Button>
+        </AuthCard>
+      </AuthShell>
     );
   }
 
   const activePath = pathname === '/' ? '/pools' : pathname;
 
+  const sidebarItems = navItems.map((item) => ({
+    href: item.href,
+    label: t(item.key),
+    icon: item.icon,
+  }));
+
   return (
-    <div className="app">
-      <header className="topbar">
-        <Link className="brand" href="/pools">
-          <span className="brand-mark brand-mark-small">K</span>
-          <span>Kini</span>
-        </Link>
-        <div className="topbar-actions">
-          {teams.length > 0 && (
-            <label className="team-switcher">
-              <span className="sr-only">{t('profile.team')}</span>
-              <select
-                disabled={teamsLoading}
-                onChange={(event) => void select(event.target.value)}
-                value={selectedTeam?.id ?? ''}
-              >
-                {!selectedTeam && <option value="">—</option>}
-                {teams.map((team) => (
-                  <option key={team.id} value={team.id}>
-                    {team.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+    <DsAppShell
+      activeHref={activePath}
+      brand={<KiniLogo href="/pools" size="sm" />}
+      bottomNavItems={sidebarItems}
+      linkComponent={Link}
+      scope={
+        <ScopeSwitcher
+          label={t('profile.team')}
+          value={selectedTeam?.name}
+          placeholder={teamsLoading ? t('common.loading') : t('teams.title')}
+          items={teams.map((team) => ({
+            id: team.id,
+            label: team.name,
+            active: team.id === selectedTeam?.id,
+            onSelect: (id: string) => void select(id),
+          }))}
+          footer={({ close }: { close: () => void }) => (
+            <MenuItem onClick={() => { close(); router.push('/teams'); }}>
+              <Icon name="users" /> {t('tabs.teams')}
+            </MenuItem>
           )}
-          <button
-            className="avatar"
-            onClick={() => router.push('/profile')}
-            title={user.name}
-            type="button"
-          >
-            {user.avatarUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img alt="" src={user.avatarUrl} />
-            ) : (
-              user.name.slice(0, 1).toUpperCase()
-            )}
-          </button>
-        </div>
-      </header>
-      <div className="app-body">
-        <aside className="sidebar" aria-label="Primary navigation">
-          <nav>
-            {navItems.map((item) => {
-              const itemPath = item.href.split('?')[0];
-              const active =
-                activePath === itemPath ||
-                (itemPath !== '/pools' &&
-                  activePath.startsWith(`${itemPath}/`));
-              return (
-                <Link
-                  aria-current={active ? 'page' : undefined}
-                  className={active ? 'nav-link nav-link-active' : 'nav-link'}
-                  href={item.href}
-                  key={item.href}
-                >
-                  <span aria-hidden="true">{item.icon}</span>
-                  {t(item.key)}
-                </Link>
-              );
-            })}
-          </nav>
-        </aside>
-        <main className="content">{children}</main>
-      </div>
-      <nav className="mobile-nav" aria-label="Primary navigation">
-        {navItems.slice(0, 4).map((item) => {
-          const itemPath = item.href.split('?')[0];
-          const active =
-            activePath === itemPath ||
-            (itemPath !== '/pools' && activePath.startsWith(`${itemPath}/`));
-          return (
-            <Link
-              aria-current={active ? 'page' : undefined}
-              className={
-                active ? 'mobile-link mobile-link-active' : 'mobile-link'
-              }
-              href={item.href}
-              key={item.href}
-            >
-              <span aria-hidden="true">{item.icon}</span>
-              <small>{t(item.key)}</small>
-            </Link>
-          );
-        })}
-      </nav>
-    </div>
+        />
+      }
+      sidebarItems={sidebarItems}
+      topbar={{
+        utilities: (
+          <>
+            <ThemeButton />
+            <LanguageButton />
+            <UserButton />
+          </>
+        ),
+      }}
+    >
+      {children}
+    </DsAppShell>
   );
 }
