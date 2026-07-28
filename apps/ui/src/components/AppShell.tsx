@@ -6,8 +6,12 @@ import type { PropsWithChildren } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
-import { AppShell as DsAppShell } from '../../design-system/components/navigation/AppShell.jsx';
+import { AuthCard } from '../../design-system/components/auth/AuthCard.jsx';
+import { AuthShell } from '../../design-system/components/auth/AuthShell.jsx';
+import { Button } from '../../design-system/components/core/Button.jsx';
+import { GoogleMark } from '../../design-system/components/icons/GoogleMark.jsx';
 import { Icon } from '../../design-system/components/icons/Icon.jsx';
+import { AppShell as DsAppShell } from '../../design-system/components/navigation/AppShell.jsx';
 import { Logo } from '../../design-system/components/navigation/Logo.jsx';
 import { Loading } from './Loading';
 import { LanguageButton, ThemeButton, UserButton } from './TopbarUtilities';
@@ -58,52 +62,37 @@ export function AppShell({ children }: PropsWithChildren) {
   const { t } = usePreferences();
 
   if (pathname === '/auth/callback') {
-    return <main className="login-shell">{children}</main>;
+    return <AuthShell>{children}</AuthShell>;
   }
 
   if (loading) return <Loading label={t('status.preparing')} />;
 
   if (!user) {
     return (
-      <main className="login-shell" style={{ position: 'relative' }}>
-        <div
-          style={{
-            position: 'absolute',
-            top: '1rem',
-            right: '1rem',
-            zIndex: 2,
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.35rem',
-          }}
+      <AuthShell utilities={<><ThemeButton /><LanguageButton /></>}>
+        <AuthCard
+          logo={<KiniLogo />}
+          eyebrow={t('login.eyebrow')}
+          title={t('login.title')}
+          description={t('login.tagline')}
+          error={!googleAuthEnabled ? t('auth.google_unavailable') : null}
+          footer={t('login.terms')}
         >
-          <ThemeButton />
-          <LanguageButton />
-        </div>
-        <section className="login-card">
-          <KiniLogo style={{ marginBottom: 24 }} />
-          <p className="eyebrow">{t('login.eyebrow')}</p>
-          <h1>{t('login.title')}</h1>
-          <p className="lead">{t('login.tagline')}</p>
-          <button
-            className="button button-primary button-large"
+          <Button
+            variant="primary"
+            size="lg"
+            style={{ width: '100%' }}
             disabled={!googleAuthEnabled || signingIn}
             onClick={() =>
               signInWithGoogle(`${pathname}${window.location.search}`)
             }
             type="button"
           >
-            <span className="google-mark" aria-hidden="true">
-              G
-            </span>
+            <GoogleMark />
             {signingIn ? t('auth.connecting') : t('auth.sign_in_google')}
-          </button>
-          {!googleAuthEnabled && (
-            <p className="form-error">{t('auth.google_unavailable')}</p>
-          )}
-          <p className="fine-print">{t('login.terms')}</p>
-        </section>
-      </main>
+          </Button>
+        </AuthCard>
+      </AuthShell>
     );
   }
 

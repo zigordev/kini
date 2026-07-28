@@ -575,55 +575,6 @@ select:disabled {
   }
 }
 
-.login-shell {
-  display: grid;
-  min-height: 100vh;
-  place-items: center;
-  padding: 28px;
-  background:
-    linear-gradient(145deg, rgb(215 25 32 / 10%), transparent 45%),
-    var(--background);
-}
-
-.login-card {
-  display: grid;
-  width: min(460px, 100%);
-  justify-items: center;
-  padding: clamp(32px, 7vw, 58px);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  background: var(--surface);
-  box-shadow: var(--shadow-md);
-  text-align: center;
-}
-
-.login-card h1 {
-  margin: 4px 0 12px;
-  font-size: clamp(2rem, 7vw, 3rem);
-  letter-spacing: -0.05em;
-}
-
-.login-card .lead {
-  margin: 0 0 28px;
-  color: var(--ink-muted);
-}
-
-.login-card .fine-print {
-  margin: 20px 0 0;
-  font-size: 0.78rem;
-}
-
-.google-mark {
-  display: grid;
-  width: 22px;
-  height: 22px;
-  place-items: center;
-  border-radius: 50%;
-  color: #4285f4;
-  background: white;
-  font-weight: 900;
-}
-
 .modal-backdrop {
   position: fixed;
   z-index: 100;
