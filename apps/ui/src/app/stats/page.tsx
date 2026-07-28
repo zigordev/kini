@@ -9,6 +9,8 @@ import { useTeams } from '@/contexts/TeamsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { poolsApi } from '@/lib/api';
 import type { Stats } from '@/types/domain';
+import { Button } from '../../../design-system/components/core/Button.jsx';
+import { StatTile } from '../../../design-system/components/data-display/StatTile.jsx';
 
 const combined = (entry: Stats['ranking'][number]) => ({
   successes:
@@ -76,9 +78,9 @@ export default function StatsPage() {
     return (
       <EmptyState
         action={
-          <Link className="button button-primary" href="/teams?manage=1">
+          <Button as={Link} variant="primary" href="/teams?manage=1">
             {t('tabs.teams')}
-          </Link>
+          </Button>
         }
         description={t('teams.subtitle')}
         title={t('teams.empty_title')}
@@ -97,43 +99,39 @@ export default function StatsPage() {
           <h1>{t('stats.title')}</h1>
           <p>{t('stats.subtitle')}</p>
         </div>
-        <button
-          className="button button-secondary"
+        <Button variant="secondary"
           onClick={() => void load()}
           type="button"
         >
           {t('actions.refresh')}
-        </button>
+        </Button>
       </header>
 
       <section className="metrics-grid">
-        <article className="metric-card metric-card-accent">
-          <span>{t('stats.summary_balance')}</span>
-          <strong className={(stats?.balance ?? 0) < 0 ? 'negative' : ''}>
-            {new Intl.NumberFormat(language, {
-              style: 'currency',
-              currency: 'EUR',
-            }).format(stats?.balance ?? 0)}
-          </strong>
-          <small>{t('stats.balance_help')}</small>
-        </article>
-        <article className="metric-card">
-          <span>{t('stats.summary_leader')}</span>
-          <strong>{ranking[0]?.user?.name ?? '—'}</strong>
-          <small>{t('stats.ranking_help')}</small>
-        </article>
-        <article className="metric-card">
-          <span>{t('stats.summary_success_rate')}</span>
-          <strong>{rate}%</strong>
-          <small>
-            {resolved} {t('stats.total_predictions')}
-          </small>
-        </article>
-        <article className="metric-card">
-          <span>{t('stats.summary_best_result')}</span>
-          <strong>{best?.key ?? '—'}</strong>
-          <small>{best ? `${Math.round(best.successRate)}%` : '—'}</small>
-        </article>
+        <StatTile
+          tone={(stats?.balance ?? 0) < 0 ? 'danger' : 'accent'}
+          label={t('stats.summary_balance')}
+          value={new Intl.NumberFormat(language, {
+            style: 'currency',
+            currency: 'EUR',
+          }).format(stats?.balance ?? 0)}
+          hint={t('stats.balance_help')}
+        />
+        <StatTile
+          label={t('stats.summary_leader')}
+          value={ranking[0]?.user?.name ?? '—'}
+          hint={t('stats.ranking_help')}
+        />
+        <StatTile
+          label={t('stats.summary_success_rate')}
+          value={`${rate}%`}
+          hint={`${resolved} ${t('stats.total_predictions')}`}
+        />
+        <StatTile
+          label={t('stats.summary_best_result')}
+          value={best?.key ?? '—'}
+          hint={best ? `${Math.round(best.successRate)}%` : '—'}
+        />
       </section>
 
       <div className="stats-layout">

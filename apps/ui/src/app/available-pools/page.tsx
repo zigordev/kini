@@ -16,6 +16,7 @@ import type {
   AvailablePoolJackpot,
   ResultValue,
 } from '@/types/domain';
+import { Button } from '../../../design-system/components/core/Button.jsx';
 
 const backgroundRefreshMs = 15 * 60 * 1000;
 
@@ -138,17 +139,16 @@ export default function AvailablePoolsPage() {
           <p>{t('available_pools.subtitle')}</p>
         </div>
         <div className="button-row">
-          <Link className="button button-secondary" href="/create-pool">
+          <Button as={Link} variant="secondary" href="/create-pool">
             {t('pools.create_title')}
-          </Link>
-          <button
-            className="button button-primary"
+          </Button>
+          <Button variant="primary"
             disabled={syncing}
             onClick={() => void sync()}
             type="button"
           >
             {syncing ? t('status.preparing') : t('available_pools.sync')}
-          </button>
+          </Button>
         </div>
       </header>
 
@@ -180,13 +180,12 @@ export default function AvailablePoolsPage() {
       ) : pools.length === 0 ? (
         <EmptyState
           action={
-            <button
-              className="button button-primary"
+            <Button variant="primary"
               onClick={() => void sync()}
               type="button"
             >
               {t('available_pools.sync')}
-            </button>
+            </Button>
           }
           description={t('available_pools.empty_text')}
           title={t('available_pools.empty_title')}
@@ -206,8 +205,7 @@ export default function AvailablePoolsPage() {
                     })}
                   </p>
                 </div>
-                <button
-                  className="button button-primary"
+                <Button variant="primary"
                   disabled={!selectedTeam || addingId === pool.id}
                   onClick={() => void addToTeam(pool)}
                   type="button"
@@ -215,7 +213,7 @@ export default function AvailablePoolsPage() {
                   {addingId === pool.id
                     ? t('status.preparing')
                     : t('available_pools.play')}
-                </button>
+                </Button>
               </header>
 
               {pool.matches.length === 0 ? (

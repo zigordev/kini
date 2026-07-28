@@ -198,65 +198,6 @@ select:disabled {
   text-transform: uppercase;
 }
 
-.button {
-  display: inline-flex;
-  min-height: 42px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 9px 16px;
-  border: 1px solid transparent;
-  border-radius: 10px;
-  font-weight: 750;
-  transition:
-    transform 120ms ease,
-    background 120ms ease,
-    border-color 120ms ease;
-}
-
-.button:active:not(:disabled) {
-  transform: translateY(1px);
-}
-
-.button-primary {
-  color: white;
-  background: var(--primary);
-}
-
-.button-primary:hover:not(:disabled) {
-  background: var(--primary-hover);
-}
-
-.button-secondary {
-  border-color: var(--border);
-  background: var(--surface);
-}
-
-.button-secondary:hover:not(:disabled),
-.button-quiet:hover:not(:disabled) {
-  background: var(--surface-hover);
-}
-
-.button-quiet {
-  color: var(--ink-muted);
-  background: transparent;
-}
-
-.button-danger {
-  color: white;
-  background: var(--danger);
-}
-
-.button-large {
-  min-height: 52px;
-  padding-inline: 24px;
-  font-size: 1rem;
-}
-
-.button-block {
-  width: 100%;
-}
-
 .button-row {
   display: flex;
   flex-wrap: wrap;
@@ -270,8 +211,7 @@ select:disabled {
 
 .panel,
 .team-card,
-.catalog-card,
-.metric-card {
+.catalog-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--surface);
@@ -394,39 +334,6 @@ select:disabled {
 .metrics-grid-compact {
   max-width: 620px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.metric-card {
-  display: grid;
-  min-height: 120px;
-  align-content: center;
-  gap: 4px;
-  padding: 20px;
-}
-
-.metric-card-accent {
-  border-color: color-mix(in srgb, var(--primary) 32%, var(--border));
-  background: linear-gradient(135deg, var(--primary-soft), var(--surface));
-}
-
-.metric-card span,
-.metric-card small {
-  color: var(--ink-muted);
-}
-
-.metric-card > span {
-  font-size: 0.76rem;
-  font-weight: 800;
-  letter-spacing: 0.055em;
-  text-transform: uppercase;
-}
-
-.metric-card strong {
-  overflow: hidden;
-  font-size: clamp(1.35rem, 2.3vw, 2rem);
-  letter-spacing: -0.035em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .card-grid {
@@ -1188,18 +1095,9 @@ select:disabled {
     width: 100%;
   }
 
-  .page-header-split > .button-row .button {
-    flex: 1;
-  }
-
   .metrics-grid,
   .metrics-grid-compact {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .metric-card {
-    min-height: 105px;
-    padding: 15px;
   }
 
   .panel {

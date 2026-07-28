@@ -6,6 +6,7 @@ import { Loading } from '@/components/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
+import { Button } from '../../../../../design-system/components/core/Button.jsx';
 
 export default function AcceptInvitationPage() {
   const params = useParams<{ teamId: string }>();
@@ -49,13 +50,12 @@ export default function AcceptInvitationPage() {
       <div className="empty-state-icon">✓</div>
       <h1>{t('teams.accept_title')}</h1>
       <p>{message}</p>
-      <button
-        className="button button-primary"
+      <Button variant="primary"
         onClick={() => router.replace('/pools')}
         type="button"
       >
         {t('teams.go_to_team')}
-      </button>
+      </Button>
     </section>
   );
 }
