@@ -7,6 +7,12 @@ import { PageHeader } from '../../../../design-system/components/data-display/Pa
 import { EmptyState } from '../../../../design-system/components/feedback/EmptyState.jsx';
 import { Badge } from '../../../../design-system/components/feedback/Badge.jsx';
 import { Icon } from '../../../../design-system/components/icons/Icon.jsx';
+import { Field } from '../../../../design-system/components/forms/Field.jsx';
+import { Input } from '../../../../design-system/components/forms/Input.jsx';
+import { DateField } from '../../../../design-system/components/forms/DateField.jsx';
+import { Select } from '../../../../design-system/components/forms/Select.jsx';
+import { Checkbox } from '../../../../design-system/components/forms/Checkbox.jsx';
+import { Switch } from '../../../../design-system/components/forms/Switch.jsx';
 
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -74,6 +80,37 @@ export function PreviewGallery() {
         <Badge variant="danger">Danger</Badge>
         <Badge variant="info">Info</Badge>
       </Row>
+
+      <h2 style={{ margin: '28px 0 12px' }}>Form controls</h2>
+      <section className="panel">
+        <div className="form-grid">
+          <Field className="field-span-2" label="Pool name" hint="Shown everywhere this pool appears.">
+            <Input placeholder="Jornada 12" defaultValue="" />
+          </Field>
+          <Field label="Date" required>
+            <DateField defaultValue="2026-06-11" />
+          </Field>
+          <Field label="Deadline">
+            <DateField type="datetime-local" defaultValue="2026-06-11T20:00" />
+          </Field>
+          <Field label="Doubles" required>
+            <Input type="number" min={0} max={14} defaultValue={6} />
+          </Field>
+          <Field label="Assignee">
+            <Select defaultValue="a">
+              <option value="a">Ana</option>
+              <option value="b">Bruno</option>
+            </Select>
+          </Field>
+          <Field label="Invalid example" error="Enter a value between 0 and 14.">
+            <Input type="number" defaultValue={99} invalid />
+          </Field>
+          <div className="field-span-2" style={{ display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+            <Checkbox label="Elige 8" defaultChecked />
+            <Switch label="Receive notifications" checked onChange={() => {}} />
+          </div>
+        </div>
+      </section>
 
       <h2 style={{ margin: '28px 0 12px' }}>EmptyState</h2>
       <EmptyState
