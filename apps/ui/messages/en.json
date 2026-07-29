@@ -106,7 +106,8 @@
     "success_yes": "Success ✅",
     "unassigned": "Unassigned",
     "update_status_message": "Select an option:",
-    "update_status_title": "Update status"
+    "update_status_title": "Update status",
+    "official_result": "Official result"
   },
   "mobile_tabs": {
     "available_pools": "Upcoming",
