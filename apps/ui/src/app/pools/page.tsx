@@ -25,6 +25,7 @@ import type {
 } from '@/types/domain';
 import { Button } from '../../../design-system/components/core/Button.jsx';
 import { StatTile } from '../../../design-system/components/data-display/StatTile.jsx';
+import { Table } from '../../../design-system/components/data-display/Table.jsx';
 
 const backgroundRefreshMs = 15 * 60 * 1000;
 
@@ -340,13 +341,16 @@ function PoolsContent() {
             </span>
           </div>
 
-          <div className="matches-table">
-            <div className="matches-header">
-              <span>#</span>
-              <span>{t('pools.matches')}</span>
-              <span>{t('matches.prediction')}</span>
-              {selectedPool.elige8 && <span>E8</span>}
-            </div>
+          <Table density="compact" hoverable={false} minWidth={520} className="matches-table">
+            <thead>
+              <tr>
+                <th className="match-col-order">#</th>
+                <th>{t('pools.matches')}</th>
+                <th>{t('matches.prediction')}</th>
+                {selectedPool.elige8 && <th className="match-col-e8">E8</th>}
+              </tr>
+            </thead>
+            <tbody>
             {selectedPool.matches.map((match, index) => (
               <MatchRow
                 canEdit={canEdit}
@@ -366,7 +370,8 @@ function PoolsContent() {
                 }
               />
             ))}
-          </div>
+            </tbody>
+          </Table>
         </section>
 
         <aside className="panel pool-inspector">
@@ -504,9 +509,9 @@ function MatchRow({
         : '';
 
   return (
-    <div className={`match-row ${resultClass}`}>
-      <span className="match-order">{number}</span>
-      <div className="match-teams">
+    <tr className={`match-row ${resultClass}`}>
+      <td className="match-order">{number}</td>
+      <td className="match-teams">
         <strong>{match.homeTeam}</strong>
         <span>{match.awayTeam}</span>
         <label className="assignee">
@@ -526,7 +531,8 @@ function MatchRow({
             ))}
           </select>
         </label>
-      </div>
+      </td>
+      <td>
       {match.full15 || number === 15 ? (
         <div className="full15-picker">
           {[0, 1].map((splitIndex) => (
@@ -557,18 +563,23 @@ function MatchRow({
           ))}
         </div>
       )}
+      </td>
       {elige8Enabled && (
-        <label className="e8-check">
-          <span className="sr-only">E8</span>
-          <input
-            checked={match.elige8}
-            disabled={!canEdit || saving}
-            onChange={(event) => onToggleE8(event.target.checked)}
-            type="checkbox"
-          />
-        </label>
+        <td className="e8-check">
+          {/* The label has to stay wrapped around the input — the column
+              heading names the column, not this row's checkbox. */}
+          <label>
+            <span className="sr-only">E8</span>
+            <input
+              checked={match.elige8}
+              disabled={!canEdit || saving}
+              onChange={(event) => onToggleE8(event.target.checked)}
+              type="checkbox"
+            />
+          </label>
+        </td>
       )}
-    </div>
+    </tr>
   );
 }
 

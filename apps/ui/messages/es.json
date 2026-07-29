@@ -106,7 +106,8 @@
     "success_yes": "Acierto ✅",
     "unassigned": "Sin asignar",
     "update_status_message": "Selecciona una opción:",
-    "update_status_title": "Actualizar estado"
+    "update_status_title": "Actualizar estado",
+    "official_result": "Resultado oficial"
   },
   "mobile_tabs": {
     "available_pools": "Próximas",

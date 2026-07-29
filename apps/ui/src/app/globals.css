@@ -157,9 +157,11 @@ select:disabled {
    (up to 88px a side, 96px below) and cap at 1380px, which cost ~250px of
    content width on a wide screen and pushed the first row well below the
    fold. */
+/* No padding: AppShell's .ds-app-shell-content provides the gutter on all
+   four sides. Adding 32px here stacked onto its bottom padding. */
 .page {
   width: 100%;
-  padding: 0 0 32px;
+  min-width: 0;
 }
 
 .page-header {
@@ -215,12 +217,6 @@ select:disabled {
 
 .panel,
 .team-card,
-.catalog-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
 
 .panel {
   padding: 24px;
@@ -574,61 +570,45 @@ select:disabled {
   gap: 18px;
 }
 
-.catalog-card {
-  overflow: hidden;
-}
 
-.catalog-card > header {
+
+/* Was another grid-as-table. Row separators, padding and column widths now
+   come from the design system's Table. */
+.catalog-caption {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 22px;
-  border-bottom: 1px solid var(--border);
+  width: 100%;
 }
 
-.catalog-card h2 {
+.catalog-caption h2 {
   margin: 7px 0 2px;
   font-size: 1.2rem;
 }
 
-.catalog-card header p {
+.catalog-caption p {
   margin: 0;
   color: var(--ink-muted);
 }
 
-.catalog-card > .muted {
-  padding: 20px 22px;
-}
-
-.available-match-list {
-  display: grid;
-}
-
-.available-match {
-  display: grid;
-  min-height: 62px;
-  align-items: center;
-  grid-template-columns: 42px minmax(0, 1fr) auto;
-  gap: 12px;
-  padding: 10px 22px;
-  border-bottom: 1px solid var(--border);
-}
-
-.available-match:last-child {
-  border-bottom: 0;
-}
-
 .match-order {
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+  font-weight: 850;
+  text-align: center;
+}
+
+/* The numbered badge. On the catalogue page this is still a <span> inside a
+   flex row; in the matches table the <td> is the cell, so the badge shape
+   goes on an inner box there instead of on the cell itself. */
+span.match-order {
   display: grid;
   width: 30px;
   height: 30px;
   place-items: center;
   border-radius: 8px;
-  color: var(--ink-muted);
   background: var(--surface-muted);
-  font-size: 0.78rem;
-  font-weight: 850;
 }
 
 .match-teams {
@@ -697,32 +677,25 @@ select:disabled {
   min-width: 0;
 }
 
-.matches-header,
-.match-row {
-  display: grid;
-  align-items: center;
-  grid-template-columns: 42px minmax(150px, 1fr) minmax(170px, auto) 42px;
-  gap: 10px;
+/* This was a grid pretending to be a table: a header row of column labels
+   with grid-template-columns repeated on every row. It is a real table now,
+   so the column widths, header styling and row separators come from the
+   design system's Table and only the two fixed-width columns stay here. */
+.matches-table .match-col-order {
+  width: 42px;
 }
 
-.matches-header {
-  padding: 10px 18px;
-  color: var(--ink-muted);
-  background: var(--surface-muted);
-  font-size: 0.72rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.matches-table .match-col-e8 {
+  width: 42px;
+  text-align: center;
+}
+
+.matches-table .e8-check {
+  text-align: center;
 }
 
 .match-row {
   min-height: 80px;
-  padding: 10px 18px;
-  border-top: 1px solid var(--border);
-}
-
-.matches-header + .match-row {
-  border-top: 0;
 }
 
 .match-success {
@@ -1109,7 +1082,7 @@ select:disabled {
   }
 
   .inline-form,
-  .catalog-card > header {
+  .catalog-caption {
     align-items: stretch;
     flex-direction: column;
   }
@@ -1123,31 +1096,11 @@ select:disabled {
     grid-column: auto;
   }
 
-  .available-match {
-    grid-template-columns: 34px minmax(0, 1fr);
-  }
-
-  .available-match > .result-buttons {
-    grid-column: 2;
-  }
-
-  .matches-header {
-    display: none;
-  }
-
+  /* These rows used to reflow into a narrower grid on mobile. They are table
+     rows now and cannot, so the table keeps its columns and the frame scrolls
+     sideways instead — same behaviour as every other table in the apps. */
   .match-row {
-    grid-template-columns: 34px minmax(0, 1fr) auto;
-    padding: 13px;
-  }
-
-  .match-row > .result-buttons,
-  .match-row > .full15-picker {
-    grid-column: 2;
-  }
-
-  .match-row > .e8-check {
-    grid-column: 3;
-    grid-row: 1 / span 2;
+    min-height: 0;
   }
 
   .match-draft {

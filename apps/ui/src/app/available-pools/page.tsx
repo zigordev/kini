@@ -17,6 +17,7 @@ import type {
   ResultValue,
 } from '@/types/domain';
 import { Button } from '../../../design-system/components/core/Button.jsx';
+import { Table, TableEmpty } from '../../../design-system/components/data-display/Table.jsx';
 
 const backgroundRefreshMs = 15 * 60 * 1000;
 
@@ -188,9 +189,15 @@ export default function AvailablePoolsPage() {
       ) : (
         <section className="catalog-list">
           {pools.map((pool) => (
-            <article className="catalog-card" key={pool.id}>
-              <header>
-                <div>
+            <Table
+              key={pool.id}
+              density="compact"
+              hoverable={false}
+              minWidth={420}
+              className="catalog-card"
+              caption={
+                <div className="catalog-caption">
+                  <div>
                   <span className="status-badge">{pool.status}</span>
                   <h2>{pool.name}</h2>
                   <p>
@@ -209,32 +216,41 @@ export default function AvailablePoolsPage() {
                     ? t('status.preparing')
                     : t('available_pools.play')}
                 </Button>
-              </header>
-
+                </div>
+              }
+            >
+              <thead>
+                <tr>
+                  <th className="match-col-order">#</th>
+                  <th>{t('pools.matches')}</th>
+                  {selectedTeam?.role === 'admin' && <th>{t('matches.official_result')}</th>}
+                </tr>
+              </thead>
+              <tbody>
               {pool.matches.length === 0 ? (
-                <p className="muted">{t('available_pools.no_matches')}</p>
+                <TableEmpty>{t('available_pools.no_matches')}</TableEmpty>
               ) : (
-                <div className="available-match-list">
-                  {pool.matches.map((match) => {
+                pool.matches.map((match) => {
                     const matchKey = `${pool.id}:${match.order}`;
                     const values = match.full15
                       ? full15Results
                       : regularResults;
                     return (
-                      <div className="available-match" key={match.order}>
-                        <span className="match-order">{match.order}</span>
-                        <div className="match-teams">
+                      <tr key={match.order}>
+                        <td className="match-order"><span className="match-order">{match.order}</span></td>
+                        <td className="match-teams">
                           <strong>{match.homeTeam}</strong>
                           <span>{match.awayTeam}</span>
-                        </div>
+                        </td>
                         {selectedTeam?.role === 'admin' && (
-                          <div
-                            aria-label={t('matches.official_result_label', {
-                              home: match.homeTeam,
-                              away: match.awayTeam,
-                            })}
-                            className="result-buttons"
-                          >
+                          <td>
+                            <div
+                              aria-label={t('matches.official_result_label', {
+                                home: match.homeTeam,
+                                away: match.awayTeam,
+                              })}
+                              className="result-buttons"
+                            >
                             {values.map((value) => (
                               <button
                                 aria-pressed={match.officialResults?.includes(
@@ -259,14 +275,15 @@ export default function AvailablePoolsPage() {
                                 {value}
                               </button>
                             ))}
-                          </div>
+                            </div>
+                          </td>
                         )}
-                      </div>
+                      </tr>
                     );
-                  })}
-                </div>
+                  })
               )}
-            </article>
+              </tbody>
+            </Table>
           ))}
         </section>
       )}

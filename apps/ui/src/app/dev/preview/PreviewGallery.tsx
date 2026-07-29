@@ -13,6 +13,7 @@ import { DateField } from '../../../../design-system/components/forms/DateField.
 import { Select } from '../../../../design-system/components/forms/Select.jsx';
 import { Checkbox } from '../../../../design-system/components/forms/Checkbox.jsx';
 import { Switch } from '../../../../design-system/components/forms/Switch.jsx';
+import { Table } from '../../../../design-system/components/data-display/Table.jsx';
 
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -119,6 +120,50 @@ export function PreviewGallery() {
         description="Create the first pool for this team to get started."
         action={<Button variant="primary">Create pool</Button>}
       />
+
+      <h2 style={{ margin: '28px 0 12px' }}>Table — the matches list, as a real table</h2>
+      <p className="muted" style={{ margin: '0 0 12px' }}>
+        Quinielas and Próximas were CSS grids with a header row of column labels. Same
+        columns, now a real table on the shared component, so kini matches gpool and the
+        operator console.
+      </p>
+      <Table density="compact" hoverable={false} minWidth={520} className="matches-table">
+        <thead>
+          <tr>
+            <th className="match-col-order">#</th>
+            <th>Partido</th>
+            <th>Pronóstico</th>
+            <th className="match-col-e8">E8</th>
+          </tr>
+        </thead>
+        <tbody>
+          {[
+            { n: 1, home: 'Real Madrid', away: 'Barcelona' },
+            { n: 2, home: 'Atlético', away: 'Sevilla' },
+          ].map((m) => (
+            <tr className="match-row" key={m.n}>
+              <td className="match-order"><span className="match-order">{m.n}</span></td>
+              <td className="match-teams">
+                <strong>{m.home}</strong>
+                <span>{m.away}</span>
+              </td>
+              <td>
+                <div className="result-buttons">
+                  {['1', 'X', '2'].map((v) => (
+                    <button className="result-button" key={v} type="button">{v}</button>
+                  ))}
+                </div>
+              </td>
+              <td className="e8-check">
+                <label>
+                  <span className="sr-only">E8</span>
+                  <input type="checkbox" readOnly />
+                </label>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </Table>
 
       <h2 style={{ margin: '28px 0 12px' }}>Icons</h2>
       <section className="panel">
