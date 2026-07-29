@@ -12,6 +12,10 @@ export interface ButtonProps
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'danger';
   /** `icon` is a square button — pair with a single glyph child. */
   size?: 'sm' | 'md' | 'lg' | 'icon';
+  /** Swaps the leading icon for a spinner and disables the button. */
+  loading?: boolean;
+  leadingIcon?: React.ReactNode;
+  trailingIcon?: React.ReactNode;
 }
 
 export declare function Button(props: ButtonProps): JSX.Element;

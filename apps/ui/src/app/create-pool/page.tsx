@@ -13,6 +13,9 @@ import { readPoolDefaults } from '@/lib/preferences';
 import { todayInputValue } from '@/lib/pools';
 import type { PoolForm, UserSummary } from '@/types/domain';
 import { Button } from '../../../design-system/components/core/Button.jsx';
+import { Field } from '../../../design-system/components/forms/Field.jsx';
+import { Input } from '../../../design-system/components/forms/Input.jsx';
+import { DateField } from '../../../design-system/components/forms/DateField.jsx';
 
 interface MatchDraft {
   order: number;
@@ -171,27 +174,23 @@ function CreatePoolForm() {
 
       <form className="panel form-stack" onSubmit={submit}>
         <div className="form-grid">
-          <label className="field field-span-2">
-            <span>{t('fields.name')}</span>
-            <input
+          <Field className="field-span-2" label={t('fields.name')}>
+            <Input
               maxLength={160}
               onChange={(event) => setName(event.target.value)}
               placeholder={t('pools.name_placeholder')}
               value={name}
             />
-          </label>
-          <label className="field">
-            <span>{t('fields.date')}</span>
-            <input
+          </Field>
+          <Field label={t('fields.date')} required>
+            <DateField
               onChange={(event) => setDate(event.target.value)}
               required
-              type="date"
               value={date}
             />
-          </label>
-          <label className="field">
-            <span>{t('fields.doubles')}</span>
-            <input
+          </Field>
+          <Field label={t('fields.doubles')} required>
+            <Input
               max={14}
               min={0}
               onChange={(event) => setDoubles(Number(event.target.value))}
@@ -199,10 +198,9 @@ function CreatePoolForm() {
               type="number"
               value={doubles}
             />
-          </label>
-          <label className="field">
-            <span>{t('fields.triples')}</span>
-            <input
+          </Field>
+          <Field label={t('fields.triples')} required>
+            <Input
               max={9}
               min={0}
               onChange={(event) => setTriples(Number(event.target.value))}
@@ -210,7 +208,7 @@ function CreatePoolForm() {
               type="number"
               value={triples}
             />
-          </label>
+          </Field>
           <label className="switch-row field-span-2">
             <span>
               <strong>E8</strong>

@@ -20,12 +20,19 @@ injectOnce('ds-button', `
 .ds-btn-ghost:hover:not(:disabled){background:var(--ds-color-surface-2);color:var(--ds-color-fg);}
 .ds-btn-danger{background:var(--ds-color-danger);color:var(--ds-color-accent-fg);}
 .ds-btn-danger:hover:not(:disabled){filter:brightness(0.92);}
+.ds-btn-spinner{display:inline-block;width:.95em;height:.95em;border:2px solid currentColor;border-bottom-color:transparent;border-radius:999px;animation:ds-btn-spin .7s linear infinite;flex-shrink:0;}
+@keyframes ds-btn-spin{to{transform:rotate(360deg);}}
+@media (prefers-reduced-motion: reduce){.ds-btn-spinner{animation:none;}}
 `);
 
 export function Button({
   as: Component = 'button',
   variant = 'primary',
   size = 'md',
+  loading = false,
+  leadingIcon,
+  trailingIcon,
+  disabled,
   children,
   className = '',
   style,
@@ -35,9 +42,21 @@ export function Button({
   // `as` lets a navigation that looks like an action render as a real link
   // (next/link, <a>) instead of a button with an onClick router.push — it
   // keeps middle-click, open-in-new-tab and the status bar working.
+  // The spinner replaces the leading icon rather than sitting beside it, so
+  // the button keeps its width and the row above it doesn't reflow on submit.
   return (
-    <Component className={cls} style={style} {...props}>
+    <Component
+      className={cls}
+      style={style}
+      disabled={Component === 'button' ? disabled || loading : undefined}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {loading ? <span className="ds-btn-spinner" aria-hidden="true" />
+        : leadingIcon ? <span aria-hidden="true" style={{ display: 'inline-flex' }}>{leadingIcon}</span>
+        : null}
       {children}
+      {trailingIcon && !loading ? <span aria-hidden="true" style={{ display: 'inline-flex' }}>{trailingIcon}</span> : null}
     </Component>
   );
 }
