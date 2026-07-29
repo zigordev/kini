@@ -132,12 +132,7 @@ export default function AvailablePoolsPage() {
 
   return (
     <div className="page">
-      <header className="page-header page-header-split">
-        <div>
-          <p className="eyebrow">{t('available_pools.eyebrow')}</p>
-          <h1>{t('available_pools.title')}</h1>
-          <p>{t('available_pools.subtitle')}</p>
-        </div>
+      <header className="page-header button-row button-row-end">
         <div className="button-row">
           <Button as={Link} variant="secondary" href="/create-pool">
             {t('pools.create_title')}
