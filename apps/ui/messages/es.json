@@ -99,6 +99,7 @@
     "edit_denied": "Solo puedes editar los partidos asignados a ti.",
     "full15": "Pleno al 15",
     "home_team": "Local",
+    "official_result": "Resultado oficial",
     "official_result_label": "Resultado oficial de {{home}} contra {{away}}",
     "prediction": "Pronóstico",
     "remove_elige8": "Quitar E8",
@@ -106,8 +107,7 @@
     "success_yes": "Acierto ✅",
     "unassigned": "Sin asignar",
     "update_status_message": "Selecciona una opción:",
-    "update_status_title": "Actualizar estado",
-    "official_result": "Resultado oficial"
+    "update_status_title": "Actualizar estado"
   },
   "mobile_tabs": {
     "available_pools": "Próximas",

@@ -99,6 +99,7 @@
     "edit_denied": "You can only edit matches assigned to you.",
     "full15": "Full 15",
     "home_team": "Home",
+    "official_result": "Official result",
     "official_result_label": "Official result for {{home}} versus {{away}}",
     "prediction": "Prediction",
     "remove_elige8": "Remove E8",
@@ -106,8 +107,7 @@
     "success_yes": "Success ✅",
     "unassigned": "Unassigned",
     "update_status_message": "Select an option:",
-    "update_status_title": "Update status",
-    "official_result": "Official result"
+    "update_status_title": "Update status"
   },
   "mobile_tabs": {
     "available_pools": "Upcoming",
