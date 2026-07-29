@@ -281,12 +281,7 @@ function PoolsContent() {
 
   return (
     <div className="page">
-      <header className="page-header page-header-split">
-        <div>
-          <p className="eyebrow">{t('pools.active_pool_subtitle')}</p>
-          <h1>{t('pools.workspace_title', { team: selectedTeam.name })}</h1>
-          <p>{t('pools.workspace_subtitle')}</p>
-        </div>
+      <header className="page-header button-row button-row-end">
         <div className="button-row">
           <Button variant="secondary"
             disabled={checking}

@@ -93,12 +93,7 @@ export default function StatsPage() {
 
   return (
     <div className="page">
-      <header className="page-header page-header-split">
-        <div>
-          <p className="eyebrow">{selectedTeam.name}</p>
-          <h1>{t('stats.title')}</h1>
-          <p>{t('stats.subtitle')}</p>
-        </div>
+      <header className="page-header button-row button-row-end">
         <Button variant="secondary"
           onClick={() => void load()}
           type="button"
