@@ -261,7 +261,7 @@ function PoolsContent() {
             <Button as={Link} variant="primary" href="/available-pools">
               {t('available_pools.add_short')}
             </Button>
-            <Button as={Link} variant="secondary" href="/create-pool">
+            <Button as={Link} variant="secondary" href="/create-pool?from=/pools">
               {t('pools.create_title')}
             </Button>
           </div>
@@ -290,7 +290,7 @@ function PoolsContent() {
           >
             {checking ? t('status.preparing') : t('pools.check_results')}
           </Button>
-          <Button as={Link} variant="primary" href="/create-pool">
+          <Button as={Link} variant="primary" href="/create-pool?from=/pools">
             {t('pools.create_title')}
           </Button>
         </div>

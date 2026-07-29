@@ -134,7 +134,7 @@ export default function AvailablePoolsPage() {
     <div className="page">
       <header className="page-header button-row button-row-end">
         <div className="button-row">
-          <Button as={Link} variant="secondary" href="/create-pool">
+          <Button as={Link} variant="secondary" href="/create-pool?from=/available-pools">
             {t('pools.create_title')}
           </Button>
           <Button variant="primary"

@@ -128,6 +128,7 @@
     "create_accessibility": "Crear quiniela",
     "create_title": "+ Crear quiniela",
     "created": "Quiniela creada",
+    "discard_changes": "Tienes cambios sin guardar. ¿Descartarlos?",
     "earning": "Ganancia",
     "edit_title": "Editar quiniela",
     "failure_count": "{{count}} fallos",
