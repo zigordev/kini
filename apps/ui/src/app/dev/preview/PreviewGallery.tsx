@@ -23,7 +23,9 @@ function Row({ title, children }: { title: string; children: React.ReactNode }) 
 
 export function PreviewGallery() {
   return (
-    <main className="page">
+    // Rendered outside AppShell, so it supplies the same 24px gutter the
+    // shell normally does — otherwise the preview misrepresents spacing.
+    <main className="page" style={{ padding: 24 }}>
       <PageHeader
         eyebrow="Dev only"
         title="Design system preview"
