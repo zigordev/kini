@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { type FormEvent, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { type FormEvent, Suspense, useEffect, useState } from 'react';
 import { EmptyState, Loading } from '@/components/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
@@ -29,8 +29,17 @@ const emptyMatches = (): MatchDraft[] =>
     userId: '',
   }));
 
-export default function CreatePoolPage() {
+/** Only ever return to an in-app path: `from` comes from the URL, so an
+ * absolute or protocol-relative value would be an open redirect. */
+function safeReturnTo(value: string | null): string {
+  if (!value || !value.startsWith('/') || value.startsWith('//')) return '/pools';
+  return value;
+}
+
+function CreatePoolForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = safeReturnTo(searchParams.get('from'));
   const { user } = useAuth();
   const { selectedTeam, loading: teamsLoading } = useTeams();
   const { t } = usePreferences();
@@ -43,6 +52,9 @@ export default function CreatePoolPage() {
   const [triples, setTriples] = useState(0);
   const [elige8, setElige8] = useState(false);
   const [matches, setMatches] = useState<MatchDraft[]>(emptyMatches);
+  // Snapshot taken once the saved defaults land, so "dirty" means the user
+  // changed something — not that the defaults finished loading.
+  const [pristine, setPristine] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedTeam) return;
@@ -50,11 +62,35 @@ export default function CreatePoolPage() {
     setDoubles(defaults.doubles);
     setTriples(defaults.triples);
     setElige8(defaults.elige8);
+    setPristine(JSON.stringify({
+      name: '', date: todayInputValue(), doubles: defaults.doubles,
+      triples: defaults.triples, elige8: defaults.elige8, matches: emptyMatches(),
+    }));
     void usersApi
       .list()
       .then(setUsers)
       .catch(() => setUsers([]));
   }, [selectedTeam]);
+
+  const isDirty =
+    pristine !== null &&
+    JSON.stringify({ name, date, doubles, triples, elige8, matches }) !== pristine;
+
+  // Covers reload, tab close and leaving the site. It deliberately does NOT
+  // cover in-app back: that is client-side routing, and Next's App Router
+  // exposes no navigation guard to intercept it — so back still discards
+  // silently. Cancel is guarded below; back is a known gap, not an oversight.
+  useEffect(() => {
+    if (!isDirty || creating) return undefined;
+    const warn = (event: BeforeUnloadEvent) => event.preventDefault();
+    globalThis.addEventListener('beforeunload', warn);
+    return () => globalThis.removeEventListener('beforeunload', warn);
+  }, [isDirty, creating]);
+
+  const cancel = () => {
+    if (isDirty && !globalThis.confirm(t('pools.discard_changes'))) return;
+    router.push(returnTo);
+  };
 
   const updateMatch = (index: number, update: Partial<MatchDraft>) => {
     setMatches((current) =>
@@ -239,7 +275,7 @@ export default function CreatePoolPage() {
         </div>
 
         <div className="button-row button-row-end sticky-form-actions">
-          <Button as={Link} variant="secondary" href="/pools">
+          <Button variant="secondary" type="button" onClick={cancel}>
             {t('actions.cancel')}
           </Button>
           <Button variant="primary"
@@ -251,5 +287,13 @@ export default function CreatePoolPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function CreatePoolPage() {
+  return (
+    <Suspense fallback={null}>
+      <CreatePoolForm />
+    </Suspense>
   );
 }
