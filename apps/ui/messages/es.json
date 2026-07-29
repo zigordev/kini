@@ -20,13 +20,16 @@
     "added": "Quiniela añadida al equipo",
     "empty_text": "Sincroniza con el proveedor externo cuando tengas configurada la API key, o espera a la sincronización semanal.",
     "empty_title": "No hay quinielas disponibles",
+    "eyebrow": "Catálogo",
     "loading": "Cargando quinielas disponibles...",
     "match_count": "{{count}} partidos disponibles",
     "no_matches": "Sin partidos detallados todavía",
     "no_team_selected": "Selecciona un equipo antes de añadir la quiniela.",
     "play": "Jugar",
+    "subtitle": "Quinielas base recuperadas del proveedor externo. Añádelas a un equipo para completar pronósticos, resultados y seguimiento.",
     "sync": "Sincronizar",
-    "synced": "Quinielas sincronizadas"
+    "synced": "Quinielas sincronizadas",
+    "title": "Próximas quinielas"
   },
   "common": {
     "loading": "Cargando...",
@@ -119,6 +122,7 @@
     "pool_updated": "Quiniela actualizada"
   },
   "pools": {
+    "active_pool_subtitle": "Quiniela seleccionada",
     "check_results": "Comprobar resultados",
     "config": "Configuración quiniela",
     "create_accessibility": "Crear quiniela",
@@ -156,7 +160,8 @@
     "workflow_pending": "{{count}} resultados pendientes",
     "workflow_successes": "{{count}} aciertos por ahora",
     "workflow_title": "Flujo de la quiniela",
-    "workspace_subtitle": "Revisa la quiniela seleccionada, ajusta una quiniela desde sus detalles o crea la siguiente quiniela del equipo."
+    "workspace_subtitle": "Revisa la quiniela seleccionada, ajusta una quiniela desde sus detalles o crea la siguiente quiniela del equipo.",
+    "workspace_title": "Quinielas de {{team}}"
   },
   "profile": {
     "pool_defaults": "Configuración quiniela por defecto",
@@ -175,6 +180,7 @@
     "ranking_heading": "Ranking de aciertos",
     "ranking_help": "Líderes por tasa de acierto en partidos resueltos.",
     "result_breakdown_heading": "Desglose de resultados (1/X/2)",
+    "subtitle": "Rendimiento a nivel de equipo en todas las quinielas del equipo seleccionado.",
     "success_rate": "Tasa",
     "successes": "Aciertos",
     "summary_balance": "Balance",
@@ -182,6 +188,7 @@
     "summary_leader": "Líder",
     "summary_players": "Jugadores",
     "summary_success_rate": "Tasa de acierto",
+    "title": "Estadísticas del equipo",
     "top_performers": "Mejores participantes",
     "total_predictions": "Total"
   },

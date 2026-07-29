@@ -152,10 +152,14 @@ select:disabled {
   object-fit: cover;
 }
 
+/* AppShell's <main> already supplies the 24px gutter on all sides, so this
+   only adds breathing room at the bottom. It used to re-pad on top of that
+   (up to 88px a side, 96px below) and cap at 1380px, which cost ~250px of
+   content width on a wide screen and pushed the first row well below the
+   fold. */
 .page {
-  width: min(1380px, 100%);
-  margin: 0 auto;
-  padding: 40px clamp(22px, 4vw, 64px) 72px;
+  width: 100%;
+  padding: 0 0 32px;
 }
 
 .page-header {

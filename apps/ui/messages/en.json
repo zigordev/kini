@@ -20,13 +20,16 @@
     "added": "Pool added to team",
     "empty_text": "Sync with the external provider once the API key is configured, or wait for the weekly sync.",
     "empty_title": "No available pools",
+    "eyebrow": "Catalog",
     "loading": "Loading available pools...",
     "match_count": "{{count}} available matches",
     "no_matches": "No detailed matches yet",
     "no_team_selected": "Select a team before adding the pool.",
     "play": "Play",
+    "subtitle": "Raw pools retrieved from the external provider. Add one to a team to complete predictions, results, and tracking.",
     "sync": "Sync",
-    "synced": "Pools synchronized"
+    "synced": "Pools synchronized",
+    "title": "Upcoming pools"
   },
   "common": {
     "loading": "Loading...",
@@ -119,6 +122,7 @@
     "pool_updated": "Pool updated"
   },
   "pools": {
+    "active_pool_subtitle": "Selected pool",
     "check_results": "Check results",
     "config": "Pool configuration",
     "create_accessibility": "Create pool",
@@ -156,7 +160,8 @@
     "workflow_pending": "{{count}} pending results",
     "workflow_successes": "{{count}} successes so far",
     "workflow_title": "Pool workflow",
-    "workspace_subtitle": "Review the selected pool, adjust one pool from its details, or create the next pool for this team."
+    "workspace_subtitle": "Review the selected pool, adjust one pool from its details, or create the next pool for this team.",
+    "workspace_title": "{{team}} pools"
   },
   "profile": {
     "pool_defaults": "Pool defaults",
@@ -175,6 +180,7 @@
     "ranking_heading": "Success ranking",
     "ranking_help": "Leaders by resolved match success rate.",
     "result_breakdown_heading": "Result breakdown (1/X/2)",
+    "subtitle": "Team-level performance across all pools in the selected team.",
     "success_rate": "Rate",
     "successes": "Successes",
     "summary_balance": "Balance",
@@ -182,6 +188,7 @@
     "summary_leader": "Leader",
     "summary_players": "Players",
     "summary_success_rate": "Success rate",
+    "title": "Team stats",
     "top_performers": "Top performers",
     "total_predictions": "Total"
   },
