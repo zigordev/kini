@@ -1,5 +1,6 @@
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import helmet from 'helmet';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
@@ -14,6 +15,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const configService = app.get(ConfigService);
+
+  // Security headers. CSP is off: this is a JSON API, where a content policy
+  // buys nothing, and both gpool and kini serve Swagger UI, which needs the
+  // inline scripts a default helmet CSP would block. The headers that matter
+  // here — HSTS, nosniff, frame-options, referrer-policy — are all still set.
+  app.use(helmet({ contentSecurityPolicy: false }));
 
   app.use(cookieParser(configService.get<string>('SESSION_COOKIE_SECRET')));
 
