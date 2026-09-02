@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
 import { FutPoolMatchModule } from './fut-pool-match/fut-pool-match.module';
 import { FutPoolModule } from './fut-pool/fut-pool.module';
+import { HealthModule } from './health/health.module';
 import { LogsModule } from './logs/logs.module';
 import { NotificationModule } from './notifications/notification.module';
 import { RumModule } from './rum/rum.module';
@@ -49,6 +50,7 @@ import { UsersModule } from './users/users.module';
       },
     }),
     FutPoolModule,
+    HealthModule,
     FutPoolMatchModule,
     UsersModule,
     AuthModule,
