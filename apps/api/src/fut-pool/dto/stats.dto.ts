@@ -28,10 +28,13 @@ export class StatsDto {
   @ApiProperty({ type: () => PoolSeriesDto, isArray: true })
   series: PoolSeriesDto[];
 
+  // Swagger 11 tightened `ApiPropertyOptions`: a bare `type: 'object'` is no
+  // longer accepted, and naming the DTO is better documentation anyway — the
+  // generated schema now describes the shape instead of saying "an object".
   @ApiProperty({
     description:
       'Breakdown of result combinations and their success/failure counts',
-    type: 'object',
+    type: () => ResultCombinationStatDto,
     isArray: true,
   })
   resultBreakdown: ResultCombinationStatDto[];

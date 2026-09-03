@@ -16,6 +16,15 @@
 8. Fill `docker/.env.app.local` if the script created it. It must contain the `kini-local-read` token as `OPENBAO_TOKEN`, non-secret Google values such as `GOOGLE_CLIENT_ID`, and `TOLGEE_PROJECT_ID` once Tolgee is configured.
 9. Rerun `npm run local:up`.
 10. Open the API docs at `http://localhost:3012/docs` and the Next.js web app at `http://localhost:3013`.
+11. Check the stack is actually working, not merely running:
+
+    ```bash
+    curl -fsS http://localhost:3012/health
+    ```
+
+    `status` is `ok` when the database and the broker are both up, `degraded`
+    when only Kafka is gone (email queues stall; nothing else does), and
+    `error` with a 503 when the database is unreachable.
 
 The app stack uses its own Postgres container, but now depends on `platform-ops` for OpenBao secrets.
 

@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -12,7 +13,7 @@ import { FutPoolRepository } from './fut-pool.repository';
 
 describe('FutPoolRepository', () => {
   let repository: FutPoolRepository;
-  let typeormRepository: jest.Mocked<Repository<FutPool>>;
+  let typeormRepository: Mocked<Repository<FutPool>>;
 
   const mockUser: User = {
     id: 'user-123',
@@ -54,13 +55,13 @@ describe('FutPoolRepository', () => {
         {
           provide: getRepositoryToken(FutPool),
           useValue: {
-            findOne: jest.fn(),
-            find: jest.fn(),
-            findAndCount: jest.fn(),
-            create: jest.fn(),
-            save: jest.fn(),
+            findOne: vi.fn(),
+            find: vi.fn(),
+            findAndCount: vi.fn(),
+            create: vi.fn(),
+            save: vi.fn(),
             manager: {
-              getRepository: jest.fn(),
+              getRepository: vi.fn(),
             },
           },
         },
@@ -68,7 +69,7 @@ describe('FutPoolRepository', () => {
     }).compile();
 
     repository = module.get<FutPoolRepository>(FutPoolRepository);
-    typeormRepository = module.get(getRepositoryToken(FutPool)) as jest.Mocked<
+    typeormRepository = module.get(getRepositoryToken(FutPool)) as Mocked<
       Repository<FutPool>
     >;
   });
@@ -337,16 +338,16 @@ describe('FutPoolRepository', () => {
       };
 
       const matchRepository = {
-        save: jest.fn().mockResolvedValue({}),
+        save: vi.fn().mockResolvedValue({}),
       };
       const userRepository = {
-        findOne: jest.fn().mockResolvedValue(mockUser),
+        findOne: vi.fn().mockResolvedValue(mockUser),
       };
 
       typeormRepository.create.mockReturnValue(mockPool);
       typeormRepository.save.mockResolvedValue(mockPool);
       typeormRepository.findOne.mockResolvedValue(mockPool);
-      typeormRepository.manager.getRepository = jest
+      typeormRepository.manager.getRepository = vi
         .fn()
         .mockImplementation((entity) => {
           if (entity === FutPoolMatch) return matchRepository;
@@ -380,16 +381,16 @@ describe('FutPoolRepository', () => {
       };
 
       const matchRepository = {
-        save: jest.fn().mockResolvedValue({}),
+        save: vi.fn().mockResolvedValue({}),
       };
       const userRepository = {
-        findOne: jest.fn().mockResolvedValue(mockUser),
+        findOne: vi.fn().mockResolvedValue(mockUser),
       };
 
       typeormRepository.create.mockReturnValue(mockPool);
       typeormRepository.save.mockResolvedValue(mockPool);
       typeormRepository.findOne.mockResolvedValue(mockPool);
-      typeormRepository.manager.getRepository = jest
+      typeormRepository.manager.getRepository = vi
         .fn()
         .mockImplementation((entity) => {
           if (entity === FutPoolMatch) return matchRepository;

@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from './events.gateway';
 
@@ -15,7 +16,7 @@ describe('EventsGateway', () => {
 
     gateway = module.get<EventsGateway>(EventsGateway);
     gateway.server = {
-      emit: jest.fn(),
+      emit: vi.fn(),
     } as any;
   });
 
@@ -26,7 +27,7 @@ describe('EventsGateway', () => {
   describe('handleConnection', () => {
     it('should log connection', () => {
       const mockClient = { id: 'client-123' };
-      const loggerSpy = jest.spyOn(gateway['logger'], 'debug');
+      const loggerSpy = vi.spyOn(gateway['logger'], 'debug');
 
       gateway.handleConnection(mockClient);
 
@@ -39,7 +40,7 @@ describe('EventsGateway', () => {
   describe('handleDisconnect', () => {
     it('should log disconnection', () => {
       const mockClient = { id: 'client-123' };
-      const loggerSpy = jest.spyOn(gateway['logger'], 'debug');
+      const loggerSpy = vi.spyOn(gateway['logger'], 'debug');
 
       gateway.handleDisconnect(mockClient);
 

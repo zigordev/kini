@@ -1,3 +1,8 @@
+// FIRST, above every other import. OpenTelemetry instruments by patching
+// modules as they load, so anything required before this line goes untraced.
+// Do not let a formatter or an import sorter move it.
+import './observability/tracing';
+
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
@@ -10,9 +15,14 @@ import * as passport from 'passport';
 
 import { AppModule } from './app.module';
 import { HttpErrorFilter } from './common/http-exception.filter';
+import { httpMetricsMiddleware, JsonLogger } from './observability';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  // `bufferLogs` holds the bootstrap lines until the logger is installed, so
+  // startup logs come out as JSON with a traceId like everything else.
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  app.useLogger(app.get(JsonLogger));
+  app.use(httpMetricsMiddleware);
 
   const configService = app.get(ConfigService);
 

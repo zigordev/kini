@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -9,7 +10,7 @@ import { GoogleStrategy } from './google.strategy';
 
 describe('GoogleStrategy', () => {
   let strategy: GoogleStrategy;
-  let authService: jest.Mocked<AuthService>;
+  let authService: Mocked<AuthService>;
 
   const mockUser: User = {
     id: 'user-123',
@@ -25,13 +26,13 @@ describe('GoogleStrategy', () => {
         {
           provide: AuthService,
           useValue: {
-            validateGoogleProfile: jest.fn(),
+            validateGoogleProfile: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
+            get: vi.fn((key: string) => {
               const config: Record<string, string> = {
                 GOOGLE_CLIENT_ID: 'test-client-id',
                 GOOGLE_CLIENT_SECRET: 'test-client-secret',
@@ -46,7 +47,7 @@ describe('GoogleStrategy', () => {
     }).compile();
 
     strategy = module.get<GoogleStrategy>(GoogleStrategy);
-    authService = module.get(AuthService) as jest.Mocked<AuthService>;
+    authService = module.get(AuthService) as Mocked<AuthService>;
   });
 
   it('should be defined', () => {
@@ -100,7 +101,7 @@ describe('GoogleStrategy', () => {
   describe('authenticate', () => {
     it('should fail when OAuth is not configured', () => {
       const mockRequest = {} as Request;
-      const failSpy = jest.fn();
+      const failSpy = vi.fn();
       (strategy as any).fail = failSpy;
 
       // Temporarily override isConfigured
@@ -127,7 +128,7 @@ describe('GoogleStrategy', () => {
 
     beforeEach(() => {
       mockRequest = {
-        logIn: jest.fn((_user, _options, callback) => callback()),
+        logIn: vi.fn((_user, _options, callback) => callback()),
       } as any;
     });
 
@@ -170,13 +171,11 @@ describe('GoogleStrategy', () => {
       authService.validateGoogleProfile.mockResolvedValue(mockUser);
 
       const loginError = new Error('Login failed');
-      mockRequest.logIn = jest.fn(
-        (_user: any, _options: any, callback: any) => {
-          if (typeof callback === 'function') {
-            callback(loginError);
-          }
-        },
-      ) as any;
+      mockRequest.logIn = vi.fn((_user: any, _options: any, callback: any) => {
+        if (typeof callback === 'function') {
+          callback(loginError);
+        }
+      }) as any;
 
       await expect(
         strategy.validate(

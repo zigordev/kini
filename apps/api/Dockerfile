@@ -1,4 +1,4 @@
-FROM node:20-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /workspace
 
 FROM base AS dependencies
@@ -23,7 +23,7 @@ COPY apps/api /workspace/apps/api
 WORKDIR /workspace/apps/api
 RUN npm run build
 
-FROM node:20-alpine AS runtime
+FROM node:24-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=production-dependencies --chown=node:node /workspace/node_modules /app/node_modules

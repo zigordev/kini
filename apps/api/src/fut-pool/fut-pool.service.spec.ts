@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
 import { NotifierService } from '../notifications/notifier.service';
@@ -8,10 +9,10 @@ import { FutPoolService } from './fut-pool.service';
 
 describe('FutPoolService', () => {
   let service: FutPoolService;
-  let repository: jest.Mocked<FutPoolRepository>;
-  let events: jest.Mocked<EventsGateway>;
-  let notifier: jest.Mocked<NotifierService>;
-  let teamsService: jest.Mocked<Pick<TeamsService, 'assertMember'>>;
+  let repository: Mocked<FutPoolRepository>;
+  let events: Mocked<EventsGateway>;
+  let notifier: Mocked<NotifierService>;
+  let teamsService: Mocked<Pick<TeamsService, 'assertMember'>>;
 
   const mockPool: FutPool = {
     id: 'pool-123',
@@ -34,41 +35,39 @@ describe('FutPoolService', () => {
         {
           provide: FutPoolRepository,
           useValue: {
-            findAll: jest.fn(),
-            getStats: jest.fn(),
-            createPool: jest.fn(),
-            updatePool: jest.fn(),
-            findById: jest.fn(),
+            findAll: vi.fn(),
+            getStats: vi.fn(),
+            createPool: vi.fn(),
+            updatePool: vi.fn(),
+            findById: vi.fn(),
           },
         },
         {
           provide: EventsGateway,
           useValue: {
-            emitPoolUpdated: jest.fn(),
+            emitPoolUpdated: vi.fn(),
           },
         },
         {
           provide: NotifierService,
           useValue: {
-            notifyPoolCreated: jest.fn(),
-            notifyPoolUpdated: jest.fn(),
+            notifyPoolCreated: vi.fn(),
+            notifyPoolUpdated: vi.fn(),
           },
         },
         {
           provide: TeamsService,
           useValue: {
-            assertMember: jest.fn(),
+            assertMember: vi.fn(),
           },
         },
       ],
     }).compile();
 
     service = module.get<FutPoolService>(FutPoolService);
-    repository = module.get(
-      FutPoolRepository,
-    ) as jest.Mocked<FutPoolRepository>;
-    events = module.get(EventsGateway) as jest.Mocked<EventsGateway>;
-    notifier = module.get(NotifierService) as jest.Mocked<NotifierService>;
+    repository = module.get(FutPoolRepository) as Mocked<FutPoolRepository>;
+    events = module.get(EventsGateway) as Mocked<EventsGateway>;
+    notifier = module.get(NotifierService) as Mocked<NotifierService>;
     teamsService = module.get(TeamsService);
   });
 

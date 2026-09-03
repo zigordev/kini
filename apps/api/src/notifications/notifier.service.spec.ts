@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import {
@@ -11,8 +12,8 @@ import { NotifierService } from './notifier.service';
 
 describe('NotifierService', () => {
   let service: NotifierService;
-  let producer: jest.Mocked<NotificationProducer>;
-  let emailPublisher: jest.Mocked<EmailNotificationPublisher>;
+  let producer: Mocked<NotificationProducer>;
+  let emailPublisher: Mocked<EmailNotificationPublisher>;
 
   const mockPool: FutPool = {
     id: 'pool-123',
@@ -35,32 +36,30 @@ describe('NotifierService', () => {
         {
           provide: NotificationProducer,
           useValue: {
-            emit: jest.fn(),
+            emit: vi.fn(),
           },
         },
         {
           provide: EmailNotificationPublisher,
           useValue: {
-            buildTeamInvitationEvent: jest.fn(),
-            publishEmail: jest.fn(),
+            buildTeamInvitationEvent: vi.fn(),
+            publishEmail: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn().mockReturnValue('http://localhost:3013'),
+            get: vi.fn().mockReturnValue('http://localhost:3013'),
           },
         },
       ],
     }).compile();
 
     service = module.get<NotifierService>(NotifierService);
-    producer = module.get(
-      NotificationProducer,
-    ) as jest.Mocked<NotificationProducer>;
+    producer = module.get(NotificationProducer) as Mocked<NotificationProducer>;
     emailPublisher = module.get(
       EmailNotificationPublisher,
-    ) as jest.Mocked<EmailNotificationPublisher>;
+    ) as Mocked<EmailNotificationPublisher>;
     emailPublisher.buildTeamInvitationEvent.mockReturnValue({
       messageId: 'message-123',
       idempotencyKey: 'kini:team:team-123:invite:invitee@example.com',

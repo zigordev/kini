@@ -15,7 +15,10 @@ module.exports = {
     node: true,
     jest: true,
   },
-  ignorePatterns: ['.eslintrc.js'],
+  // Vendored from platform-ops and formatted there. Each repo's prettier
+  // config differs slightly, so linting a generated file here only ever
+  // produces churn the sync script would overwrite.
+  ignorePatterns: ['.eslintrc.js', 'src/observability/**'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

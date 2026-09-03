@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
@@ -5,7 +6,7 @@ import { SessionSerializer } from './session.serializer';
 
 describe('SessionSerializer', () => {
   let serializer: SessionSerializer;
-  let usersService: jest.Mocked<UsersService>;
+  let usersService: Mocked<UsersService>;
 
   const mockUser: User = {
     id: 'user-123',
@@ -30,14 +31,14 @@ describe('SessionSerializer', () => {
         {
           provide: UsersService,
           useValue: {
-            findById: jest.fn(),
+            findById: vi.fn(),
           },
         },
       ],
     }).compile();
 
     serializer = module.get<SessionSerializer>(SessionSerializer);
-    usersService = module.get(UsersService) as jest.Mocked<UsersService>;
+    usersService = module.get(UsersService) as Mocked<UsersService>;
   });
 
   it('should be defined', () => {
@@ -45,11 +46,15 @@ describe('SessionSerializer', () => {
   });
 
   describe('serializeUser', () => {
-    it('should serialize user to ID', (done) => {
-      serializer.serializeUser(mockUser, (err, payload) => {
-        expect(err).toBeNull();
-        expect(payload).toBe('user-123');
-        done();
+    // A promise, not a `done` callback: Vitest removed `done`, and the rest of
+    // this file already wraps its callbacks this way.
+    it('should serialize user to ID', async () => {
+      await new Promise<void>((resolve) => {
+        serializer.serializeUser(mockUser, (err, payload) => {
+          expect(err).toBeNull();
+          expect(payload).toBe('user-123');
+          resolve();
+        });
       });
     });
   });
