@@ -26,6 +26,13 @@ RUN npm run build
 FROM node:24-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
+# Pull the latest Alpine security patches at build time rather than waiting on
+# the upstream node:24-alpine tag to be rebuilt, and drop the bundled npm CLI —
+# this image only ever runs `node dist/main.js`, so npm/npx/corepack (and their
+# own vendored, separately-versioned dependencies) are attack surface with no
+# legitimate use here.
+RUN apk upgrade --no-cache \
+  && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 COPY --from=production-dependencies --chown=node:node /workspace/node_modules /app/node_modules
 COPY --from=build --chown=node:node /workspace/apps/api/dist /app/apps/api/dist
 COPY --from=build --chown=node:node /workspace/apps/api/package.json /app/apps/api/package.json
