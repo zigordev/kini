@@ -17,6 +17,11 @@ permissions:
 jobs:
   analyze:
     name: Analyze
+    # Code scanning upload needs GitHub Advanced Security, a paid add-on on a
+    # private repo. Without this guard the job runs the full analysis and only
+    # fails at the very last step ("Code scanning is not enabled for this
+    # repository") — every other repo in the estate already skips instead.
+    if: ${{ !github.event.repository.private }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -31,6 +36,13 @@ jobs:
       - uses: github/codeql-action/init@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
         with:
           languages: ${{ matrix.language }}
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm install
 
       - uses: github/codeql-action/analyze@cdf488f595d80d6e07e03d4674febd5ab45fa938 # v4
         with:
