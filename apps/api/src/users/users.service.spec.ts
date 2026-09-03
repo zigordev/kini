@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -6,7 +7,7 @@ import { UsersService } from './users.service';
 
 describe('UsersService', () => {
   let service: UsersService;
-  let repository: jest.Mocked<Repository<User>>;
+  let repository: Mocked<Repository<User>>;
 
   const mockUser: User = {
     id: 'user-123',
@@ -33,18 +34,18 @@ describe('UsersService', () => {
         {
           provide: getRepositoryToken(User),
           useValue: {
-            findOne: jest.fn(),
-            find: jest.fn(),
-            create: jest.fn(),
-            save: jest.fn(),
-            update: jest.fn(),
+            findOne: vi.fn(),
+            find: vi.fn(),
+            create: vi.fn(),
+            save: vi.fn(),
+            update: vi.fn(),
           },
         },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    repository = module.get(getRepositoryToken(User)) as jest.Mocked<
+    repository = module.get(getRepositoryToken(User)) as Mocked<
       Repository<User>
     >;
   });

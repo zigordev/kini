@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
 import {
@@ -7,7 +8,7 @@ import {
 
 describe('NotificationProducer', () => {
   let producer: NotificationProducer;
-  let gateway: jest.Mocked<EventsGateway>;
+  let gateway: Mocked<EventsGateway>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -17,7 +18,7 @@ describe('NotificationProducer', () => {
           provide: EventsGateway,
           useValue: {
             server: {
-              emit: jest.fn(),
+              emit: vi.fn(),
             },
           },
         },
@@ -25,7 +26,7 @@ describe('NotificationProducer', () => {
     }).compile();
 
     producer = module.get<NotificationProducer>(NotificationProducer);
-    gateway = module.get(EventsGateway) as jest.Mocked<EventsGateway>;
+    gateway = module.get(EventsGateway) as Mocked<EventsGateway>;
   });
 
   it('should be defined', () => {

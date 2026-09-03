@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { Providers } from '@/components/Providers';
 import './globals.css';
+import { RumProvider } from '@/observability/RumProvider';
 
 export const metadata: Metadata = {
   title: {
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html data-theme="kini" lang="en" suppressHydrationWarning>
       <body>
+        <RumProvider />
         <Providers>
           <AppShell>{children}</AppShell>
         </Providers>

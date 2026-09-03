@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Request, Response } from 'express';
@@ -8,8 +9,8 @@ import { AuthService } from './auth.service';
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: jest.Mocked<AuthService>;
-  let configService: jest.Mocked<ConfigService>;
+  let authService: Mocked<AuthService>;
+  let configService: Mocked<ConfigService>;
 
   const mockUser: User = {
     id: 'user-123',
@@ -24,23 +25,23 @@ describe('AuthController', () => {
         {
           provide: AuthService,
           useValue: {
-            sanitizeUser: jest.fn(),
-            getSuccessRedirectUrl: jest.fn(),
-            getFailureRedirectUrl: jest.fn(),
+            sanitizeUser: vi.fn(),
+            getSuccessRedirectUrl: vi.fn(),
+            getFailureRedirectUrl: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    authService = module.get(AuthService) as jest.Mocked<AuthService>;
-    configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
+    authService = module.get(AuthService) as Mocked<AuthService>;
+    configService = module.get(ConfigService) as Mocked<ConfigService>;
   });
 
   it('should be defined', () => {
@@ -98,7 +99,7 @@ describe('AuthController', () => {
       } as any;
 
       mockResponse = {
-        redirect: jest.fn(),
+        redirect: vi.fn(),
       } as any;
     });
 
@@ -216,16 +217,16 @@ describe('AuthController', () => {
   describe('logout', () => {
     it('should destroy session and clear cookie', async () => {
       const mockRequest = {
-        logout: jest.fn((cb) => cb()),
+        logout: vi.fn((cb) => cb()),
         session: {
-          destroy: jest.fn((cb) => cb()),
+          destroy: vi.fn((cb) => cb()),
         },
       } as any;
 
       const mockResponse = {
-        clearCookie: jest.fn(),
-        status: jest.fn().mockReturnThis(),
-        send: jest.fn(),
+        clearCookie: vi.fn(),
+        status: vi.fn().mockReturnThis(),
+        send: vi.fn(),
       } as any;
 
       configService.get.mockReturnValue('kini.sid');

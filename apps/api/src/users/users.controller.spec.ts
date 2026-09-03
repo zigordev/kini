@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { UsersController } from './users.controller';
@@ -5,7 +6,7 @@ import { UsersService } from './users.service';
 
 describe('UsersController', () => {
   let controller: UsersController;
-  let service: jest.Mocked<UsersService>;
+  let service: Mocked<UsersService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,18 +15,18 @@ describe('UsersController', () => {
         {
           provide: UsersService,
           useValue: {
-            listUsers: jest.fn(),
-            updateUser: jest.fn(),
+            listUsers: vi.fn(),
+            updateUser: vi.fn(),
           },
         },
       ],
     })
       .overrideGuard(AuthenticatedGuard)
-      .useValue({ canActivate: jest.fn().mockReturnValue(true) })
+      .useValue({ canActivate: vi.fn().mockReturnValue(true) })
       .compile();
 
     controller = module.get<UsersController>(UsersController);
-    service = module.get(UsersService) as jest.Mocked<UsersService>;
+    service = module.get(UsersService) as Mocked<UsersService>;
   });
 
   it('should be defined', () => {

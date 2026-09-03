@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { AuthenticatedGuard } from './authenticated.guard';
 
@@ -14,12 +15,12 @@ describe('AuthenticatedGuard', () => {
 
   it('should allow authenticated requests', () => {
     const mockRequest = {
-      isAuthenticated: jest.fn().mockReturnValue(true),
+      isAuthenticated: vi.fn().mockReturnValue(true),
     };
 
     const context = {
-      switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
+      switchToHttp: vi.fn().mockReturnValue({
+        getRequest: vi.fn().mockReturnValue(mockRequest),
       }),
     } as unknown as ExecutionContext;
 
@@ -29,12 +30,12 @@ describe('AuthenticatedGuard', () => {
 
   it('should block unauthenticated requests', () => {
     const mockRequest = {
-      isAuthenticated: jest.fn().mockReturnValue(false),
+      isAuthenticated: vi.fn().mockReturnValue(false),
     };
 
     const context = {
-      switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
+      switchToHttp: vi.fn().mockReturnValue({
+        getRequest: vi.fn().mockReturnValue(mockRequest),
       }),
     } as unknown as ExecutionContext;
 
@@ -43,18 +44,19 @@ describe('AuthenticatedGuard', () => {
 
   it('should throw UnauthorizedException with proper error code', () => {
     const mockRequest = {
-      isAuthenticated: jest.fn().mockReturnValue(false),
+      isAuthenticated: vi.fn().mockReturnValue(false),
     };
 
     const context = {
-      switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
+      switchToHttp: vi.fn().mockReturnValue({
+        getRequest: vi.fn().mockReturnValue(mockRequest),
       }),
     } as unknown as ExecutionContext;
 
     try {
       guard.canActivate(context);
-      fail('Should have thrown');
+      // `fail()` was a Jest global; Vitest's equivalent is expect.fail().
+      expect.fail('Should have thrown');
     } catch (error) {
       expect(error).toBeInstanceOf(UnauthorizedException);
       expect((error as UnauthorizedException).getResponse()).toEqual({
@@ -68,8 +70,8 @@ describe('AuthenticatedGuard', () => {
     const mockRequest = {};
 
     const context = {
-      switchToHttp: jest.fn().mockReturnValue({
-        getRequest: jest.fn().mockReturnValue(mockRequest),
+      switchToHttp: vi.fn().mockReturnValue({
+        getRequest: vi.fn().mockReturnValue(mockRequest),
       }),
     } as unknown as ExecutionContext;
 

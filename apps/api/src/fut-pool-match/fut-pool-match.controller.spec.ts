@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Result } from './entities/fut-pool-match.entity';
 import { FutPoolMatchController } from './fut-pool-match.controller';
@@ -5,7 +6,7 @@ import { FutPoolMatchService } from './fut-pool-match.service';
 
 describe('FutPoolMatchController', () => {
   let controller: FutPoolMatchController;
-  let service: jest.Mocked<FutPoolMatchService>;
+  let service: Mocked<FutPoolMatchService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,16 +15,14 @@ describe('FutPoolMatchController', () => {
         {
           provide: FutPoolMatchService,
           useValue: {
-            update: jest.fn(),
+            update: vi.fn(),
           },
         },
       ],
     }).compile();
 
     controller = module.get<FutPoolMatchController>(FutPoolMatchController);
-    service = module.get(
-      FutPoolMatchService,
-    ) as jest.Mocked<FutPoolMatchService>;
+    service = module.get(FutPoolMatchService) as Mocked<FutPoolMatchService>;
   });
 
   it('should be defined', () => {

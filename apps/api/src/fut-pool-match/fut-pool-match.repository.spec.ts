@@ -1,3 +1,4 @@
+import { vi, type Mocked, type Mock } from 'vitest';
 import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,7 +10,7 @@ import { FutPoolMatchRepository } from './fut-pool-match.repository';
 
 describe('FutPoolMatchRepository', () => {
   let repository: FutPoolMatchRepository;
-  let typeormRepository: jest.Mocked<Repository<FutPoolMatch>>;
+  let typeormRepository: Mocked<Repository<FutPoolMatch>>;
 
   const mockPool: FutPool = {
     id: 'pool-123',
@@ -38,12 +39,12 @@ describe('FutPoolMatchRepository', () => {
         {
           provide: getRepositoryToken(FutPoolMatch),
           useValue: {
-            findOne: jest.fn(),
-            save: jest.fn(),
-            count: jest.fn(),
-            createQueryBuilder: jest.fn(),
+            findOne: vi.fn(),
+            save: vi.fn(),
+            count: vi.fn(),
+            createQueryBuilder: vi.fn(),
             manager: {
-              findOne: jest.fn(),
+              findOne: vi.fn(),
             },
           },
         },
@@ -51,9 +52,9 @@ describe('FutPoolMatchRepository', () => {
     }).compile();
 
     repository = module.get<FutPoolMatchRepository>(FutPoolMatchRepository);
-    typeormRepository = module.get(
-      getRepositoryToken(FutPoolMatch),
-    ) as jest.Mocked<Repository<FutPoolMatch>>;
+    typeormRepository = module.get(getRepositoryToken(FutPoolMatch)) as Mocked<
+      Repository<FutPoolMatch>
+    >;
   });
 
   it('should be defined', () => {
@@ -92,9 +93,9 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.save.mockResolvedValue(updatedMatch);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
@@ -110,14 +111,14 @@ describe('FutPoolMatchRepository', () => {
       const updatedMatch = { ...mockMatch, userId: 'user-456', user };
 
       typeormRepository.findOne.mockResolvedValue(mockMatch);
-      (typeormRepository.manager.findOne as jest.Mock).mockResolvedValue(user);
+      (typeormRepository.manager.findOne as Mock).mockResolvedValue(user);
       typeormRepository.count.mockResolvedValue(0);
       typeormRepository.save.mockResolvedValue(updatedMatch);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
@@ -136,9 +137,9 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.save.mockResolvedValue(updatedMatch);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
@@ -170,9 +171,9 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.save.mockResolvedValue(updatedMatch);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
@@ -190,9 +191,9 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.count.mockResolvedValue(0);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(2), // Already 2 doubles
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(2), // Already 2 doubles
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
@@ -217,9 +218,9 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.save.mockResolvedValue(updatedMatch);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
@@ -237,9 +238,9 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.count.mockResolvedValue(0);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(1), // Already 1 triple, limit is 1
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(1), // Already 1 triple, limit is 1
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
@@ -264,9 +265,9 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.save.mockResolvedValue(updatedMatch);
 
       const qb = {
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        getCount: jest.fn().mockResolvedValue(0),
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 

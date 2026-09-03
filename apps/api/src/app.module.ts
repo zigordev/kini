@@ -13,9 +13,12 @@ import { NotificationModule } from './notifications/notification.module';
 import { RumModule } from './rum/rum.module';
 import { TeamsModule } from './teams/teams.module';
 import { UsersModule } from './users/users.module';
+import { ObservabilityModule } from './observability';
 
 @Module({
   imports: [
+    // Brings `/metrics`, the shared prom-client registry, and the JSON logger.
+    ObservabilityModule,
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: ['.env'],
@@ -45,7 +48,26 @@ import { UsersModule } from './users/users.module';
           database,
           autoLoadEntities: true,
           synchronize,
-          ssl: sslEnabled ? { rejectUnauthorized: false } : undefined,
+          // TLS *with* certificate verification.
+          //
+          // This was `{ rejectUnauthorized: false }`, which is encryption
+          // without authentication: it stops someone reading the traffic but
+          // not someone sitting in the middle of it presenting their own
+          // certificate, which is the attack TLS exists to prevent. Turning
+          // verification off is the usual shortcut when a managed database
+          // presents a CA the container does not trust — the fix for that is
+          // to supply the CA, not to stop checking.
+          //
+          // Verification is on by default and the opt-out is explicit, so
+          // disabling it is now a deliberate act with a name attached.
+          ssl: sslEnabled
+            ? {
+                rejectUnauthorized:
+                  config.get<string>('DATABASE_SSL_REJECT_UNAUTHORIZED') !==
+                  'false',
+                ca: config.get<string>('DATABASE_CA_CERT') || undefined,
+              }
+            : undefined,
         };
       },
     }),

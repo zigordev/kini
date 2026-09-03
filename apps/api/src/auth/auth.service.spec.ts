@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -8,8 +9,8 @@ import { AuthService } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let usersService: jest.Mocked<UsersService>;
-  let configService: jest.Mocked<ConfigService>;
+  let usersService: Mocked<UsersService>;
+  let configService: Mocked<ConfigService>;
 
   const mockUser: User = {
     id: 'user-123',
@@ -36,21 +37,21 @@ describe('AuthService', () => {
         {
           provide: UsersService,
           useValue: {
-            findOrCreateGoogleUser: jest.fn(),
+            findOrCreateGoogleUser: vi.fn(),
           },
         },
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    usersService = module.get(UsersService) as jest.Mocked<UsersService>;
-    configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
+    usersService = module.get(UsersService) as Mocked<UsersService>;
+    configService = module.get(ConfigService) as Mocked<ConfigService>;
   });
 
   it('should be defined', () => {

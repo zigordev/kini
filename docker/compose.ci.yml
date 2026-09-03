@@ -2,6 +2,8 @@ name: kini-ci
 
 services:
   kini_db:
+    security_opt:
+      - no-new-privileges:true
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: kini
@@ -16,12 +18,16 @@ services:
       retries: 20
 
   kini_api:
+    security_opt:
+      - no-new-privileges:true
     build:
       context: ..
       dockerfile: apps/api/Dockerfile
       target: local
     environment:
       NODE_ENV: test
+      OTEL_SERVICE_NAME: kini-api
+      OTEL_TRACES_ENABLED: 'false'
       PORT: 3000
       DATABASE_HOST: kini_db
       DATABASE_PORT: 5432
@@ -50,7 +56,7 @@ services:
       - '3012:3000'
     healthcheck:
       test:
-        ['CMD-SHELL', 'wget -qO- http://localhost:3000/docs >/dev/null 2>&1']
+        ['CMD-SHELL', 'wget -qO- http://localhost:3000/health >/dev/null 2>&1']
       interval: 5s
       timeout: 3s
       retries: 20
@@ -60,6 +66,8 @@ services:
     command: ['node', 'dist/main.js']
 
   kini_web:
+    security_opt:
+      - no-new-privileges:true
     build:
       context: ..
       dockerfile: apps/ui/Dockerfile

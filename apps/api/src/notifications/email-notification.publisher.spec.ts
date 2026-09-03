@@ -1,3 +1,4 @@
+import { vi } from 'vitest';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmailNotificationPublisher } from './email-notification.publisher';
@@ -12,7 +13,7 @@ describe('EmailNotificationPublisher', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string, fallback?: string) => {
+            get: vi.fn((key: string, fallback?: string) => {
               const values: Record<string, string> = {
                 FRONTEND_URL: 'http://localhost:3013',
                 NOTIFICATIONS_EMAIL_TOPIC: 'notification.email.requested.v1',

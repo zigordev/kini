@@ -1,3 +1,4 @@
+import { vi, type Mocked } from 'vitest';
 import { ExecutionContext, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -6,7 +7,7 @@ import { GoogleAuthGuard } from './google-auth.guard';
 
 describe('GoogleAuthGuard', () => {
   let guard: GoogleAuthGuard;
-  let configService: jest.Mocked<ConfigService>;
+  let configService: Mocked<ConfigService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -15,14 +16,14 @@ describe('GoogleAuthGuard', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn(),
+            get: vi.fn(),
           },
         },
       ],
     }).compile();
 
     guard = module.get<GoogleAuthGuard>(GoogleAuthGuard);
-    configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
+    configService = module.get(ConfigService) as Mocked<ConfigService>;
   });
 
   it('should be defined', () => {
@@ -34,14 +35,14 @@ describe('GoogleAuthGuard', () => {
       configService.get.mockReturnValue(undefined);
 
       const mockResponse = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        status: vi.fn().mockReturnThis(),
+        json: vi.fn(),
       } as unknown as Response;
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getResponse: jest.fn().mockReturnValue(mockResponse),
-          getRequest: jest.fn().mockReturnValue({}),
+        switchToHttp: vi.fn().mockReturnValue({
+          getResponse: vi.fn().mockReturnValue(mockResponse),
+          getRequest: vi.fn().mockReturnValue({}),
         }),
       } as unknown as ExecutionContext;
 
@@ -60,9 +61,9 @@ describe('GoogleAuthGuard', () => {
       configService.get.mockReturnValue(undefined);
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getResponse: jest.fn().mockReturnValue(undefined),
-          getRequest: jest.fn().mockReturnValue({}),
+        switchToHttp: vi.fn().mockReturnValue({
+          getResponse: vi.fn().mockReturnValue(undefined),
+          getRequest: vi.fn().mockReturnValue({}),
         }),
       } as unknown as ExecutionContext;
 
@@ -79,16 +80,17 @@ describe('GoogleAuthGuard', () => {
       });
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getResponse: jest.fn().mockReturnValue({} as Response),
-          getRequest: jest.fn().mockReturnValue({} as Request),
+        switchToHttp: vi.fn().mockReturnValue({
+          getResponse: vi.fn().mockReturnValue({} as Response),
+          getRequest: vi.fn().mockReturnValue({} as Request),
         }),
       } as unknown as ExecutionContext;
 
       // Mock parent canActivate
-      jest
-        .spyOn(Object.getPrototypeOf(GoogleAuthGuard.prototype), 'canActivate')
-        .mockResolvedValue(true);
+      vi.spyOn(
+        Object.getPrototypeOf(GoogleAuthGuard.prototype),
+        'canActivate',
+      ).mockResolvedValue(true);
 
       const result = await guard.canActivate(context);
 
@@ -115,17 +117,15 @@ describe('GoogleAuthGuard', () => {
       } as unknown as Request;
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getRequest: jest.fn().mockReturnValue(mockRequest),
+        switchToHttp: vi.fn().mockReturnValue({
+          getRequest: vi.fn().mockReturnValue(mockRequest),
         }),
       } as unknown as ExecutionContext;
 
-      jest
-        .spyOn(
-          Object.getPrototypeOf(GoogleAuthGuard.prototype),
-          'getAuthenticateOptions',
-        )
-        .mockReturnValue({});
+      vi.spyOn(
+        Object.getPrototypeOf(GoogleAuthGuard.prototype),
+        'getAuthenticateOptions',
+      ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
 
@@ -148,17 +148,15 @@ describe('GoogleAuthGuard', () => {
       } as unknown as Request;
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getRequest: jest.fn().mockReturnValue(mockRequest),
+        switchToHttp: vi.fn().mockReturnValue({
+          getRequest: vi.fn().mockReturnValue(mockRequest),
         }),
       } as unknown as ExecutionContext;
 
-      jest
-        .spyOn(
-          Object.getPrototypeOf(GoogleAuthGuard.prototype),
-          'getAuthenticateOptions',
-        )
-        .mockReturnValue({});
+      vi.spyOn(
+        Object.getPrototypeOf(GoogleAuthGuard.prototype),
+        'getAuthenticateOptions',
+      ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
 
@@ -180,17 +178,15 @@ describe('GoogleAuthGuard', () => {
       } as unknown as Request;
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getRequest: jest.fn().mockReturnValue(mockRequest),
+        switchToHttp: vi.fn().mockReturnValue({
+          getRequest: vi.fn().mockReturnValue(mockRequest),
         }),
       } as unknown as ExecutionContext;
 
-      jest
-        .spyOn(
-          Object.getPrototypeOf(GoogleAuthGuard.prototype),
-          'getAuthenticateOptions',
-        )
-        .mockReturnValue({});
+      vi.spyOn(
+        Object.getPrototypeOf(GoogleAuthGuard.prototype),
+        'getAuthenticateOptions',
+      ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
 
@@ -205,17 +201,15 @@ describe('GoogleAuthGuard', () => {
       } as unknown as Request;
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getRequest: jest.fn().mockReturnValue(mockRequest),
+        switchToHttp: vi.fn().mockReturnValue({
+          getRequest: vi.fn().mockReturnValue(mockRequest),
         }),
       } as unknown as ExecutionContext;
 
-      jest
-        .spyOn(
-          Object.getPrototypeOf(GoogleAuthGuard.prototype),
-          'getAuthenticateOptions',
-        )
-        .mockReturnValue({});
+      vi.spyOn(
+        Object.getPrototypeOf(GoogleAuthGuard.prototype),
+        'getAuthenticateOptions',
+      ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
 
@@ -233,17 +227,15 @@ describe('GoogleAuthGuard', () => {
       } as unknown as Request;
 
       const context = {
-        switchToHttp: jest.fn().mockReturnValue({
-          getRequest: jest.fn().mockReturnValue(mockRequest),
+        switchToHttp: vi.fn().mockReturnValue({
+          getRequest: vi.fn().mockReturnValue(mockRequest),
         }),
       } as unknown as ExecutionContext;
 
-      jest
-        .spyOn(
-          Object.getPrototypeOf(GoogleAuthGuard.prototype),
-          'getAuthenticateOptions',
-        )
-        .mockReturnValue({});
+      vi.spyOn(
+        Object.getPrototypeOf(GoogleAuthGuard.prototype),
+        'getAuthenticateOptions',
+      ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
 
