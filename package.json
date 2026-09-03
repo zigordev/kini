@@ -4,7 +4,7 @@
   "private": true,
   "description": "Kini football pool platform monorepo",
   "engines": {
-    "node": ">=20.19.0 <21",
+    "node": ">=24 <25",
     "npm": ">=10"
   },
   "workspaces": [
@@ -18,7 +18,7 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "test:cov:api": "npm run test:cov -w @kini/api -- --passWithNoTests --watchman=false --ci",
+    "test:cov:api": "npm run test:cov -w @kini/api -- --passWithNoTests",
     "test:secrets:gitleaks": "./scripts/precommit-gitleaks.sh",
     "ci:quality:local": "npm run lint && npm run typecheck && npm run build && npm run test:cov:api && npm run test -w @kini/web",
     "precommit:checks": "npm run test:secrets:gitleaks && npm run ci:quality:local",
@@ -29,11 +29,20 @@
     "local:down": "bash ./scripts/local-stack-down.sh",
     "local:reset": "bash ./scripts/local-stack-reset.sh",
     "audit": "npm audit --audit-level=high",
-    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "audit:prod:gate": "node ./scripts/audit-prod-gate.mjs",
+    "contract:gen:web": "node ./scripts/generate-api-contract.mjs"
   },
   "overrides": {
-    "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "@nestjs/common": "11.2.3",
+    "@nestjs/core": "11.2.3",
+    "postcss": "8.5.24",
+    "gaxios": "7.3.0",
+    "multer": "2.2.0",
+    "@nestjs/platform-express": {
+      "multer": "2.2.0"
+    },
+    "ioredis": "5.9.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^20.4.2",
