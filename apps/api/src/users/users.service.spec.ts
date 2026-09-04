@@ -226,7 +226,12 @@ describe('UsersService', () => {
 
       expect(result).toEqual(users);
       expect(repository.find).toHaveBeenCalledWith({
-        select: ['id', 'name', 'textColor', 'backgroundColor'],
+        select: {
+          id: true,
+          name: true,
+          textColor: true,
+          backgroundColor: true,
+        },
         order: { name: 'ASC' },
       });
     });
