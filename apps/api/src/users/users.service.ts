@@ -71,7 +71,7 @@ export class UsersService {
     Array<Pick<User, 'id' | 'name' | 'textColor' | 'backgroundColor'>>
   > {
     const users = await this.usersRepository.find({
-      select: ['id', 'name', 'textColor', 'backgroundColor'],
+      select: { id: true, name: true, textColor: true, backgroundColor: true },
       order: { name: 'ASC' },
     });
     return users.map(({ id, name, textColor, backgroundColor }) => ({
