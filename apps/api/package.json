@@ -78,6 +78,7 @@
     "eslint": "^10.9.1",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "typescript-eslint": "^8.69.0",
     "prettier": "^3.0.0",
     "sonarqube-scanner": "^4.3.2",
     "source-map-support": "^0.5.21",

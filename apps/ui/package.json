@@ -6,7 +6,7 @@
     "dev": "next dev --hostname 0.0.0.0 --port 3001",
     "build": "next build",
     "start": "next start --hostname 0.0.0.0 --port 3001",
-    "lint": "next lint --no-cache",
+    "lint": "eslint --no-cache .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "sonar:scan": "sonar-scanner -Dsonar.token=${SONAR_TOKEN}",
@@ -22,12 +22,13 @@
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@tolgee/cli": "2.20.0",
     "@types/node": "^20.17.0",
     "@types/react": "^18.3.0",
     "@types/react-dom": "^18.3.0",
-    "eslint": "^10.9.1",
-    "eslint-config-next": "^15.5.10",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.25",
     "sonarqube-scanner": "^4.3.2",
     "typescript": "^5.9.2",
     "vitest": "^3.2.4"
