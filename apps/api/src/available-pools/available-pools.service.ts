@@ -8,7 +8,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import pdf from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 import { EventsGateway } from '../events/events.gateway';
 import { convertMatchToResponseDto } from '../fut-pool/dto/match-conversion.util';
 import { FutPoolResponseDto } from '../fut-pool/dto/fut-pool-response.dto';
@@ -1132,8 +1132,15 @@ export class AvailablePoolsService implements OnModuleInit {
         `SELAE PDF request failed with ${response.status}`,
       );
     }
-    const document = await pdf(Buffer.from(await response.arrayBuffer()));
-    return document.text;
+    const parser = new PDFParse({
+      data: Buffer.from(await response.arrayBuffer()),
+    });
+    try {
+      const document = await parser.getText();
+      return document.text;
+    } finally {
+      await parser.destroy();
+    }
   }
 
   private startOfToday(): Date {
