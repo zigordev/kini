@@ -1,4 +1,4 @@
-FROM node:24-alpine AS base
+FROM node:26-alpine AS base
 WORKDIR /workspace
 
 FROM base AS dependencies
@@ -23,7 +23,7 @@ COPY apps/api /workspace/apps/api
 WORKDIR /workspace/apps/api
 RUN npm run build
 
-FROM node:24-alpine AS runtime
+FROM node:26-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 # Pull the latest Alpine security patches at build time rather than waiting on
