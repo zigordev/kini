@@ -16,8 +16,8 @@ import type {
   AvailablePoolJackpot,
   ResultValue,
 } from '@/types/domain';
-import { Button } from '../../../design-system/components/core/Button.jsx';
-import { Table, TableEmpty } from '../../../design-system/components/data-display/Table.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { Table, TableEmpty } from 'design-system/components/data-display/Table.jsx';
 
 const backgroundRefreshMs = 15 * 60 * 1000;
 

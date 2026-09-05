@@ -9,8 +9,8 @@ import { useTeams } from '@/contexts/TeamsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { poolsApi } from '@/lib/api';
 import type { Stats } from '@/types/domain';
-import { Button } from '../../../design-system/components/core/Button.jsx';
-import { StatTile } from '../../../design-system/components/data-display/StatTile.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { StatTile } from 'design-system/components/data-display/StatTile.jsx';
 
 const combined = (entry: Stats['ranking'][number]) => ({
   successes:

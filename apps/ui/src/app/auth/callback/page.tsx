@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Loading } from '@/components/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
-import { Button } from '../../../../design-system/components/core/Button.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
 
 export default function AuthCallbackPage() {
   return (

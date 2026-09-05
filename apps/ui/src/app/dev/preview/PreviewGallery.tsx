@@ -1,19 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { Button } from '../../../../design-system/components/core/Button.jsx';
-import { StatTile } from '../../../../design-system/components/data-display/StatTile.jsx';
-import { PageHeader } from '../../../../design-system/components/data-display/PageHeader.jsx';
-import { EmptyState } from '../../../../design-system/components/feedback/EmptyState.jsx';
-import { Badge } from '../../../../design-system/components/feedback/Badge.jsx';
-import { Icon } from '../../../../design-system/components/icons/Icon.jsx';
-import { Field } from '../../../../design-system/components/forms/Field.jsx';
-import { Input } from '../../../../design-system/components/forms/Input.jsx';
-import { DateField } from '../../../../design-system/components/forms/DateField.jsx';
-import { Select } from '../../../../design-system/components/forms/Select.jsx';
-import { Checkbox } from '../../../../design-system/components/forms/Checkbox.jsx';
-import { Switch } from '../../../../design-system/components/forms/Switch.jsx';
-import { Table } from '../../../../design-system/components/data-display/Table.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { StatTile } from 'design-system/components/data-display/StatTile.jsx';
+import { PageHeader } from 'design-system/components/data-display/PageHeader.jsx';
+import { EmptyState } from 'design-system/components/feedback/EmptyState.jsx';
+import { Badge } from 'design-system/components/feedback/Badge.jsx';
+import { Icon } from 'design-system/components/icons/Icon.jsx';
+import { Field } from 'design-system/components/forms/Field.jsx';
+import { Input } from 'design-system/components/forms/Input.jsx';
+import { DateField } from 'design-system/components/forms/DateField.jsx';
+import { Select } from 'design-system/components/forms/Select.jsx';
+import { Checkbox } from 'design-system/components/forms/Checkbox.jsx';
+import { Switch } from 'design-system/components/forms/Switch.jsx';
+import { Table } from 'design-system/components/data-display/Table.jsx';
 
 function Row({ title, children }: { title: string; children: React.ReactNode }) {
   return (
