@@ -6,7 +6,7 @@ import { Loading } from '@/components/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
-import { Button } from '../../../../../design-system/components/core/Button.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
 
 export default function AcceptInvitationPage() {
   const params = useParams<{ teamId: string }>();

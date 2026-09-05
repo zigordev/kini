@@ -10,8 +10,8 @@ import { useToast } from '@/contexts/ToastContext';
 import { availablePoolsApi } from '@/lib/api';
 import { formatDate } from '@/lib/pools';
 import type { AvailablePoolJackpot, Team } from '@/types/domain';
-import { Button } from '../../../design-system/components/core/Button.jsx';
-import { StatTile } from '../../../design-system/components/data-display/StatTile.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { StatTile } from 'design-system/components/data-display/StatTile.jsx';
 
 export default function TeamsPage() {
   const router = useRouter();
