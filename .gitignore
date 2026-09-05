@@ -22,6 +22,10 @@ infra/monitoring/.env
 !*.env.example
 !docker/*.env.example
 !docker/.env.*.example
+# Committed on purpose, same as gpool: non-secret production defaults only —
+# real secrets (OPENBAO_TOKEN, GOOGLE_CLIENT_SECRET, ...) come from OpenBao
+# at deploy time, never from this file.
+!docker/.env.app.prod
 
 # scanners and generated reports
 .scannerwork/
