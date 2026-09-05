@@ -1,0 +1,108 @@
+name: kini-app-prod
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+    labels: "com.docker.compose.project,com.docker.compose.service"
+
+services:
+  kini_db:
+    security_opt:
+      - no-new-privileges:true
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: kini_admin
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: kini
+    volumes:
+      - app-prod-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    logging: *default-logging
+    networks:
+      kn_shared:
+        aliases:
+          - kini-postgres
+
+  kini_api:
+    security_opt:
+      - no-new-privileges:true
+    image: ${API_IMAGE:?API_IMAGE is required}
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_HOST: kini-postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: kini_admin
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      DATABASE_NAME: kini
+      DATABASE_SSL: 'false'
+      DATABASE_SYNCHRONIZE: 'false'
+      AUTH_CORS_ORIGINS: ${AUTH_CORS_ORIGINS:?AUTH_CORS_ORIGINS is required}
+      AUTH_SUCCESS_REDIRECT_URL: ${AUTH_SUCCESS_REDIRECT_URL:?AUTH_SUCCESS_REDIRECT_URL is required}
+      AUTH_FAILURE_REDIRECT_URL: ${AUTH_FAILURE_REDIRECT_URL:?AUTH_FAILURE_REDIRECT_URL is required}
+      SESSION_COOKIE_NAME: ${SESSION_COOKIE_NAME:-kini.sid}
+      SESSION_COOKIE_SECURE: 'true'
+      SESSION_COOKIE_MAX_AGE_MS: ${SESSION_COOKIE_MAX_AGE_MS:-604800000}
+      SESSION_COOKIE_SAME_SITE: ${SESSION_COOKIE_SAME_SITE:-lax}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?GOOGLE_CLIENT_ID is required}
+      GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL:?GOOGLE_CALLBACK_URL is required}
+      FRONTEND_URL: ${FRONTEND_URL:?FRONTEND_URL is required}
+      NOTIFICATIONS_KAFKA_BROKERS: ${NOTIFICATIONS_KAFKA_BROKERS:?NOTIFICATIONS_KAFKA_BROKERS is required}
+      NOTIFICATIONS_EMAIL_TOPIC: ${NOTIFICATIONS_EMAIL_TOPIC:-notification.email.requested.v1}
+      EDUARDO_LOSILLA_SYNC_ENABLED: ${EDUARDO_LOSILLA_SYNC_ENABLED:-true}
+      EDUARDO_LOSILLA_QUINIELA_TICKET_URL: ${EDUARDO_LOSILLA_QUINIELA_TICKET_URL:-https://www.eduardolosilla.es/quiniela/boletos}
+      EDUARDO_LOSILLA_QUINIELA_RESULTS_URL: ${EDUARDO_LOSILLA_QUINIELA_RESULTS_URL:-https://www.eduardolosilla.es/quiniela/ayudas/escrutinio}
+      OTEL_SERVICE_NAME: kini-api
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OPENBAO_ADDR: http://openbao:8200
+      OPENBAO_TOKEN: ${OPENBAO_TOKEN:?OPENBAO_TOKEN is required}
+      OPENBAO_KV_MOUNT: kv
+      OPENBAO_SECRET_PATH: kini
+      OPENBAO_REQUIRED_KEYS: SESSION_SECRET,SESSION_COOKIE_SECRET,GOOGLE_CLIENT_SECRET
+    depends_on:
+      kini_db:
+        condition: service_healthy
+    command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'dist/main.js']
+    logging: *default-logging
+    networks:
+      kn_shared:
+        aliases:
+          - kini-api
+
+  kini_web:
+    security_opt:
+      - no-new-privileges:true
+    image: ${WEB_IMAGE:?WEB_IMAGE is required}
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?NEXT_PUBLIC_API_BASE_URL is required}
+      NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:?NEXT_PUBLIC_RELEASE is required}
+    depends_on:
+      - kini_api
+    command:
+      [
+        'sh',
+        '-lc',
+        'until wget -qO- http://kini-api:3000/health >/dev/null 2>&1; do sleep 2; done; exec node apps/ui/server.js',
+      ]
+    logging: *default-logging
+    networks:
+      kn_shared:
+        aliases:
+          - kini-web
+
+networks:
+  kn_shared:
+    name: platform_ops_shared
+    external: true
+
+volumes:
+  app-prod-pgdata:
