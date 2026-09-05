@@ -12,10 +12,10 @@ import { poolsApi, usersApi } from '@/lib/api';
 import { readPoolDefaults } from '@/lib/preferences';
 import { todayInputValue } from '@/lib/pools';
 import type { PoolForm, UserSummary } from '@/types/domain';
-import { Button } from '../../../design-system/components/core/Button.jsx';
-import { Field } from '../../../design-system/components/forms/Field.jsx';
-import { Input } from '../../../design-system/components/forms/Input.jsx';
-import { DateField } from '../../../design-system/components/forms/DateField.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { Field } from 'design-system/components/forms/Field.jsx';
+import { Input } from 'design-system/components/forms/Input.jsx';
+import { DateField } from 'design-system/components/forms/DateField.jsx';
 
 interface MatchDraft {
   order: number;

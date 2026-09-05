@@ -23,9 +23,9 @@ import type {
   ResultValue,
   UserSummary,
 } from '@/types/domain';
-import { Button } from '../../../design-system/components/core/Button.jsx';
-import { StatTile } from '../../../design-system/components/data-display/StatTile.jsx';
-import { Table } from '../../../design-system/components/data-display/Table.jsx';
+import { Button } from 'design-system/components/core/Button.jsx';
+import { StatTile } from 'design-system/components/data-display/StatTile.jsx';
+import { Table } from 'design-system/components/data-display/Table.jsx';
 
 const backgroundRefreshMs = 15 * 60 * 1000;
 
