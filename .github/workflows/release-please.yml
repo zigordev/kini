@@ -8,6 +8,14 @@ on:
   # the one repository that could not be unblocked by hand.
   workflow_dispatch:
 
+# Two merges in quick succession would otherwise start two runs that both
+# try to create the same release branch, tag and pull request. Queued rather
+# than cancelled: a run interrupted between tagging and publishing leaves
+# state the next one has to reconcile.
+concurrency:
+  group: release-please-${{ github.ref }}
+  cancel-in-progress: false
+
 permissions:
   contents: write
   pull-requests: write

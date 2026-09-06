@@ -4,6 +4,12 @@ on:
   pull_request:
     branches: [main]
 
+# A superseded run tells you about a commit nobody is waiting on, while
+# holding a runner the current commit needs.
+concurrency:
+  group: commitlint-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
   pull-requests: read
