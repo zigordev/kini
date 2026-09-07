@@ -168,4 +168,10 @@ if [ -n "$tolgee_project_id" ]; then
   sync_tolgee_messages "$tolgee_project_id"
 fi
 
+if [ "${LOCAL_STACK_MODE:-}" = "dev" ]; then
+  exec docker compose --env-file "${APP_ENV_FILE}" \
+    -f docker/compose.app.local.yml -f docker/compose.app.dev.yml \
+    up --build --remove-orphans --watch
+fi
+
 docker compose --env-file "${APP_ENV_FILE}" -f docker/compose.app.local.yml up -d --build --remove-orphans
