@@ -15,6 +15,7 @@ ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ENV NEXT_PUBLIC_RELEASE=${NEXT_PUBLIC_RELEASE}
 ENV NEXT_TELEMETRY_DISABLED=1
 COPY --from=dependencies /workspace/node_modules /workspace/node_modules
+COPY --from=dependencies /workspace/apps/ui/node_modules /workspace/apps/ui/node_modules
 COPY package.json /workspace/package.json
 COPY apps/ui /workspace/apps/ui
 WORKDIR /workspace/apps/ui

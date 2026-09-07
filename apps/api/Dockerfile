@@ -18,6 +18,7 @@ RUN HUSKY=0 npm ci --workspace @kini/api --include-workspace-root --omit=dev --i
 FROM base AS build
 ENV NODE_ENV=production
 COPY --from=dependencies /workspace/node_modules /workspace/node_modules
+COPY --from=dependencies /workspace/apps/api/node_modules /workspace/apps/api/node_modules
 COPY package.json /workspace/package.json
 COPY apps/api /workspace/apps/api
 WORKDIR /workspace/apps/api
