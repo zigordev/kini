@@ -39,3 +39,14 @@ COPY --from=build --chown=node:node /workspace/apps/ui/public ./apps/ui/public
 USER node
 EXPOSE 3001
 CMD ["node", "apps/ui/server.js"]
+
+FROM base AS dev
+ENV NODE_ENV=development
+ENV NEXT_TELEMETRY_DISABLED=1
+COPY --from=dependencies /workspace/node_modules /workspace/node_modules
+COPY --from=dependencies /workspace/apps/ui/node_modules /workspace/apps/ui/node_modules
+COPY package.json package-lock.json /workspace/
+COPY apps/ui /workspace/apps/ui
+WORKDIR /workspace/apps/ui
+EXPOSE 3001
+CMD ["npm", "exec", "--", "next", "dev", "-H", "0.0.0.0", "-p", "3001"]
