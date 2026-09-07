@@ -44,3 +44,14 @@ EXPOSE 3000
 CMD ["node", "dist/main.js"]
 
 FROM runtime AS local
+
+FROM base AS dev
+ENV NODE_ENV=development
+COPY --from=dependencies /workspace/node_modules /workspace/node_modules
+COPY --from=dependencies /workspace/apps/api/node_modules /workspace/apps/api/node_modules
+COPY package.json package-lock.json /workspace/
+COPY apps/api/scripts/openbao-run.mjs /workspace/scripts/openbao-run.mjs
+COPY apps/api /workspace/apps/api
+WORKDIR /workspace/apps/api
+EXPOSE 3000
+CMD ["npm", "run", "start:dev"]
