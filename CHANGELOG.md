@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/zigordev/kini/compare/kini-v0.2.0...kini-v0.3.0) (2026-09-07)
+
+
+### Features
+
+* **docker:** run the api and web under compose watch for local development ([#46](https://github.com/zigordev/kini/issues/46)) ([ca6daf5](https://github.com/zigordev/kini/commit/ca6daf51d88fc1627604d6da5d69055f9bda38d5))
+
 ## [0.2.0](https://github.com/zigordev/kini/compare/kini-v0.1.0...kini-v0.2.0) (2026-09-06)
 
 
