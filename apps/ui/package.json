@@ -12,7 +12,8 @@
     "sonar:scan": "sonar-scanner -Dsonar.token=${SONAR_TOKEN}",
     "i18n:pull": "tolgee pull --config ./tolgee.config.cjs",
     "i18n:push": "tolgee push --config ./tolgee.config.cjs --force-mode OVERRIDE",
-    "clean": "rm -rf .next coverage"
+    "clean": "rm -rf .next coverage",
+    "e2e": "playwright test"
   },
   "dependencies": {
     "design-system": "github:zigordev/design-system#v0.1.42",
@@ -23,7 +24,9 @@
     "socket.io-client": "^4.8.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@eslint/eslintrc": "^3.3.7",
+    "@playwright/test": "^1.63.0",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.3",
     "@tolgee/cli": "2.20.0",
