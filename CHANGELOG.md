@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/zigordev/kini/compare/kini-v0.6.0...kini-v0.6.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **auth:** keep sessions in Postgres so a restart stops signing everyone out ([#66](https://github.com/zigordev/kini/issues/66)) ([93954be](https://github.com/zigordev/kini/commit/93954be2cd7a95ec193b4a163a1fed92022bdcc0))
+
 ## [0.6.0](https://github.com/zigordev/kini/compare/kini-v0.5.2...kini-v0.6.0) (2026-09-08)
 
 
