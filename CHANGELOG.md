@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/zigordev/kini/compare/kini-v0.4.0...kini-v0.5.0) (2026-09-08)
+
+
+### Features
+
+* **auth:** set kini's Google OAuth client id ([#58](https://github.com/zigordev/kini/issues/58)) ([02d8908](https://github.com/zigordev/kini/commit/02d8908d760d7b1e2b549ab4a292395d4bfdc8e7))
+
 ## [0.4.0](https://github.com/zigordev/kini/compare/kini-v0.3.0...kini-v0.4.0) (2026-09-08)
 
 
