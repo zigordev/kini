@@ -204,9 +204,9 @@ jobs:
 
       - name: Build prod images
         run: |
-          docker build -f apps/api/Dockerfile --target runtime -t kini-api:ci . &
+          docker build -f apps/api/Dockerfile --target prod -t kini-api:ci . &
           pid_0=$!
-          docker build -f apps/ui/Dockerfile --target runtime -t kini-web:ci . &
+          docker build -f apps/ui/Dockerfile --target prod -t kini-web:ci . &
           pid_1=$!
           wait "$pid_0"
           wait "$pid_1"

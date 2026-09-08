@@ -24,7 +24,7 @@ COPY apps/api /workspace/apps/api
 WORKDIR /workspace/apps/api
 RUN npm run build
 
-FROM node:26-alpine AS runtime
+FROM node:26-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 # Pull the latest Alpine security patches at build time rather than waiting on
@@ -43,7 +43,7 @@ USER node
 EXPOSE 3000
 CMD ["node", "dist/main.js"]
 
-FROM runtime AS local
+FROM prod AS local
 
 FROM base AS dev
 ENV NODE_ENV=development
