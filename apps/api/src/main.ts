@@ -17,12 +17,47 @@ import { AppModule } from './app.module';
 import { HttpErrorFilter } from './common/http-exception.filter';
 import { httpMetricsMiddleware, JsonLogger } from './observability';
 
+type TrustProxy = boolean | number | 'loopback' | 'linklocal' | 'uniquelocal';
+
+function parseTrustProxy(input: string | undefined): TrustProxy {
+  if (input === undefined || input === null || input.trim() === '') {
+    return false;
+  }
+
+  const normalized = input.trim().toLowerCase();
+  if (normalized === 'true' || normalized === '1' || normalized === 'yes') {
+    return true;
+  }
+  if (normalized === 'false' || normalized === '0' || normalized === 'no') {
+    return false;
+  }
+  if (
+    normalized === 'loopback' ||
+    normalized === 'linklocal' ||
+    normalized === 'uniquelocal'
+  ) {
+    return normalized;
+  }
+  if (/^\d+$/.test(normalized)) {
+    return Number(normalized);
+  }
+
+  throw new Error(
+    'TRUST_PROXY must be one of: false, true, loopback, linklocal, uniquelocal, or a numeric hop count',
+  );
+}
+
 async function bootstrap() {
   // `bufferLogs` holds the bootstrap lines until the logger is installed, so
   // startup logs come out as JSON with a traceId like everything else.
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   app.useLogger(app.get(JsonLogger));
   app.use(httpMetricsMiddleware);
+
+  const expressApp = app.getHttpAdapter().getInstance();
+  if (typeof expressApp?.set === 'function') {
+    expressApp.set('trust proxy', parseTrustProxy(process.env.TRUST_PROXY));
+  }
 
   const configService = app.get(ConfigService);
 
