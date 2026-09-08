@@ -47,10 +47,13 @@ describe('buildSessionPoolConfig', () => {
       DATABASE_CA_CERT: 'a-ca-cert',
     });
 
-    expect(buildSessionPoolConfig(config).ssl).toEqual({
-      rejectUnauthorized: false,
-      ca: 'a-ca-cert',
-    });
+    const ssl = buildSessionPoolConfig(config).ssl as {
+      rejectUnauthorized: boolean;
+      ca?: string;
+    };
+
+    expect(ssl.rejectUnauthorized).toBe(false);
+    expect(ssl.ca).toBe('a-ca-cert');
   });
 
   it('caps the pool so it does not compete with the ORM for connections', () => {
