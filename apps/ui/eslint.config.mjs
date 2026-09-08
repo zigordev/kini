@@ -1,12 +1,8 @@
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
+import { defineConfig } from 'eslint/config';
+import nextCoreWebVitals from 'eslint-config-next/core-web-vitals';
+import nextTypescript from 'eslint-config-next/typescript';
 
-const compat = new FlatCompat({
-  baseDirectory: dirname(fileURLToPath(import.meta.url)),
-});
-
-const eslintConfig = [
+export default defineConfig([
   {
     ignores: [
       // `next lint` always excluded these by default; a plain `eslint .`
@@ -19,13 +15,15 @@ const eslintConfig = [
       'src/observability/**/*',
     ],
   },
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...nextCoreWebVitals,
+  ...nextTypescript,
+  {
+    rules: { 'react-hooks/set-state-in-effect': 'off' },
+  },
   {
     // next.config.js is loaded by Next's config loader as CommonJS, so it
     // has to use require() regardless of what the rest of the app does.
     files: ['next.config.js'],
     rules: { '@typescript-eslint/no-require-imports': 'off' },
   },
-];
-
-export default eslintConfig;
+]);
