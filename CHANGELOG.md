@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/zigordev/kini/compare/kini-v0.5.2...kini-v0.6.0) (2026-09-08)
+
+
+### Features
+
+* **db:** create the schema from a versioned migration ([#64](https://github.com/zigordev/kini/issues/64)) ([0a9dfe6](https://github.com/zigordev/kini/commit/0a9dfe6a692c55311f154c3fef27b44f1c83dbe7))
+
 ## [0.5.2](https://github.com/zigordev/kini/compare/kini-v0.5.1...kini-v0.5.2) (2026-09-08)
 
 
