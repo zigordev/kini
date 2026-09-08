@@ -45,9 +45,12 @@ from OpenBao by the Compose entrypoint. Production web and API origins must use
 compatible cookie `SameSite`, `Secure`, domain, HTTPS, CORS, and Socket.IO
 settings; see [`../../docs/web-cutover.md`](../../docs/web-cutover.md).
 
-The current `express-session` MemoryStore is suitable only for a single local
-process. Replace it with a durable shared session store before scaling or
-enabling production.
+Sessions are stored in Postgres via `connect-pg-simple`, in the `user_sessions`
+table, using the same connection values as the ORM. The table is created on
+first boot if it is missing, so neither the local synchronized schema nor the
+production migrations need to know about it. Sessions therefore survive an API
+restart, which the previous `express-session` MemoryStore did not: every deploy
+signed every user out.
 
 ## Database lifecycle
 

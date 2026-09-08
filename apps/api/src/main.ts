@@ -8,12 +8,18 @@ import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as connectPgSimple from 'connect-pg-simple';
 import * as cookieParser from 'cookie-parser';
 import 'dotenv/config';
 import * as session from 'express-session';
 import * as passport from 'passport';
+import { Pool } from 'pg';
 
 import { AppModule } from './app.module';
+import {
+  buildSessionPoolConfig,
+  SESSION_TABLE_NAME,
+} from './auth/session-store.config';
 import { HttpErrorFilter } from './common/http-exception.filter';
 import { httpMetricsMiddleware, JsonLogger } from './observability';
 
@@ -69,8 +75,16 @@ async function bootstrap() {
 
   app.use(cookieParser(configService.get<string>('SESSION_COOKIE_SECRET')));
 
+  const PgSession = connectPgSimple(session);
+  const sessionPool = new Pool(buildSessionPoolConfig(configService));
+
   app.use(
     session({
+      store: new PgSession({
+        pool: sessionPool,
+        tableName: SESSION_TABLE_NAME,
+        createTableIfMissing: true,
+      }),
       secret: configService.get<string>('SESSION_SECRET'),
       resave: false,
       saveUninitialized: false,

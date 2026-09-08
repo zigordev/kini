@@ -100,6 +100,7 @@ services:
     build:
       context: ..
       dockerfile: apps/ui/Dockerfile
+      target: prod
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3012}
         NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:-local}
