@@ -48,6 +48,8 @@ import { ObservabilityModule } from './observability';
           database,
           autoLoadEntities: true,
           synchronize,
+          migrations: [`${__dirname}/database/migrations/*.{ts,js}`],
+          migrationsRun: !synchronize,
           // TLS *with* certificate verification.
           //
           // This was `{ rejectUnauthorized: false }`, which is encryption
