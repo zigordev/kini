@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.2](https://github.com/zigordev/kini/compare/kini-v0.5.1...kini-v0.5.2) (2026-09-08)
+
+
+### Bug Fixes
+
+* **auth:** trust the ingress proxy so the session cookie is set ([#62](https://github.com/zigordev/kini/issues/62)) ([e22288e](https://github.com/zigordev/kini/commit/e22288e53ce141a27042963b9cfae3057952647b))
+
 ## [0.5.1](https://github.com/zigordev/kini/compare/kini-v0.5.0...kini-v0.5.1) (2026-09-08)
 
 
