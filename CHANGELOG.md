@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/zigordev/kini/compare/kini-v0.3.0...kini-v0.4.0) (2026-09-08)
+
+
+### Features
+
+* **deploy:** set the production domains kini deploys behind ([#56](https://github.com/zigordev/kini/issues/56)) ([0ea3135](https://github.com/zigordev/kini/commit/0ea31357080569d8d8c24d2d03ebd6cc2a9e46b5))
+
 ## [0.3.0](https://github.com/zigordev/kini/compare/kini-v0.2.0...kini-v0.3.0) (2026-09-07)
 
 
