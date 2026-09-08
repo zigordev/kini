@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.1](https://github.com/zigordev/kini/compare/kini-v0.5.0...kini-v0.5.1) (2026-09-08)
+
+
+### Bug Fixes
+
+* **docker:** name kini's production build stage prod ([#60](https://github.com/zigordev/kini/issues/60)) ([d87f7c6](https://github.com/zigordev/kini/commit/d87f7c6d1a4fcba3227b5031401bf58797d4c6ee))
+
 ## [0.5.0](https://github.com/zigordev/kini/compare/kini-v0.4.0...kini-v0.5.0) (2026-09-08)
 
 
