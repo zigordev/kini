@@ -23,7 +23,10 @@
     "trivy:scan": "docker run --rm -v $(pwd):/project:ro -v $(pwd)/../../infra/monitoring/trivy-reports:/reports aquasec/trivy:0.56.2 fs --scanners vuln,secret --include-dev-deps --format json --output /reports/kini-api.trivy.json /project && node ../../infra/monitoring/trivy-json-to-ndjson.js ../../infra/monitoring/trivy-reports/kini-api.trivy.json ../../infra/monitoring/trivy-reports/kini-api-trivy.ndjson kini-api && node ../../infra/monitoring/npm-audit-to-ndjson.js . ../../infra/monitoring/trivy-reports/kini-api-npm.ndjson kini-api",
     "trivy:scan:image": "npm run docker:build && docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/../../infra/monitoring/trivy-reports:/reports aquasec/trivy:0.56.2 image --scanners vuln,secret --format template --template '{{range .Results}}{{$t:=.Target}}{{range .Vulnerabilities}}{\"project\":\"kini-api\",\"Target\":\"{{$t}}\",\"Class\":\"vuln\",\"Severity\":\"{{.Severity}}\",\"VulnerabilityID\":\"{{.VulnerabilityID}}\",\"PkgName\":\"{{.PkgName}}\",\"InstalledVersion\":\"{{.InstalledVersion}}\",\"FixedVersion\":\"{{.FixedVersion}}\",\"Title\":\"{{.Title}}\",\"PrimaryURL\":\"{{.PrimaryURL}}\"}{{\"\\n\"}}{{end}}{{range .Secrets}}{\"project\":\"kini-api\",\"Target\":\"{{$t}}\",\"Class\":\"secret\",\"Severity\":\"{{.Severity}}\",\"RuleID\":\"{{.RuleID}}\",\"Category\":\"{{.Category}}\",\"Match\":\"{{.Match}}\"}{{\"\\n\"}}{{end}}{{end}}' --output /reports/kini-api.ndjson kini-api:local",
     "sonar:scan": "sonar-scanner -Dsonar.token=${SONAR_TOKEN}",
-    "sonar:install": "npm install -D sonarqube-scanner"
+    "sonar:install": "npm install -D sonarqube-scanner",
+    "typeorm": "TS_NODE_COMPILER_OPTIONS='{\"types\":[\"node\"]}' TS_NODE_BASEURL=./ node -r tsconfig-paths/register ./node_modules/typeorm/cli-ts-node-commonjs.js -d src/database/data-source.ts",
+    "migration:run": "npm run typeorm -- migration:run",
+    "migration:generate": "npm run typeorm -- migration:generate"
   },
   "dependencies": {
     "@nestjs/common": "^11.1.19",
