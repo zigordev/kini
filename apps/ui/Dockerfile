@@ -21,7 +21,7 @@ COPY apps/ui /workspace/apps/ui
 WORKDIR /workspace/apps/ui
 RUN npm run build
 
-FROM node:26-alpine AS runtime
+FROM node:26-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
