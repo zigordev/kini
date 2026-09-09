@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { HTMLElement, Node, NodeType, parse } from 'node-html-parser';
 import { AvailablePoolMatch } from './entities/available-pool.entity';
 
 export interface SelaeRssItem {
@@ -46,21 +47,34 @@ const normalizeAccents = (value: string): string =>
     .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 
+const TAG_BREAK = '\n';
+
+const collectText = (node: Node): string => {
+  if (node.nodeType === NodeType.TEXT_NODE) {
+    return node.textContent;
+  }
+
+  if (node.nodeType !== NodeType.ELEMENT_NODE) {
+    return '';
+  }
+
+  const element = node as HTMLElement;
+  const tagName = element.rawTagName?.toLowerCase();
+
+  if (tagName === 'script' || tagName === 'style') {
+    return TAG_BREAK;
+  }
+
+  if (element.childNodes.length === 0) {
+    return TAG_BREAK;
+  }
+
+  return `${TAG_BREAK}${element.childNodes.map(collectText).join('')}${TAG_BREAK}`;
+};
+
 export const htmlToText = (html: string): string =>
-  html
-    .replace(/<script[\s\S]*?<\/script>/gi, '\n')
-    .replace(/<style[\s\S]*?<\/style>/gi, '\n')
-    .replace(/<[^>]+>/g, '\n')
-    .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&aacute;/gi, 'a')
-    .replace(/&eacute;/gi, 'e')
-    .replace(/&iacute;/gi, 'i')
-    .replace(/&oacute;/gi, 'o')
-    .replace(/&uacute;/gi, 'u')
-    .replace(/&ntilde;/gi, 'n')
+  collectText(parse(html))
+    .replace(/\u00a0/g, ' ')
     .replace(/\r/g, '')
     .replace(/\n[ \t]+/g, '\n')
     .replace(/[ \t]{2,}/g, ' ')
