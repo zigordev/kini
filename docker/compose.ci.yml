@@ -17,6 +17,33 @@ services:
       timeout: 3s
       retries: 20
 
+  # The browser suite signs in through the real Google callback code, so CI
+  # needs something that speaks OpenID Connect. Published on the host as well
+  # as reachable on the network, because the authorization redirect goes
+  # through the browser while the token and userinfo calls come from the API.
+  #
+  # Version 6 dropped the bundled logging backend, so this container is silent
+  # whether it is healthy or dead. The healthcheck is the only thing that tells
+  # the two apart.
+  oauth:
+    security_opt:
+      - no-new-privileges:true
+    image: ghcr.io/navikt/mock-oauth2-server:6.0.2
+    environment:
+      SERVER_PORT: '8080'
+      JSON_CONFIG: '{"interactiveLogin":true,"tokenCallbacks":[{"issuerId":"kini","requestMappings":[{"requestParam":"code","match":"*","claims":{"email":"e2e@zigordev.test","email_verified":true,"name":"End To End"}}]}]}'
+    ports:
+      - '3901:8080'
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qO- http://localhost:8080/kini/.well-known/openid-configuration >/dev/null 2>&1',
+        ]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
   kini_api:
     security_opt:
       - no-new-privileges:true
@@ -48,6 +75,9 @@ services:
       GOOGLE_CLIENT_ID: ci-google-client-id
       GOOGLE_CLIENT_SECRET: ci-google-client-secret
       GOOGLE_CALLBACK_URL: http://localhost:3012/auth/google/callback
+      GOOGLE_AUTHORIZATION_URL: http://localhost:3901/kini/authorize
+      GOOGLE_TOKEN_URL: http://oauth:8080/kini/token
+      GOOGLE_USERINFO_URL: http://oauth:8080/kini/userinfo
       FRONTEND_URL: http://localhost:3013
       NOTIFICATIONS_KAFKA_BROKERS: platform-redpanda:9092
       NOTIFICATIONS_EMAIL_TOPIC: notification.email.requested.v1
