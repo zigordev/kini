@@ -9,6 +9,8 @@ import {
   Post,
   Req,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -39,6 +41,7 @@ export class AvailablePoolsController {
   }
 
   @Post('sync')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Synchronize available pools from external providers',
   })
@@ -73,6 +76,7 @@ export class AvailablePoolsController {
   }
 
   @Post(':availablePoolId/add-to-team')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Add an available pool to one of my teams' })
   @ApiCreatedResponse({ type: FutPoolResponseDto })
   addToTeam(
@@ -86,17 +90,5 @@ export class AvailablePoolsController {
       payload.teamId,
       req.user as User,
     );
-  }
-
-  @Post('team-pools/:poolId/check-results')
-  @ApiOperation({
-    summary: 'Fetch official results and mark team pool correctness',
-  })
-  @ApiOkResponse({ type: FutPoolResponseDto })
-  checkResults(
-    @Param('poolId', new ParseUUIDPipe({ version: '4' })) poolId: string,
-    @Req() req: any,
-  ): Promise<FutPoolResponseDto> {
-    return this.availablePools.checkTeamPoolResults(poolId, req.user as User);
   }
 }

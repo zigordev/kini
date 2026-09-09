@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
@@ -88,7 +88,11 @@ export class UsersService {
   ): Promise<UserResponseDto> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new NotFoundException({
+        code: 'USER.NOT_FOUND',
+        message: 'User not found',
+        params: { userId },
+      });
     }
 
     // Update only the provided fields

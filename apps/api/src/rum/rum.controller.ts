@@ -1,4 +1,11 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  Post,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 
 type RumEvent = {
   type: 'view' | 'error' | 'action';
@@ -13,7 +20,8 @@ type RumEvent = {
 
 @Controller('rum')
 export class RumController {
-  @Post('event')
+  @Post('events')
+  @HttpCode(HttpStatus.NO_CONTENT)
   async ingest(@Body() event: RumEvent, @Headers('user-agent') ua?: string) {
     // Emit single-line JSON logs for Promtail/Loki
     const normalized = {

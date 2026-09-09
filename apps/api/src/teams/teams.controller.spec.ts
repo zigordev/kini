@@ -102,7 +102,8 @@ describe('TeamsController over HTTP', () => {
       .set('x-test-session', 'valid')
       .send({ email: 'friend@example.com' });
 
-    expect(response.status).toBe(201);
+    // Inviting is an action on an existing team, not a create.
+    expect(response.status).toBe(200);
     expect(service.inviteUser).toHaveBeenCalledWith(
       teamId,
       'friend@example.com',

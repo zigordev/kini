@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { EventsGateway } from 'src/events/events.gateway';
 import { NotifierService } from 'src/notifications/notifier.service';
 import { TeamsService } from 'src/teams/teams.service';
@@ -17,11 +21,22 @@ export class FutPoolMatchService {
   ) {}
 
   async update(
+    poolId: string,
     matchId: string,
     match: UpdateFutPoolMatchDto,
     actor?: { id: string; name?: string },
   ): Promise<FutPoolMatchResponseDto> {
     const oldMatch = await this.futPoolMatchRepository.findById(matchId);
+
+    // The pool in the path is part of the identity of the match, not
+    // decoration: a match id from another pool must not resolve here.
+    if (!oldMatch || oldMatch.futPoolId !== poolId) {
+      throw new NotFoundException({
+        code: 'FUT_POOL_MATCH.NOT_FOUND',
+        message: 'Match not found in this pool',
+        params: { poolId, matchId },
+      });
+    }
 
     if (
       match.results !== undefined &&
@@ -29,9 +44,12 @@ export class FutPoolMatchService {
       oldMatch?.userId &&
       actor.id !== oldMatch.userId
     ) {
-      throw new Error(
-        'No tienes permisos para cambiar los resultados de este partido. Solo puedes cambiar los resultados de los partidos asignados a ti.',
-      );
+      throw new ForbiddenException({
+        code: 'FUT_POOL_MATCH.NOT_ASSIGNED',
+        message:
+          'Only the player a match is assigned to can change its results',
+        params: { matchId },
+      });
     }
 
     const wasComplete =

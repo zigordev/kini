@@ -9,6 +9,8 @@ import {
   Query,
   Req,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -28,7 +30,7 @@ import { StatsDto } from './dto/stats.dto';
 import { UpdateFutPoolDto } from './dto/update-fut-pool.dto';
 import { FutPoolService } from './fut-pool.service';
 
-@Controller('fut-pool')
+@Controller('fut-pools')
 @ApiTags('Pool')
 @UseGuards(AuthenticatedGuard)
 export class FutPoolController {
@@ -66,6 +68,7 @@ export class FutPoolController {
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a Fut Pool' })
   @ApiCreatedResponse({
     description: 'Created Fut Pool',

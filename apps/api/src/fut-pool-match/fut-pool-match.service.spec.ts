@@ -8,6 +8,8 @@ import { FutPoolMatch, Result } from './entities/fut-pool-match.entity';
 import { FutPoolMatchRepository } from './fut-pool-match.repository';
 import { FutPoolMatchService } from './fut-pool-match.service';
 
+const POOL_ID = 'pool-123';
+
 describe('FutPoolMatchService', () => {
   let service: FutPoolMatchService;
   let repository: Mocked<FutPoolMatchRepository>;
@@ -96,7 +98,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      const result = await service.update('match-123', updateDto);
+      const result = await service.update(POOL_ID, 'match-123', updateDto);
 
       expect(result.success).toBe(false);
       expect(repository.update).toHaveBeenCalledWith('match-123', updateDto);
@@ -115,7 +117,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      await service.update('match-123', updateDto, actor);
+      await service.update(POOL_ID, 'match-123', updateDto, actor);
 
       expect(notifier.notifyMatchUpdated).toHaveBeenCalledWith(
         updatedMatch,
@@ -125,6 +127,17 @@ describe('FutPoolMatchService', () => {
       );
     });
 
+    it('refuses a match id that belongs to another pool', async () => {
+      repository.findById.mockResolvedValue(mockMatch);
+
+      await expect(
+        service.update('another-pool', 'match-123', { success: true }),
+      ).rejects.toMatchObject({
+        status: 404,
+        response: { code: 'FUT_POOL_MATCH.NOT_FOUND' },
+      });
+    });
+
     it('should enforce permission for results change', async () => {
       const updateDto = { results: [Result.DRAW] };
       const actor = { id: 'user-456', name: 'Other User' };
@@ -132,10 +145,11 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
 
       await expect(
-        service.update('match-123', updateDto, actor),
-      ).rejects.toThrow(
-        'No tienes permisos para cambiar los resultados de este partido',
-      );
+        service.update(POOL_ID, 'match-123', updateDto, actor),
+      ).rejects.toMatchObject({
+        status: 403,
+        response: { code: 'FUT_POOL_MATCH.NOT_ASSIGNED' },
+      });
     });
 
     it('should allow results change for own match', async () => {
@@ -146,7 +160,12 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      const result = await service.update('match-123', updateDto, actor);
+      const result = await service.update(
+        POOL_ID,
+        'match-123',
+        updateDto,
+        actor,
+      );
 
       expect(result.results).toEqual([Result.DRAW]);
     });
@@ -158,7 +177,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      const result = await service.update('match-123', updateDto);
+      const result = await service.update(POOL_ID, 'match-123', updateDto);
 
       expect(result.results).toEqual([Result.DRAW]);
     });
@@ -174,7 +193,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      await service.update('match-123', updateDto, actor);
+      await service.update(POOL_ID, 'match-123', updateDto, actor);
 
       expect(notifier.notifyMatchUpdated).toHaveBeenCalled();
     });
@@ -186,7 +205,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      await service.update('match-123', updateDto);
+      await service.update(POOL_ID, 'match-123', updateDto);
 
       expect(notifier.notifyMatchUpdated).toHaveBeenCalled();
     });
@@ -198,7 +217,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      await service.update('match-123', updateDto);
+      await service.update(POOL_ID, 'match-123', updateDto);
 
       expect(notifier.notifyMatchUpdated).toHaveBeenCalled();
     });
@@ -214,7 +233,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      await service.update('match-123', updateDto);
+      await service.update(POOL_ID, 'match-123', updateDto);
 
       expect(notifier.notifyMatchUpdated).toHaveBeenCalled();
     });

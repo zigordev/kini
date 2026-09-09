@@ -3,53 +3,39 @@ import {
   Catch,
   ExceptionFilter,
   HttpException,
-  HttpStatus,
+  Logger,
 } from '@nestjs/common';
+import type { Request, Response } from 'express';
+import {
+  internalProblem,
+  PROBLEM_CONTENT_TYPE,
+  problemFromException,
+} from './http/problem-details';
 
 @Catch()
 export class HttpErrorFilter implements ExceptionFilter {
+  private readonly logger = new Logger(HttpErrorFilter.name);
+
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
-    const response = ctx.getResponse();
+    const response = ctx.getResponse<Response>();
+    const request = ctx.getRequest<Request>();
 
-    if (exception instanceof HttpException) {
-      const status = exception.getStatus();
-      const payload = exception.getResponse();
+    const problem =
+      exception instanceof HttpException
+        ? problemFromException(exception, request.url)
+        : internalProblem(request.url);
 
-      if (typeof payload === 'object' && payload !== null) {
-        const body = payload as Record<string, unknown>;
-        const code =
-          typeof body.code === 'string' ? (body.code as string) : undefined;
-        const params =
-          typeof body.params === 'object' && body.params !== null
-            ? body.params
-            : undefined;
-        const message =
-          typeof body.message === 'string'
-            ? (body.message as string)
-            : undefined;
-
-        return response.status(status).json({
-          status,
-          code,
-          params,
-          message,
-        });
-      }
-
-      // Payload is a string
-      return response.status(status).json({
-        status,
-        message: String(payload),
-      });
+    if (problem.status >= 500) {
+      this.logger.error(
+        `${request.method} ${request.url} - ${problem.status} - ${problem.code}`,
+        exception instanceof Error ? exception.stack : undefined,
+      );
     }
 
-    // Unknown error fallback
-    const status = HttpStatus.INTERNAL_SERVER_ERROR;
-    return response.status(status).json({
-      status,
-      code: 'GENERIC.UNKNOWN',
-      message: (exception as any)?.message ?? 'Internal server error',
-    });
+    return response
+      .status(problem.status)
+      .type(PROBLEM_CONTENT_TYPE)
+      .json(problem);
   }
 }
