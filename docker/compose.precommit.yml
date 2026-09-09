@@ -1,0 +1,91 @@
+name: kini-precommit
+
+services:
+  kini_db:
+    security_opt:
+      - no-new-privileges:true
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kini
+      POSTGRES_PASSWORD: kini
+      POSTGRES_DB: kini
+    ports:
+      - '15435:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  kini_api:
+    security_opt:
+      - no-new-privileges:true
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      target: local
+    environment:
+      NODE_ENV: test
+      OTEL_SERVICE_NAME: kini-api
+      OTEL_TRACES_ENABLED: 'false'
+      PORT: 3000
+      DATABASE_HOST: kini_db
+      DATABASE_PORT: 5432
+      DATABASE_USER: kini
+      DATABASE_PASSWORD: kini
+      DATABASE_NAME: kini
+      DATABASE_SSL: 'false'
+      DATABASE_SYNCHRONIZE: 'true'
+      AUTH_CORS_ORIGINS: http://localhost:3113
+      AUTH_SUCCESS_REDIRECT_URL: http://localhost:3113/auth/callback
+      AUTH_FAILURE_REDIRECT_URL: http://localhost:3113/auth/callback
+      SESSION_SECRET: ci-session-secret
+      SESSION_COOKIE_SECRET: ci-cookie-secret
+      SESSION_COOKIE_NAME: kini.sid
+      SESSION_COOKIE_SECURE: 'false'
+      SESSION_COOKIE_MAX_AGE_MS: '604800000'
+      SESSION_COOKIE_SAME_SITE: lax
+      GOOGLE_CLIENT_ID: ci-google-client-id
+      GOOGLE_CLIENT_SECRET: ci-google-client-secret
+      GOOGLE_CALLBACK_URL: http://localhost:3112/auth/google/callback
+      FRONTEND_URL: http://localhost:3113
+      NOTIFICATIONS_KAFKA_BROKERS: platform-redpanda:9092
+      NOTIFICATIONS_EMAIL_TOPIC: notification.email.requested.v1
+      EDUARDO_LOSILLA_SYNC_ENABLED: 'false'
+    ports:
+      - '3112:3000'
+    healthcheck:
+      test:
+        ['CMD-SHELL', 'wget -qO- http://localhost:3000/health >/dev/null 2>&1']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    depends_on:
+      kini_db:
+        condition: service_healthy
+    command: ['node', 'dist/main.js']
+
+  kini_web:
+    security_opt:
+      - no-new-privileges:true
+    build:
+      context: ..
+      dockerfile: apps/ui/Dockerfile
+      target: prod
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:3012
+        NEXT_PUBLIC_RELEASE: ci
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:3012
+      NEXT_PUBLIC_RELEASE: ci
+    ports:
+      - '3113:3001'
+    depends_on:
+      kini_api:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001 >/dev/null 2>&1']
+      interval: 5s
+      timeout: 3s
+      retries: 20

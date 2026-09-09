@@ -3,9 +3,9 @@ name: kini-app-prod
 x-logging: &default-logging
   driver: json-file
   options:
-    max-size: "10m"
-    max-file: "3"
-    labels: "com.docker.compose.project,com.docker.compose.service"
+    max-size: '10m'
+    max-file: '3'
+    labels: 'com.docker.compose.project,com.docker.compose.service'
 
 services:
   kini_db:
@@ -71,7 +71,8 @@ services:
     depends_on:
       kini_db:
         condition: service_healthy
-    command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'dist/main.js']
+    command:
+      ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'dist/main.js']
     logging: *default-logging
     networks:
       kn_shared:

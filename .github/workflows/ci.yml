@@ -46,6 +46,9 @@ jobs:
           docker compose -f docker/compose.app.local.yml config > /dev/null
           docker compose -f docker/compose.ci.yml config > /dev/null
 
+      - name: Format check
+        run: npm run format:check
+
       - name: Lint workspaces
         run: npm run lint
 
@@ -79,7 +82,7 @@ jobs:
       pull-requests: read
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
