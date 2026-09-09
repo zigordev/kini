@@ -4,6 +4,7 @@ import {
   extractSelaeDate,
   extractSelaeJackpot,
   extractSelaeJornada,
+  htmlToText,
   parseSelaeRss,
 } from './selae-quiniela.parser';
 
@@ -80,5 +81,63 @@ describe('SELAE Quiniela parser', () => {
     expect(results).toHaveLength(15);
     expect(results.slice(0, 3)).toEqual([['1'], ['X'], ['X']]);
     expect(results[14]).toEqual(['1', '1']);
+  });
+});
+
+describe('htmlToText', () => {
+  it('strips a script whose end tag carries whitespace', () => {
+    const text = htmlToText(
+      '<p>Real Madrid - Barcelona</p><script >leaked()</script ><p>Sevilla - Betis</p>',
+    );
+
+    expect(text).not.toContain('leaked()');
+    expect(text).toContain('Real Madrid - Barcelona');
+  });
+
+  it('ignores a greater-than sign inside an attribute', () => {
+    const text = htmlToText('<p title="a > b">Valencia - Osasuna</p>');
+
+    expect(text).toBe('Valencia - Osasuna');
+  });
+
+  it('drops comments rather than emitting their contents', () => {
+    const text = htmlToText(
+      '<div><!-- Girona - Elche --><p>Cadiz - Getafe</p></div>',
+    );
+
+    expect(text).not.toContain('Girona');
+    expect(text).toContain('Cadiz - Getafe');
+  });
+
+  it('unescapes an entity exactly once', () => {
+    expect(htmlToText('<p>&amp;quot;</p>')).toBe('&quot;');
+    expect(htmlToText('<p>&amp;amp;</p>')).toBe('&amp;');
+    expect(htmlToText('<p>Elche &amp; Levante</p>')).toBe('Elche & Levante');
+  });
+
+  it('turns a non-breaking space into a plain space', () => {
+    expect(htmlToText('<p>Rayo&nbsp;Vallecano</p>')).toBe('Rayo Vallecano');
+  });
+
+  it('decodes accented entities to their characters', () => {
+    expect(htmlToText('<p>Alav&eacute;s - Legan&eacute;s</p>')).toBe(
+      'Alavés - Leganés',
+    );
+  });
+
+  it('breaks lines at element boundaries so fixtures stay separated', () => {
+    const matches = extractCompositionMatches(
+      '<ul><li>1 Real Madrid - Barcelona</li><li>2 Sevilla - Betis</li></ul>',
+    );
+
+    expect(matches).toEqual([
+      {
+        order: 1,
+        homeTeam: 'Real Madrid',
+        awayTeam: 'Barcelona',
+        full15: false,
+      },
+      { order: 2, homeTeam: 'Sevilla', awayTeam: 'Betis', full15: false },
+    ]);
   });
 });
