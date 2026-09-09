@@ -6,6 +6,7 @@ import { FutPoolMatch } from '../fut-pool-match/entities/fut-pool-match.entity';
 import { FutPool } from '../fut-pool/entities/fut-pool.entity';
 import { TeamsModule } from '../teams/teams.module';
 import { AvailablePoolsController } from './available-pools.controller';
+import { FutPoolResultsController } from './fut-pool-results.controller';
 import { AvailablePoolsService } from './available-pools.service';
 import { AvailablePool } from './entities/available-pool.entity';
 
@@ -16,7 +17,7 @@ import { AvailablePool } from './entities/available-pool.entity';
     TeamsModule,
     TypeOrmModule.forFeature([AvailablePool, FutPool, FutPoolMatch]),
   ],
-  controllers: [AvailablePoolsController],
+  controllers: [AvailablePoolsController, FutPoolResultsController],
   providers: [AvailablePoolsService],
   exports: [AvailablePoolsService],
 })

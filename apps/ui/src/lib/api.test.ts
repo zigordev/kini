@@ -27,7 +27,7 @@ describe('API client', () => {
 
   it('maps an unauthenticated session response to null', async () => {
     fetchMock.mockResolvedValueOnce(
-      jsonResponse({ message: 'Unauthorized' }, 401),
+      jsonResponse({ status: 401, code: 'HTTP.UNAUTHORIZED' }, 401),
     );
 
     await expect(authApi.me()).resolves.toBeNull();
@@ -39,11 +39,15 @@ describe('API client', () => {
     await expect(authApi.logout()).resolves.toBeUndefined();
   });
 
-  it('normalizes structured server errors', async () => {
+  it('normalizes an RFC 9457 problem response', async () => {
     fetchMock.mockResolvedValueOnce(
       jsonResponse(
         {
-          message: ['Email is invalid', 'Name is required'],
+          type: 'https://zigordev.com/problems/validation-failed',
+          title: 'Bad request',
+          status: 400,
+          detail: 'Email is invalid; Name is required',
+          instance: '/teams',
           code: 'VALIDATION.FAILED',
           params: { field: 'email' },
         },
@@ -55,7 +59,7 @@ describe('API client', () => {
 
     expect(error).toBeInstanceOf(ApiError);
     expect(error).toMatchObject({
-      message: 'Email is invalid, Name is required',
+      message: 'Email is invalid; Name is required',
       status: 400,
       code: 'VALIDATION.FAILED',
       params: { field: 'email' },
@@ -106,7 +110,7 @@ describe('API client', () => {
     await poolsApi.list('team with spaces', 2, 25);
 
     const url = new URL(String(fetchMock.mock.calls[0]![0]));
-    expect(url.pathname).toBe('/fut-pool');
+    expect(url.pathname).toBe('/fut-pools');
     expect(Object.fromEntries(url.searchParams)).toMatchObject({
       teamId: 'team with spaces',
       page: '2',

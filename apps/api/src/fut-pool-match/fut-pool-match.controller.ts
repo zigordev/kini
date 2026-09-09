@@ -18,7 +18,7 @@ import { FutPoolMatchResponseDto } from './dto/fut-pool-match-response.dto';
 import { UpdateFutPoolMatchDto } from './dto/update-fut-pool-match.dto';
 import { FutPoolMatchService } from './fut-pool-match.service';
 
-@Controller('fut-pool-match')
+@Controller('fut-pools/:poolId/matches')
 @ApiTags('Pool match')
 @UseGuards(AuthenticatedGuard)
 export class FutPoolMatchController {
@@ -26,17 +26,19 @@ export class FutPoolMatchController {
 
   @Patch(':matchId')
   @ApiOperation({ summary: 'Partially update a pool match' })
+  @ApiParam({ name: 'poolId', format: 'uuid' })
   @ApiParam({ name: 'matchId', format: 'uuid' })
   @ApiOkResponse({
     description: 'Partially update a pool match',
     type: FutPoolMatchResponseDto,
   })
   update(
+    @Param('poolId', new ParseUUIDPipe({ version: '4' })) poolId: string,
     @Param('matchId', new ParseUUIDPipe({ version: '4' })) matchId: string,
     @Body() match: UpdateFutPoolMatchDto,
     @Req() req: any,
   ): Promise<FutPoolMatchResponseDto> {
     const actor = req.user as { id: string; name?: string } | undefined;
-    return this.futPoolMatchService.update(matchId, match, actor);
+    return this.futPoolMatchService.update(poolId, matchId, match, actor);
   }
 }

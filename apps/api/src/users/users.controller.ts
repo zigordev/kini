@@ -25,7 +25,7 @@ export class UsersController {
     return users.map(UserSummaryDto.fromEntity);
   }
 
-  @Patch()
+  @Patch('me')
   @ApiOperation({ summary: 'Partially update user profile' })
   @ApiOkResponse({
     description: 'Updated user profile',

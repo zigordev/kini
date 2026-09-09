@@ -1,4 +1,11 @@
-import { Body, Controller, Headers, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Headers,
+  Post,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 
 type UiLog = {
   level: 'debug' | 'info' | 'warn' | 'error';
@@ -10,6 +17,7 @@ type UiLog = {
 @Controller('logs')
 export class LogsController {
   @Post()
+  @HttpCode(HttpStatus.NO_CONTENT)
   async ingest(@Body() log: UiLog, @Headers('user-agent') ua?: string) {
     const entry = {
       level: log.level ?? 'info',

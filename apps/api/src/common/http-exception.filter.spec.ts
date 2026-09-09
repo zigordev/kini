@@ -1,5 +1,5 @@
-import { vi } from 'vitest';
 import { ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
+import { vi } from 'vitest';
 import { HttpErrorFilter } from './http-exception.filter';
 
 describe('HttpErrorFilter', () => {
@@ -7,175 +7,111 @@ describe('HttpErrorFilter', () => {
   let mockResponse: any;
   let mockArgumentsHost: ArgumentsHost;
 
+  const body = () => mockResponse.json.mock.calls[0][0];
+
   beforeEach(() => {
     filter = new HttpErrorFilter();
     mockResponse = {
       status: vi.fn().mockReturnThis(),
+      type: vi.fn().mockReturnThis(),
       json: vi.fn().mockReturnThis(),
     };
 
     mockArgumentsHost = {
       switchToHttp: vi.fn().mockReturnValue({
         getResponse: vi.fn().mockReturnValue(mockResponse),
-        getRequest: vi.fn().mockReturnValue({}),
+        getRequest: vi
+          .fn()
+          .mockReturnValue({ url: '/fut-pools/7f3a', method: 'GET' }),
       }),
     } as unknown as ArgumentsHost;
   });
 
-  it('should be defined', () => {
-    expect(filter).toBeDefined();
+  it('sends problem details with the content type the RFC defines', () => {
+    filter.catch(
+      new HttpException(
+        {
+          code: 'FUT_POOL.NOT_FOUND',
+          message: 'Pool not found',
+          params: { poolId: '7f3a' },
+        },
+        HttpStatus.NOT_FOUND,
+      ),
+      mockArgumentsHost,
+    );
+
+    expect(mockResponse.status).toHaveBeenCalledWith(404);
+    expect(mockResponse.type).toHaveBeenCalledWith('application/problem+json');
+    expect(body()).toEqual({
+      type: 'https://zigordev.com/problems/fut-pool-not-found',
+      title: 'Not found',
+      status: 404,
+      detail: 'Pool not found',
+      instance: '/fut-pools/7f3a',
+      code: 'FUT_POOL.NOT_FOUND',
+      params: { poolId: '7f3a' },
+    });
   });
 
-  describe('HttpException with object payload', () => {
-    it('should format with code, params, and message', () => {
-      const exception = new HttpException(
+  it('derives a code from the status when the throw carries none', () => {
+    filter.catch(
+      new HttpException('Nope', HttpStatus.FORBIDDEN),
+      mockArgumentsHost,
+    );
+
+    expect(body()).toMatchObject({
+      status: 403,
+      code: 'HTTP.FORBIDDEN',
+      detail: 'Nope',
+    });
+    expect(body().params).toBeUndefined();
+  });
+
+  it('turns anything that is not an HttpException into an opaque 500', () => {
+    filter.catch(
+      new Error('relation "fut_pool" does not exist'),
+      mockArgumentsHost,
+    );
+
+    expect(mockResponse.status).toHaveBeenCalledWith(500);
+    expect(body()).toEqual({
+      type: 'https://zigordev.com/problems/http-internal-error',
+      title: 'Internal server error',
+      status: 500,
+      instance: '/fut-pools/7f3a',
+      code: 'HTTP.INTERNAL_ERROR',
+    });
+  });
+
+  it('says nothing about why a thrown 5xx happened', () => {
+    filter.catch(
+      new HttpException(
+        'connection terminated',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      ),
+      mockArgumentsHost,
+    );
+
+    expect(body().status).toBe(503);
+    expect(body().detail).toBeUndefined();
+  });
+
+  it('joins a validation array under one code', () => {
+    filter.catch(
+      new HttpException(
         {
-          code: 'CUSTOM.ERROR',
-          params: { field: 'email' },
-          message: 'Invalid email format',
+          statusCode: 400,
+          message: ['name must be a string', 'size must be a number'],
         },
         HttpStatus.BAD_REQUEST,
-      );
+      ),
+      mockArgumentsHost,
+    );
 
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        status: 400,
-        code: 'CUSTOM.ERROR',
-        params: { field: 'email' },
-        message: 'Invalid email format',
-      });
-    });
-
-    it('should handle payload without code', () => {
-      const exception = new HttpException(
-        {
-          message: 'Something went wrong',
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        status: 500,
-        code: undefined,
-        params: undefined,
-        message: 'Something went wrong',
-      });
-    });
-
-    it('should handle payload without params', () => {
-      const exception = new HttpException(
-        {
-          code: 'AUTH.FAILED',
-          message: 'Authentication failed',
-        },
-        HttpStatus.UNAUTHORIZED,
-      );
-
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        status: 401,
-        code: 'AUTH.FAILED',
-        params: undefined,
-        message: 'Authentication failed',
-      });
-    });
-  });
-
-  describe('HttpException with string payload', () => {
-    it('should format string message', () => {
-      const exception = new HttpException('Not found', HttpStatus.NOT_FOUND);
-
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(404);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        status: 404,
-        message: 'Not found',
-      });
-    });
-  });
-
-  describe('Unknown errors', () => {
-    it('should handle unknown errors with 500 status', () => {
-      const error = new Error('Unexpected error');
-
-      filter.catch(error, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        status: 500,
-        code: 'GENERIC.UNKNOWN',
-        message: 'Unexpected error',
-      });
-    });
-
-    it('should handle errors without message', () => {
-      const error = { something: 'weird' };
-
-      filter.catch(error, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        status: 500,
-        code: 'GENERIC.UNKNOWN',
-        message: 'Internal server error',
-      });
-    });
-
-    it('should handle null errors', () => {
-      filter.catch(null, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(500);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        status: 500,
-        code: 'GENERIC.UNKNOWN',
-        message: 'Internal server error',
-      });
-    });
-  });
-
-  describe('Different HTTP status codes', () => {
-    it('should handle 400 Bad Request', () => {
-      const exception = new HttpException(
-        'Bad request',
-        HttpStatus.BAD_REQUEST,
-      );
-
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-    });
-
-    it('should handle 401 Unauthorized', () => {
-      const exception = new HttpException(
-        'Unauthorized',
-        HttpStatus.UNAUTHORIZED,
-      );
-
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(401);
-    });
-
-    it('should handle 403 Forbidden', () => {
-      const exception = new HttpException('Forbidden', HttpStatus.FORBIDDEN);
-
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(403);
-    });
-
-    it('should handle 404 Not Found', () => {
-      const exception = new HttpException('Not found', HttpStatus.NOT_FOUND);
-
-      filter.catch(exception, mockArgumentsHost);
-
-      expect(mockResponse.status).toHaveBeenCalledWith(404);
+    expect(body()).toMatchObject({
+      status: 400,
+      code: 'VALIDATION.FAILED',
+      detail: 'name must be a string; size must be a number',
     });
   });
 });
