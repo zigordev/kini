@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/zigordev/kini/compare/kini-v0.6.2...kini-v0.6.3) (2026-09-09)
+
+
+### Bug Fixes
+
+* **api:** declare the TypeORM line @nestjs/typeorm resolves ([#75](https://github.com/zigordev/kini/issues/75)) ([5e6fa7f](https://github.com/zigordev/kini/commit/5e6fa7f2b4ef4b45fa669f0eac9d11fa751d194e))
+
 ## [0.6.2](https://github.com/zigordev/kini/compare/kini-v0.6.1...kini-v0.6.2) (2026-09-09)
 
 
