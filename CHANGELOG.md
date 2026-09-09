@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/zigordev/kini/compare/kini-v0.6.1...kini-v0.6.2) (2026-09-09)
+
+
+### Bug Fixes
+
+* **deps:** take the patched multer ([#77](https://github.com/zigordev/kini/issues/77)) ([83f8bbb](https://github.com/zigordev/kini/commit/83f8bbbb754c888226d7c19d6e4c559a28db143e))
+
 ## [0.6.1](https://github.com/zigordev/kini/compare/kini-v0.6.0...kini-v0.6.1) (2026-09-08)
 
 
