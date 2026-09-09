@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.0](https://github.com/zigordev/kini/compare/kini-v0.6.5...kini-v0.7.0) (2026-09-09)
+
+
+### Features
+
+* **api:** send RFC 9457 problem details and name resources plurally ([#84](https://github.com/zigordev/kini/issues/84)) ([c58932d](https://github.com/zigordev/kini/commit/c58932d97fe60b0594e2b446ad1b001051ccb0a5))
+
 ## [0.6.5](https://github.com/zigordev/kini/compare/kini-v0.6.4...kini-v0.6.5) (2026-09-09)
 
 
