@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.5](https://github.com/zigordev/kini/compare/kini-v0.6.4...kini-v0.6.5) (2026-09-09)
+
+
+### Bug Fixes
+
+* **available-pools:** parse the SELAE document instead of stripping tags ([#82](https://github.com/zigordev/kini/issues/82)) ([acb83f8](https://github.com/zigordev/kini/commit/acb83f8904f45cafc1cae3bab132995a2d25e340))
+
 ## [0.6.4](https://github.com/zigordev/kini/compare/kini-v0.6.3...kini-v0.6.4) (2026-09-09)
 
 
