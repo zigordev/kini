@@ -5,6 +5,7 @@ import './observability/tracing';
 
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { NextFunction, Request, Response } from 'express';
 import helmet from 'helmet';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -22,6 +23,8 @@ import {
 } from './auth/session-store.config';
 import { HttpErrorFilter } from './common/http-exception.filter';
 import { httpMetricsMiddleware, JsonLogger } from './observability';
+
+const SWAGGER_PATH = '/docs';
 
 type TrustProxy = boolean | number | 'loopback' | 'linklocal' | 'uniquelocal';
 
@@ -67,11 +70,40 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
 
-  // Security headers. CSP is off: this is a JSON API, where a content policy
-  // buys nothing, and both gpool and kini serve Swagger UI, which needs the
-  // inline scripts a default helmet CSP would block. The headers that matter
-  // here — HSTS, nosniff, frame-options, referrer-policy — are all still set.
-  app.use(helmet({ contentSecurityPolicy: false }));
+  const apiSecurityHeaders = helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        'default-src': ["'none'"],
+        'base-uri': ["'none'"],
+        'form-action': ["'none'"],
+        'frame-ancestors': ["'none'"],
+      },
+    },
+  });
+
+  const swaggerSecurityHeaders = helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        'default-src': ["'self'"],
+        'script-src': ["'self'", "'unsafe-inline'"],
+        'style-src': ["'self'", "'unsafe-inline'"],
+        'img-src': ["'self'", 'data:'],
+        'font-src': ["'self'", 'data:'],
+        'connect-src': ["'self'"],
+        'base-uri': ["'none'"],
+        'form-action': ["'none'"],
+        'frame-ancestors': ["'none'"],
+      },
+    },
+  });
+
+  app.use((req: Request, res: Response, next: NextFunction) =>
+    req.path === SWAGGER_PATH || req.path.startsWith(`${SWAGGER_PATH}/`)
+      ? swaggerSecurityHeaders(req, res, next)
+      : apiSecurityHeaders(req, res, next),
+  );
 
   app.use(cookieParser(configService.get<string>('SESSION_COOKIE_SECRET')));
 
@@ -132,7 +164,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document, {
+  SwaggerModule.setup(SWAGGER_PATH.slice(1), app, document, {
     swaggerOptions: { persistAuthorization: true },
   });
 
