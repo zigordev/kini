@@ -31,6 +31,7 @@ describe('FutPoolMatchController', () => {
 
   describe('update', () => {
     it('should update match with actor', async () => {
+      const poolId = 'pool-123';
       const matchId = '550e8400-e29b-41d4-a716-446655440000';
       const updateDto = { results: [Result.HOME, Result.DRAW], success: true };
       const mockRequest = {
@@ -60,25 +61,32 @@ describe('FutPoolMatchController', () => {
 
       service.update.mockResolvedValue(expectedMatch);
 
-      const result = await controller.update(matchId, updateDto, mockRequest);
+      const result = await controller.update(
+        poolId,
+        matchId,
+        updateDto,
+        mockRequest,
+      );
 
       expect(result).toEqual(expectedMatch);
-      expect(service.update).toHaveBeenCalledWith(matchId, updateDto, {
+      expect(service.update).toHaveBeenCalledWith(poolId, matchId, updateDto, {
         id: 'user-123',
         name: 'Test User',
       });
     });
 
     it('should update match without actor', async () => {
+      const poolId = 'pool-123';
       const matchId = '550e8400-e29b-41d4-a716-446655440000';
       const updateDto = { success: false };
       const mockRequest = {};
 
       service.update.mockResolvedValue({} as any);
 
-      await controller.update(matchId, updateDto, mockRequest);
+      await controller.update(poolId, matchId, updateDto, mockRequest);
 
       expect(service.update).toHaveBeenCalledWith(
+        poolId,
         matchId,
         updateDto,
         undefined,

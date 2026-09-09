@@ -41,15 +41,12 @@ const request = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
 
   if (!response.ok) {
     const payload = (await response.json().catch(() => null)) as {
-      message?: string | string[];
+      detail?: string;
       code?: string;
       params?: Record<string, unknown>;
     } | null;
-    const message = Array.isArray(payload?.message)
-      ? payload.message.join(', ')
-      : payload?.message;
     throw new ApiError(
-      message || `Request failed (${response.status})`,
+      payload?.detail || `Request failed (${response.status})`,
       response.status,
       payload?.code,
       payload?.params,
@@ -118,7 +115,7 @@ export const teamsApi = {
 export const usersApi = {
   list: () => request<UserSummary[]>('/users'),
   update: (payload: Partial<AuthenticatedUser>) =>
-    request<AuthenticatedUser>('/users', {
+    request<AuthenticatedUser>('/users/me', {
       method: 'PATCH',
       body: JSON.stringify(payload),
     }),
@@ -145,21 +142,22 @@ export const poolsApi = {
       sortBy: 'date',
       sortOrder: 'desc',
     });
-    return request<PoolsPage>(`/fut-pool?${query}`);
+    return request<PoolsPage>(`/fut-pools?${query}`);
   },
   stats: (teamId: string) =>
-    request<Stats>(`/fut-pool/stats?teamId=${encodeURIComponent(teamId)}`),
+    request<Stats>(`/fut-pools/stats?teamId=${encodeURIComponent(teamId)}`),
   create: (payload: PoolForm) =>
-    request<FutPool>('/fut-pool', {
+    request<FutPool>('/fut-pools', {
       method: 'POST',
       body: JSON.stringify(payload),
     }),
   update: (poolId: string, payload: Partial<PoolForm>) =>
-    request<FutPool>(`/fut-pool/${encodeURIComponent(poolId)}`, {
+    request<FutPool>(`/fut-pools/${encodeURIComponent(poolId)}`, {
       method: 'PATCH',
       body: JSON.stringify(payload),
     }),
   updateMatch: (
+    poolId: string,
     matchId: string,
     payload: {
       results?: ResultValue[];
@@ -170,12 +168,12 @@ export const poolsApi = {
     },
   ) =>
     request<FutPoolMatchResponse>(
-      `/fut-pool-match/${encodeURIComponent(matchId)}`,
+      `/fut-pools/${encodeURIComponent(poolId)}/matches/${encodeURIComponent(matchId)}`,
       { method: 'PATCH', body: JSON.stringify(payload) },
     ),
   checkResults: (poolId: string) =>
     request<FutPool>(
-      `/available-pools/team-pools/${encodeURIComponent(poolId)}/check-results`,
+      `/fut-pools/${encodeURIComponent(poolId)}/check-results`,
       { method: 'POST' },
     ),
 };

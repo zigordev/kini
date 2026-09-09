@@ -33,12 +33,12 @@ export type ApiOperation = {
   responseCodes: ['200'];
 } | {
   method: 'GET';
-  path: '/fut-pool';
+  path: '/fut-pools';
   operationId: 'FutPoolController_getFutPools';
   responseCodes: ['200'];
 } | {
   method: 'GET';
-  path: '/fut-pool/stats';
+  path: '/fut-pools/stats';
   operationId: 'FutPoolController_getStats';
   responseCodes: ['200'];
 } | {
@@ -68,24 +68,24 @@ export type ApiOperation = {
   responseCodes: ['200'];
 } | {
   method: 'PATCH';
-  path: '/fut-pool-match/{matchId}';
-  operationId: 'FutPoolMatchController_update';
-  responseCodes: ['200'];
-} | {
-  method: 'PATCH';
-  path: '/fut-pool/{poolId}';
+  path: '/fut-pools/{poolId}';
   operationId: 'FutPoolController_updatePool';
   responseCodes: ['200'];
 } | {
   method: 'PATCH';
-  path: '/users';
+  path: '/fut-pools/{poolId}/matches/{matchId}';
+  operationId: 'FutPoolMatchController_update';
+  responseCodes: ['200'];
+} | {
+  method: 'PATCH';
+  path: '/users/me';
   operationId: 'UsersController_updateUser';
   responseCodes: ['200'];
 } | {
   method: 'POST';
   path: '/auth/logout';
   operationId: 'AuthController_logout';
-  responseCodes: ['201'];
+  responseCodes: ['200'];
 } | {
   method: 'POST';
   path: '/available-pools/{availablePoolId}/add-to-team';
@@ -98,24 +98,24 @@ export type ApiOperation = {
   responseCodes: ['200'];
 } | {
   method: 'POST';
-  path: '/available-pools/team-pools/{poolId}/check-results';
-  operationId: 'AvailablePoolsController_checkResults';
-  responseCodes: ['200'];
-} | {
-  method: 'POST';
-  path: '/fut-pool';
+  path: '/fut-pools';
   operationId: 'FutPoolController_createPool';
   responseCodes: ['201'];
 } | {
   method: 'POST';
-  path: '/logs';
-  operationId: 'LogsController_ingest';
-  responseCodes: ['201'];
+  path: '/fut-pools/{poolId}/check-results';
+  operationId: 'FutPoolResultsController_checkResults';
+  responseCodes: ['200'];
 } | {
   method: 'POST';
-  path: '/rum/event';
+  path: '/logs';
+  operationId: 'LogsController_ingest';
+  responseCodes: ['204'];
+} | {
+  method: 'POST';
+  path: '/rum/events';
   operationId: 'RumController_ingest';
-  responseCodes: ['201'];
+  responseCodes: ['204'];
 } | {
   method: 'POST';
   path: '/teams';
@@ -125,12 +125,12 @@ export type ApiOperation = {
   method: 'POST';
   path: '/teams/{teamId}/accept-invitation';
   operationId: 'TeamsController_acceptInvitation';
-  responseCodes: ['201'];
+  responseCodes: ['200'];
 } | {
   method: 'POST';
   path: '/teams/{teamId}/invite';
   operationId: 'TeamsController_inviteUser';
-  responseCodes: ['201'];
+  responseCodes: ['200'];
 };
 
 export const API_OPERATION_COUNT = 26 as const;
@@ -186,7 +186,7 @@ export const API_OPERATIONS = [
   },
   {
     "method": "GET",
-    "path": "/fut-pool",
+    "path": "/fut-pools",
     "operationId": "FutPoolController_getFutPools",
     "responseCodes": [
       "200"
@@ -194,7 +194,7 @@ export const API_OPERATIONS = [
   },
   {
     "method": "GET",
-    "path": "/fut-pool/stats",
+    "path": "/fut-pools/stats",
     "operationId": "FutPoolController_getStats",
     "responseCodes": [
       "200"
@@ -242,15 +242,7 @@ export const API_OPERATIONS = [
   },
   {
     "method": "PATCH",
-    "path": "/fut-pool-match/{matchId}",
-    "operationId": "FutPoolMatchController_update",
-    "responseCodes": [
-      "200"
-    ]
-  },
-  {
-    "method": "PATCH",
-    "path": "/fut-pool/{poolId}",
+    "path": "/fut-pools/{poolId}",
     "operationId": "FutPoolController_updatePool",
     "responseCodes": [
       "200"
@@ -258,7 +250,15 @@ export const API_OPERATIONS = [
   },
   {
     "method": "PATCH",
-    "path": "/users",
+    "path": "/fut-pools/{poolId}/matches/{matchId}",
+    "operationId": "FutPoolMatchController_update",
+    "responseCodes": [
+      "200"
+    ]
+  },
+  {
+    "method": "PATCH",
+    "path": "/users/me",
     "operationId": "UsersController_updateUser",
     "responseCodes": [
       "200"
@@ -269,7 +269,7 @@ export const API_OPERATIONS = [
     "path": "/auth/logout",
     "operationId": "AuthController_logout",
     "responseCodes": [
-      "201"
+      "200"
     ]
   },
   {
@@ -290,15 +290,7 @@ export const API_OPERATIONS = [
   },
   {
     "method": "POST",
-    "path": "/available-pools/team-pools/{poolId}/check-results",
-    "operationId": "AvailablePoolsController_checkResults",
-    "responseCodes": [
-      "200"
-    ]
-  },
-  {
-    "method": "POST",
-    "path": "/fut-pool",
+    "path": "/fut-pools",
     "operationId": "FutPoolController_createPool",
     "responseCodes": [
       "201"
@@ -306,18 +298,26 @@ export const API_OPERATIONS = [
   },
   {
     "method": "POST",
-    "path": "/logs",
-    "operationId": "LogsController_ingest",
+    "path": "/fut-pools/{poolId}/check-results",
+    "operationId": "FutPoolResultsController_checkResults",
     "responseCodes": [
-      "201"
+      "200"
     ]
   },
   {
     "method": "POST",
-    "path": "/rum/event",
+    "path": "/logs",
+    "operationId": "LogsController_ingest",
+    "responseCodes": [
+      "204"
+    ]
+  },
+  {
+    "method": "POST",
+    "path": "/rum/events",
     "operationId": "RumController_ingest",
     "responseCodes": [
-      "201"
+      "204"
     ]
   },
   {
@@ -333,7 +333,7 @@ export const API_OPERATIONS = [
     "path": "/teams/{teamId}/accept-invitation",
     "operationId": "TeamsController_acceptInvitation",
     "responseCodes": [
-      "201"
+      "200"
     ]
   },
   {
@@ -341,7 +341,7 @@ export const API_OPERATIONS = [
     "path": "/teams/{teamId}/invite",
     "operationId": "TeamsController_inviteUser",
     "responseCodes": [
-      "201"
+      "200"
     ]
   }
 ] as const;

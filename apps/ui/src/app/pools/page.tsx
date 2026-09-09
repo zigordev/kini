@@ -187,7 +187,7 @@ function PoolsContent() {
 
   const updateMatch = async (
     match: FutPoolMatch,
-    payload: Parameters<typeof poolsApi.updateMatch>[1],
+    payload: Parameters<typeof poolsApi.updateMatch>[2],
   ) => {
     if (!selectedPool) return;
     if (payload.results && match.userId && match.userId !== user?.id) {
@@ -196,7 +196,11 @@ function PoolsContent() {
     }
     setSaving(`match:${match.id}`);
     try {
-      const updated = await poolsApi.updateMatch(match.id, payload);
+      const updated = await poolsApi.updateMatch(
+        selectedPool.id,
+        match.id,
+        payload,
+      );
       setPools((current) =>
         current.map((pool) =>
           pool.id === selectedPool.id

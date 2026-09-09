@@ -7,6 +7,8 @@ import {
   Post,
   Req,
   UseGuards,
+  HttpCode,
+  HttpStatus,
 } from '@nestjs/common';
 import {
   ApiCreatedResponse,
@@ -35,6 +37,7 @@ export class TeamsController {
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Create a team' })
   @ApiCreatedResponse({ type: TeamResponseDto })
   createTeam(
@@ -45,6 +48,7 @@ export class TeamsController {
   }
 
   @Post(':teamId/invite')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Invite a user to a team' })
   inviteUser(
     @Param('teamId', new ParseUUIDPipe({ version: '4' })) teamId: string,
@@ -59,6 +63,7 @@ export class TeamsController {
   }
 
   @Post(':teamId/accept-invitation')
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Accept a team invitation' })
   acceptInvitation(
     @Param('teamId', new ParseUUIDPipe({ version: '4' })) teamId: string,
