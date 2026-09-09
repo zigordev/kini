@@ -24,7 +24,7 @@
     "trivy:scan:image": "npm run docker:build && docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v $(pwd)/../../infra/monitoring/trivy-reports:/reports aquasec/trivy:0.56.2 image --scanners vuln,secret --format template --template '{{range .Results}}{{$t:=.Target}}{{range .Vulnerabilities}}{\"project\":\"kini-api\",\"Target\":\"{{$t}}\",\"Class\":\"vuln\",\"Severity\":\"{{.Severity}}\",\"VulnerabilityID\":\"{{.VulnerabilityID}}\",\"PkgName\":\"{{.PkgName}}\",\"InstalledVersion\":\"{{.InstalledVersion}}\",\"FixedVersion\":\"{{.FixedVersion}}\",\"Title\":\"{{.Title}}\",\"PrimaryURL\":\"{{.PrimaryURL}}\"}{{\"\\n\"}}{{end}}{{range .Secrets}}{\"project\":\"kini-api\",\"Target\":\"{{$t}}\",\"Class\":\"secret\",\"Severity\":\"{{.Severity}}\",\"RuleID\":\"{{.RuleID}}\",\"Category\":\"{{.Category}}\",\"Match\":\"{{.Match}}\"}{{\"\\n\"}}{{end}}{{end}}' --output /reports/kini-api.ndjson kini-api:local",
     "sonar:scan": "sonar-scanner -Dsonar.token=${SONAR_TOKEN}",
     "sonar:install": "npm install -D sonarqube-scanner",
-    "typeorm": "TS_NODE_COMPILER_OPTIONS='{\"types\":[\"node\"]}' TS_NODE_BASEURL=./ node -r tsconfig-paths/register ./node_modules/typeorm/cli-ts-node-commonjs.js -d src/database/data-source.ts",
+    "typeorm": "TS_NODE_COMPILER_OPTIONS='{\"types\":[\"node\"]}' typeorm-ts-node-commonjs -d src/database/data-source.ts",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:generate": "npm run typeorm -- migration:generate"
   },
@@ -63,7 +63,7 @@
     "rxjs": "^7.8.1",
     "socket.io": "^4.7.5",
     "swagger-ui-express": "^5.0.0",
-    "typeorm": "^1.1.1"
+    "typeorm": "^0.3.31"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.10",
