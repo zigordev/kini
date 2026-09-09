@@ -46,6 +46,9 @@ jobs:
           docker compose -f docker/compose.app.local.yml config > /dev/null
           docker compose -f docker/compose.ci.yml config > /dev/null
 
+      - name: Format check
+        run: npm run format:check
+
       - name: Lint workspaces
         run: npm run lint
 
@@ -65,8 +68,9 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: api-coverage
+          name: coverage-api
           path: apps/api/coverage
+          retention-days: 7
           if-no-files-found: warn
 
   secrets-scan:
@@ -78,7 +82,7 @@ jobs:
       pull-requests: read
 
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           fetch-depth: 0
 
@@ -131,6 +135,15 @@ jobs:
           mkdir -p artifacts
           docker compose -f docker/compose.ci.yml exec -T kini_api sh -lc 'wget -qO- http://localhost:3000/docs-json' > artifacts/openapi.test.json
 
+      - name: Upload OpenAPI spec
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: openapi-api
+          path: artifacts/openapi.test.json
+          retention-days: 7
+          if-no-files-found: error
+
       - name: Regenerate web API contract
         run: npm run contract:gen:web -- artifacts/openapi.test.json apps/ui/src/lib/api/generated.ts
 
@@ -166,7 +179,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: playwright-report
+          name: playwright-report-web
           path: apps/ui/playwright-report
           retention-days: 7
 
@@ -239,13 +252,65 @@ jobs:
           test -s artifacts/sbom-kini-web.spdx.json
           jq -e '.spdxVersion and (.packages | type == "array")' artifacts/sbom-kini-web.spdx.json
 
-      - name: Upload SBOM artifacts
+      - name: Upload SBOM (kini-api:ci)
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: sbom
-          path: |
-            artifacts/sbom-kini-api.spdx.json
-            artifacts/sbom-kini-web.spdx.json
+          name: sbom-api
+          path: artifacts/sbom-kini-api.spdx.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload SBOM (kini-web:ci)
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: sbom-web
+          path: artifacts/sbom-kini-web.spdx.json
+          retention-days: 30
+          if-no-files-found: error
+
+      # Twice per image on purpose: the JSON run records what was found and
+      # never fails, so the artifact exists even when the gate below stops the
+      # build. The vulnerability database is cached after the first scan.
+      - name: Trivy report (kini-api:ci)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: kini-api:ci
+          format: json
+          output: artifacts/trivy-kini-api.json
+          exit-code: '0'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
+      - name: Trivy report (kini-web:ci)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: kini-web:ci
+          format: json
+          output: artifacts/trivy-kini-web.json
+          exit-code: '0'
+          ignore-unfixed: true
+          trivyignores: .trivyignore
+          vuln-type: os,library
+          severity: HIGH,CRITICAL
+
+      - name: Upload Trivy report (kini-api:ci)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: trivy-api
+          path: artifacts/trivy-kini-api.json
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload Trivy report (kini-web:ci)
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: trivy-web
+          path: artifacts/trivy-kini-web.json
+          retention-days: 30
           if-no-files-found: error
 
       - name: Trivy scan (kini-api:ci)
