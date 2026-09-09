@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.4](https://github.com/zigordev/kini/compare/kini-v0.6.3...kini-v0.6.4) (2026-09-09)
+
+
+### Bug Fixes
+
+* **api:** send a content security policy instead of disabling it ([#80](https://github.com/zigordev/kini/issues/80)) ([87dd4a4](https://github.com/zigordev/kini/commit/87dd4a4ea23d7e4a37194db7ff157f5438125c2f))
+
 ## [0.6.3](https://github.com/zigordev/kini/compare/kini-v0.6.2...kini-v0.6.3) (2026-09-09)
 
 
