@@ -1,11 +1,12 @@
 title = "kini gitleaks config"
 
+[extend]
+useDefault = true
+
 [allowlist]
-description = "Ignore generated and legacy migration artifacts"
-paths = [
-  '''^\.legacy-git/''',
-  '''^apps/[^/]+/\.env(\..*)?$''',
-  '''^docker/\.env\.app\.local$''',
-  '''^infra/monitoring/\.env$''',
-  '''^infra/monitoring/trivy-reports/'''
+description = "Allow known placeholder/example values"
+regexes = [
+  '''CHANGE_ME_[A-Z0-9_]+''',
+  '''REQUIRED_SET_BY_DEPLOY''',
+  '''dummy''',
 ]
