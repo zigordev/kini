@@ -1,4 +1,4 @@
-FROM node:26-alpine AS base
+FROM node:24-alpine AS base
 WORKDIR /workspace
 
 FROM base AS dependencies
@@ -21,7 +21,7 @@ COPY apps/ui /workspace/apps/ui
 WORKDIR /workspace/apps/ui
 RUN npm run build
 
-FROM node:26-alpine AS prod
+FROM node:24-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
