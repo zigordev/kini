@@ -43,7 +43,7 @@ npm run sonar:install  # First time only
 npm run sonar:scan
 
 # Kini Web
-cd apps/ui
+cd apps/web
 npm run sonar:install  # First time only
 npm run sonar:scan
 ```
@@ -54,7 +54,7 @@ npm run sonar:scan
 cd apps/api
 npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
 
-cd ../../apps/ui
+cd ../../apps/web
 npx sonar-scanner -Dsonar.login=$SONAR_TOKEN
 ```
 
@@ -101,7 +101,7 @@ docker-compose restart sonarqube
 ```bash
 # Verify sonar-project.properties exists
 ls -la apps/api/sonar-project.properties
-ls -la apps/ui/sonar-project.properties
+ls -la apps/web/sonar-project.properties
 
 # Check SonarQube is accessible
 curl http://localhost:9000/api/system/status
@@ -132,7 +132,7 @@ crontab -e
 
 # Add these lines:
 0 2 * * * cd apps/api && npm run sonar:scan
-0 2 * * * cd apps/ui && npm run sonar:scan
+0 2 * * * cd apps/web && npm run sonar:scan
 ```
 
 ### Git Pre-commit Hook
@@ -141,7 +141,7 @@ crontab -e
 cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 cd apps/api && npm run sonar:scan
-cd ../../apps/ui && npm run sonar:scan
+cd ../../apps/web && npm run sonar:scan
 EOF
 
 chmod +x .git/hooks/pre-commit

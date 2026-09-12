@@ -117,7 +117,7 @@ function resolveManifest(name) {
     join(root, 'node_modules', name, 'package.json'),
     ...[
       'apps/api',
-      'apps/ui',
+      'apps/web',
       'apps/control-plane',
       'apps/operator-console',
     ].map((w) => join(root, w, 'node_modules', name, 'package.json')),

@@ -99,7 +99,7 @@ services:
       - no-new-privileges:true
     build:
       context: ..
-      dockerfile: apps/ui/Dockerfile
+      dockerfile: apps/web/Dockerfile
       target: prod
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3012}

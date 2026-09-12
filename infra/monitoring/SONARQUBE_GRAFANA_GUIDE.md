@@ -32,7 +32,7 @@ export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api
 npm run sonar:scan
 
-cd apps/ui
+cd apps/web
 npm run sonar:scan
 ```
 
@@ -41,7 +41,7 @@ npm run sonar:scan
 cd apps/api
 npx sonar-scanner -Dsonar.token=SONAR_TOKEN_PLACEHOLDER
 
-cd apps/ui
+cd apps/web
 npx sonar-scanner -Dsonar.token=SONAR_TOKEN_PLACEHOLDER
 ```
 
@@ -108,7 +108,7 @@ crontab -e
 
 # Add these lines:
 0 2 * * * cd apps/api && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
-0 2 * * * cd apps/ui && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
+0 2 * * * cd apps/web && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
 ```
 
 ### Git Pre-commit Hook
@@ -118,7 +118,7 @@ cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api && npm run sonar:scan
-cd ../../apps/ui && npm run sonar:scan
+cd ../../apps/web && npm run sonar:scan
 EOF
 
 chmod +x .git/hooks/pre-commit

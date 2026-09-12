@@ -9,7 +9,7 @@ The intended repository contract matches the other app repos:
 - Runtime secrets are not committed and are injected by the deployment target.
 - Docker manifests live under `docker/`.
 - The API and web app are built from the root lockfile with
-  `apps/api/Dockerfile` and `apps/ui/Dockerfile`.
+  `apps/api/Dockerfile` and `apps/web/Dockerfile`.
 - `NEXT_PUBLIC_API_BASE_URL` is supplied while building the web image.
 - The web and API origins must use HTTPS and the API must allow the exact web
   origin with credentialed CORS.

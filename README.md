@@ -5,7 +5,7 @@ Kini football pool platform monorepo.
 ## Repository shape
 
 - `apps/api`: NestJS backend
-- `apps/ui`: Next.js web client
+- `apps/web`: Next.js web client
 - `docker/`: root-owned local and CI compose manifests
 - `infra/monitoring`: local SonarQube, Grafana, Loki, Prometheus, and Trivy support
 - `.github/workflows`: CI, commit lint, CodeQL, release, and deploy entrypoints
@@ -99,11 +99,11 @@ Keep non-secret OAuth and translation values in `docker/.env.app.local`, includi
 
 Translations are authored in local Tolgee from `platform-ops`. `npm run local:up`
 first uploads local translation changes, then refreshes the tracked
-`apps/ui/messages/*.json` snapshots before starting the app.
+`apps/web/messages/*.json` snapshots before starting the app.
 
 ## Web runtime contract
 
-Kini uses the same `apps/api` + `apps/ui` repository shape as GPool. The browser
+Kini uses the same `apps/api` + `apps/web` repository shape as GPool. The browser
 talks directly to the configured API and Socket.IO origins. Local defaults are:
 
 - Web: `http://localhost:3013`

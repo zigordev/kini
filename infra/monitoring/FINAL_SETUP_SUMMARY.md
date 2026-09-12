@@ -29,7 +29,7 @@ apps/api/
 ├── sonar-project.properties                # SonarQube config
 └── package.json                            # Added sonar:scan script
 
-apps/ui/
+apps/web/
 ├── sonar-project.properties                # SonarQube config
 └── package.json                            # Added sonar:scan script
 ```
@@ -61,7 +61,7 @@ cd apps/api
 npm run sonar:scan
 
 # Analyze kini-web
-cd apps/ui
+cd apps/web
 npm run sonar:scan
 ```
 
@@ -118,7 +118,7 @@ source ~/.zshrc
 # After code changes
 export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api && npm run sonar:scan
-cd ../../apps/ui && npm run sonar:scan
+cd ../../apps/web && npm run sonar:scan
 
 # View results
 open http://localhost:9000
@@ -131,7 +131,7 @@ crontab -e
 
 # Add:
 0 2 * * * cd apps/api && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
-0 2 * * * cd apps/ui && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
+0 2 * * * cd apps/web && export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER && npm run sonar:scan
 ```
 
 ### Option 3: Pre-commit Hook
@@ -140,7 +140,7 @@ cat > ./kini/.git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 export SONAR_TOKEN=SONAR_TOKEN_PLACEHOLDER
 cd apps/api && npm run sonar:scan || true
-cd ../../apps/ui && npm run sonar:scan || true
+cd ../../apps/web && npm run sonar:scan || true
 EOF
 
 chmod +x ./kini/.git/hooks/pre-commit
