@@ -35,6 +35,7 @@ services:
   kini_api:
     security_opt:
       - no-new-privileges:true
+    init: true
     build:
       context: ..
       dockerfile: apps/api/Dockerfile
@@ -97,10 +98,11 @@ services:
   kini_web:
     security_opt:
       - no-new-privileges:true
+    init: true
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
-      target: prod
+      target: local
       args:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3012}
         NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:-local}
@@ -115,7 +117,8 @@ services:
       kini_api:
         condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001 >/dev/null 2>&1']
+      test:
+        ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/health >/dev/null 2>&1']
       interval: 10s
       timeout: 4s
       retries: 12

@@ -6,8 +6,7 @@ Kini football pool platform monorepo.
 
 - `apps/api`: NestJS backend
 - `apps/web`: Next.js web client
-- `docker/`: root-owned local and CI compose manifests
-- `infra/monitoring`: local SonarQube, Grafana, Loki, Prometheus, and Trivy support
+- `docker/`: app-local, app-dev, app-prod and CI compose manifests + env templates
 - `.github/workflows`: CI, commit lint, CodeQL, release, and deploy entrypoints
 
 ## Quick start

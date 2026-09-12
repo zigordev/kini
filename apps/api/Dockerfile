@@ -1,7 +1,7 @@
 FROM node:24-alpine AS base
 WORKDIR /workspace
 
-FROM base AS dependencies
+FROM base AS deps-build
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
@@ -9,7 +9,7 @@ COPY scripts/prepare-husky.mjs scripts/prepare-husky.mjs
 RUN HUSKY=0 npm ci --workspace @kini/api --include-workspace-root --ignore-scripts
 RUN mkdir -p /workspace/apps/api/node_modules
 
-FROM base AS production-dependencies
+FROM base AS deps-prod
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
@@ -18,8 +18,8 @@ RUN HUSKY=0 npm ci --workspace @kini/api --include-workspace-root --omit=dev --i
 
 FROM base AS build
 ENV NODE_ENV=production
-COPY --from=dependencies /workspace/node_modules /workspace/node_modules
-COPY --from=dependencies /workspace/apps/api/node_modules /workspace/apps/api/node_modules
+COPY --from=deps-build /workspace/node_modules /workspace/node_modules
+COPY --from=deps-build /workspace/apps/api/node_modules /workspace/apps/api/node_modules
 COPY package.json /workspace/package.json
 COPY apps/api /workspace/apps/api
 WORKDIR /workspace/apps/api
@@ -35,7 +35,7 @@ ENV NODE_ENV=production
 # legitimate use here.
 RUN apk upgrade --no-cache \
   && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
-COPY --from=production-dependencies --chown=node:node /workspace/node_modules /app/node_modules
+COPY --from=deps-prod --chown=node:node /workspace/node_modules /app/node_modules
 COPY --from=build --chown=node:node /workspace/apps/api/dist /app/apps/api/dist
 COPY --from=build --chown=node:node /workspace/apps/api/package.json /app/apps/api/package.json
 COPY --chown=node:node apps/api/scripts/openbao-run.mjs /app/scripts/openbao-run.mjs
@@ -48,8 +48,8 @@ FROM prod AS local
 
 FROM base AS dev
 ENV NODE_ENV=development
-COPY --from=dependencies /workspace/node_modules /workspace/node_modules
-COPY --from=dependencies /workspace/apps/api/node_modules /workspace/apps/api/node_modules
+COPY --from=deps-build /workspace/node_modules /workspace/node_modules
+COPY --from=deps-build /workspace/apps/api/node_modules /workspace/apps/api/node_modules
 COPY package.json package-lock.json /workspace/
 COPY apps/api/scripts/openbao-run.mjs /workspace/scripts/openbao-run.mjs
 COPY apps/api /workspace/apps/api
