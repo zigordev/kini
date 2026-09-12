@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-COMPOSE_FILE="docker/compose.precommit.yml"
+COMPOSE_FILE="docker/compose.ci.yml"
+COMPOSE_PROJECT="kini-precommit"
+export CI_DB_PORT=15435
+export CI_API_PORT=3112
+export CI_WEB_PORT=3113
+export CI_OAUTH_PORT=3911
 STARTED_BY_HOOK=0
-STACK_SERVICES=(kini_db kini_api kini_web)
+STACK_SERVICES=(postgres api web)
 
 cleanup() {
   if [ "$STARTED_BY_HOOK" -eq 1 ]; then
-    docker compose -f "$COMPOSE_FILE" down -v >/dev/null 2>&1 || true
+    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" down -v >/dev/null 2>&1 || true
   fi
 }
 trap cleanup EXIT
 
-running_container="$(docker compose -f "$COMPOSE_FILE" ps -q kini_api 2>/dev/null || true)"
+running_container="$(docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" ps -q api 2>/dev/null || true)"
 local_api_container="$(
   docker compose --env-file docker/.env.app.local -f docker/compose.app.local.yml ps -q kini_api 2>/dev/null || true
 )"
@@ -26,13 +31,13 @@ if [ -n "$local_api_container" ] && [ -n "$local_web_container" ]; then
 fi
 
 if [ -z "$running_container" ] && [ "$existing_local_stack" -eq 0 ]; then
-  docker compose -f "$COMPOSE_FILE" up -d --build "${STACK_SERVICES[@]}"
+  docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" up -d --build "${STACK_SERVICES[@]}"
   STARTED_BY_HOOK=1
 fi
 
-API_HEALTH_URL="http://localhost:3112/health"
-METRICS_URL="http://localhost:3112/metrics"
-WEB_HEALTH_URL="http://localhost:3113/login"
+API_HEALTH_URL="http://localhost:${CI_API_PORT}/health"
+METRICS_URL="http://localhost:${CI_API_PORT}/metrics"
+WEB_HEALTH_URL="http://localhost:${CI_WEB_PORT}/login"
 
 if [ "$existing_local_stack" -eq 1 ]; then
   API_HEALTH_URL="http://localhost:3012/health"
@@ -56,11 +61,11 @@ wait_for() {
   done
 
   echo "$label did not become reachable in time" >&2
-  docker compose -f "$COMPOSE_FILE" logs --no-color "$service"
+  docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" logs --no-color "$service"
   exit 1
 }
 
-wait_for "$API_HEALTH_URL" "API health" kini_api
+wait_for "$API_HEALTH_URL" "API health" api
 
 metrics_payload="$(curl -fsS "$METRICS_URL")"
 for metric in http_requests_total http_request_duration_seconds_bucket; do
@@ -70,6 +75,6 @@ for metric in http_requests_total http_request_duration_seconds_bucket; do
   fi
 done
 
-wait_for "$WEB_HEALTH_URL" "web" kini_web
+wait_for "$WEB_HEALTH_URL" "web" web
 
 echo "Precommit integration smoke passed"

@@ -1,7 +1,7 @@
 name: kini-ci
 
 services:
-  kini_db:
+  postgres:
     security_opt:
       - no-new-privileges:true
     image: postgres:16-alpine
@@ -10,7 +10,7 @@ services:
       POSTGRES_PASSWORD: kini
       POSTGRES_DB: kini
     ports:
-      - '15434:5432'
+      - '${CI_DB_PORT:-15434}:5432'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
       interval: 5s
@@ -33,7 +33,7 @@ services:
       SERVER_PORT: '8080'
       JSON_CONFIG: '{"interactiveLogin":true,"tokenCallbacks":[{"issuerId":"kini","requestMappings":[{"requestParam":"code","match":"*","claims":{"email":"e2e@zigordev.test","email_verified":true,"name":"End To End"}}]}]}'
     ports:
-      - '3901:8080'
+      - '${CI_OAUTH_PORT:-3901}:8080'
     healthcheck:
       test:
         [
@@ -44,9 +44,10 @@ services:
       timeout: 3s
       retries: 20
 
-  kini_api:
+  api:
     security_opt:
       - no-new-privileges:true
+    init: true
     build:
       context: ..
       dockerfile: apps/api/Dockerfile
@@ -56,16 +57,16 @@ services:
       OTEL_SERVICE_NAME: kini-api
       OTEL_TRACES_ENABLED: 'false'
       PORT: 3000
-      DATABASE_HOST: kini_db
+      DATABASE_HOST: postgres
       DATABASE_PORT: 5432
       DATABASE_USER: kini
       DATABASE_PASSWORD: kini
       DATABASE_NAME: kini
       DATABASE_SSL: 'false'
       DATABASE_SYNCHRONIZE: 'true'
-      AUTH_CORS_ORIGINS: http://localhost:3013
-      AUTH_SUCCESS_REDIRECT_URL: http://localhost:3013/auth/callback
-      AUTH_FAILURE_REDIRECT_URL: http://localhost:3013/auth/callback
+      AUTH_CORS_ORIGINS: http://localhost:${CI_WEB_PORT:-3013}
+      AUTH_SUCCESS_REDIRECT_URL: http://localhost:${CI_WEB_PORT:-3013}/auth/callback
+      AUTH_FAILURE_REDIRECT_URL: http://localhost:${CI_WEB_PORT:-3013}/auth/callback
       SESSION_SECRET: ci-session-secret
       SESSION_COOKIE_SECRET: ci-cookie-secret
       SESSION_COOKIE_NAME: kini.sid
@@ -74,16 +75,16 @@ services:
       SESSION_COOKIE_SAME_SITE: lax
       GOOGLE_CLIENT_ID: ci-google-client-id
       GOOGLE_CLIENT_SECRET: ci-google-client-secret
-      GOOGLE_CALLBACK_URL: http://localhost:3012/auth/google/callback
-      GOOGLE_AUTHORIZATION_URL: http://localhost:3901/kini/authorize
+      GOOGLE_CALLBACK_URL: http://localhost:${CI_API_PORT:-3012}/auth/google/callback
+      GOOGLE_AUTHORIZATION_URL: http://localhost:${CI_OAUTH_PORT:-3901}/kini/authorize
       GOOGLE_TOKEN_URL: http://oauth:8080/kini/token
       GOOGLE_USERINFO_URL: http://oauth:8080/kini/userinfo
-      FRONTEND_URL: http://localhost:3013
+      FRONTEND_URL: http://localhost:${CI_WEB_PORT:-3013}
       NOTIFICATIONS_KAFKA_BROKERS: platform-redpanda:9092
       NOTIFICATIONS_EMAIL_TOPIC: notification.email.requested.v1
       EDUARDO_LOSILLA_SYNC_ENABLED: 'false'
     ports:
-      - '3012:3000'
+      - '${CI_API_PORT:-3012}:3000'
     healthcheck:
       test:
         ['CMD-SHELL', 'wget -qO- http://localhost:3000/health >/dev/null 2>&1']
@@ -91,31 +92,33 @@ services:
       timeout: 3s
       retries: 20
     depends_on:
-      kini_db:
+      postgres:
         condition: service_healthy
     command: ['node', 'dist/main.js']
 
-  kini_web:
+  web:
     security_opt:
       - no-new-privileges:true
+    init: true
     build:
       context: ..
       dockerfile: apps/web/Dockerfile
-      target: prod
+      target: local
       args:
-        NEXT_PUBLIC_API_BASE_URL: http://localhost:3012
+        NEXT_PUBLIC_API_BASE_URL: http://localhost:${CI_API_PORT:-3012}
         NEXT_PUBLIC_RELEASE: ci
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_BASE_URL: http://localhost:3012
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:${CI_API_PORT:-3012}
       NEXT_PUBLIC_RELEASE: ci
     ports:
-      - '3013:3001'
+      - '${CI_WEB_PORT:-3013}:3001'
     depends_on:
-      kini_api:
+      api:
         condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001 >/dev/null 2>&1']
+      test:
+        ['CMD-SHELL', 'wget -qO- http://localhost:3001/health >/dev/null 2>&1']
       interval: 5s
       timeout: 3s
       retries: 20

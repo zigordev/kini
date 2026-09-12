@@ -9,7 +9,6 @@
     "lint": "eslint --no-cache .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "sonar:scan": "sonar-scanner -Dsonar.token=${SONAR_TOKEN}",
     "i18n:pull": "tolgee pull --config ./tolgee.config.cjs",
     "i18n:push": "tolgee push --config ./tolgee.config.cjs --force-mode OVERRIDE",
     "clean": "rm -rf .next coverage",
@@ -35,7 +34,6 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.3.4",
     "jsdom": "^26.1.0",
-    "sonarqube-scanner": "^5.0.0",
     "typescript": "^5.9.2",
     "vitest": "^5.0.0"
   }

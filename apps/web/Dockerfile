@@ -1,7 +1,7 @@
 FROM node:24-alpine AS base
 WORKDIR /workspace
 
-FROM base AS dependencies
+FROM base AS deps-build
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
 COPY apps/web/package.json apps/web/package.json
@@ -15,8 +15,8 @@ ARG NEXT_PUBLIC_RELEASE=local
 ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ENV NEXT_PUBLIC_RELEASE=${NEXT_PUBLIC_RELEASE}
 ENV NEXT_TELEMETRY_DISABLED=1
-COPY --from=dependencies /workspace/node_modules /workspace/node_modules
-COPY --from=dependencies /workspace/apps/web/node_modules /workspace/apps/web/node_modules
+COPY --from=deps-build /workspace/node_modules /workspace/node_modules
+COPY --from=deps-build /workspace/apps/web/node_modules /workspace/apps/web/node_modules
 COPY package.json /workspace/package.json
 COPY apps/web /workspace/apps/web
 WORKDIR /workspace/apps/web
@@ -41,11 +41,13 @@ USER node
 EXPOSE 3001
 CMD ["node", "apps/web/server.js"]
 
+FROM prod AS local
+
 FROM base AS dev
 ENV NODE_ENV=development
 ENV NEXT_TELEMETRY_DISABLED=1
-COPY --from=dependencies /workspace/node_modules /workspace/node_modules
-COPY --from=dependencies /workspace/apps/web/node_modules /workspace/apps/web/node_modules
+COPY --from=deps-build /workspace/node_modules /workspace/node_modules
+COPY --from=deps-build /workspace/apps/web/node_modules /workspace/apps/web/node_modules
 COPY package.json package-lock.json /workspace/
 COPY apps/web /workspace/apps/web
 WORKDIR /workspace/apps/web
