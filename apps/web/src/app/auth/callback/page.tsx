@@ -30,14 +30,10 @@ function AuthCallbackContent() {
     }
     const requestedPath = search.get('next');
     const returnPath =
-      requestedPath?.startsWith('/') && !requestedPath.startsWith('//')
-        ? requestedPath
-        : '/';
+      requestedPath?.startsWith('/') && !requestedPath.startsWith('//') ? requestedPath : '/';
     void refresh()
       .then(() => router.replace(returnPath))
-      .catch((caught) =>
-        setError(caught instanceof Error ? caught.message : String(caught)),
-      );
+      .catch((caught) => setError(caught instanceof Error ? caught.message : String(caught)));
   }, [refresh, router, search]);
 
   if (error) {
@@ -45,10 +41,7 @@ function AuthCallbackContent() {
       <section className="page-state">
         <h1>{t('login.title')}</h1>
         <p className="form-error">{error}</p>
-        <Button variant="primary"
-          onClick={() => router.replace('/')}
-          type="button"
-        >
+        <Button variant="primary" onClick={() => router.replace('/')} type="button">
           {t('actions.done')}
         </Button>
       </section>

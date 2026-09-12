@@ -15,8 +15,7 @@ export function buildSessionPoolConfig(config: ConfigService): PoolConfig {
     max: 4,
     ssl: sslEnabled
       ? {
-          rejectUnauthorized:
-            config.get<string>('DATABASE_SSL_REJECT_UNAUTHORIZED') !== 'false',
+          rejectUnauthorized: config.get<string>('DATABASE_SSL_REJECT_UNAUTHORIZED') !== 'false',
           ca: config.get<string>('DATABASE_CA_CERT') || undefined,
         }
       : undefined,

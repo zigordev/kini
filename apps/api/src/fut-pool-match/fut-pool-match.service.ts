@@ -1,8 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventsGateway } from 'src/events/events.gateway';
 import { NotifierService } from 'src/notifications/notifier.service';
 import { TeamsService } from 'src/teams/teams.service';
@@ -17,14 +13,14 @@ export class FutPoolMatchService {
     private readonly futPoolMatchRepository: FutPoolMatchRepository,
     private readonly events: EventsGateway,
     private readonly notifier: NotifierService,
-    private readonly teams: TeamsService,
+    private readonly teams: TeamsService
   ) {}
 
   async update(
     poolId: string,
     matchId: string,
     match: UpdateFutPoolMatchDto,
-    actor?: { id: string; name?: string },
+    actor?: { id: string; name?: string }
   ): Promise<FutPoolMatchResponseDto> {
     const oldMatch = await this.futPoolMatchRepository.findById(matchId);
 
@@ -46,17 +42,14 @@ export class FutPoolMatchService {
     ) {
       throw new ForbiddenException({
         code: 'FUT_POOL_MATCH.NOT_ASSIGNED',
-        message:
-          'Only the player a match is assigned to can change its results',
+        message: 'Only the player a match is assigned to can change its results',
         params: { matchId },
       });
     }
 
     const wasComplete =
       oldMatch?.futPoolId && match.results !== undefined
-        ? await this.futPoolMatchRepository.isPoolPredictionsComplete(
-            oldMatch.futPoolId,
-          )
+        ? await this.futPoolMatchRepository.isPoolPredictionsComplete(oldMatch.futPoolId)
         : false;
 
     const updated = await this.futPoolMatchRepository.update(matchId, match);
@@ -70,14 +63,11 @@ export class FutPoolMatchService {
     await this.notifier.notifyMatchUpdated(updated, oldMatch, match, actor);
 
     if (match.results !== undefined && !wasComplete) {
-      const isComplete =
-        await this.futPoolMatchRepository.isPoolPredictionsComplete(
-          updated.futPoolId,
-        );
+      const isComplete = await this.futPoolMatchRepository.isPoolPredictionsComplete(
+        updated.futPoolId
+      );
       if (isComplete && updated.futPool?.teamId) {
-        const members = await this.teams.listActiveMemberUsers(
-          updated.futPool.teamId,
-        );
+        const members = await this.teams.listActiveMemberUsers(updated.futPool.teamId);
         await this.notifier.notifyPoolPredictionsCompleted({
           poolId: updated.futPool.id,
           poolDate: updated.futPool.date,

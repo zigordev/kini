@@ -21,9 +21,7 @@ describe('SELAE Quiniela parser', () => {
 
     expect(items).toHaveLength(1);
     expect(extractSelaeJornada(items[0].title)).toBe(71);
-    expect(extractSelaeDate(items[0].description)?.toISOString()).toBe(
-      '2026-07-04T12:00:00.000Z',
-    );
+    expect(extractSelaeDate(items[0].description)?.toISOString()).toBe('2026-07-04T12:00:00.000Z');
     expect(extractSelaeJackpot(items[0])).toMatchObject({
       value: '1250000',
       formatted: '1.250.000 EUR',
@@ -87,7 +85,7 @@ describe('SELAE Quiniela parser', () => {
 describe('htmlToText', () => {
   it('strips a script whose end tag carries whitespace', () => {
     const text = htmlToText(
-      '<p>Real Madrid - Barcelona</p><script >leaked()</script ><p>Sevilla - Betis</p>',
+      '<p>Real Madrid - Barcelona</p><script >leaked()</script ><p>Sevilla - Betis</p>'
     );
 
     expect(text).not.toContain('leaked()');
@@ -101,9 +99,7 @@ describe('htmlToText', () => {
   });
 
   it('drops comments rather than emitting their contents', () => {
-    const text = htmlToText(
-      '<div><!-- Girona - Elche --><p>Cadiz - Getafe</p></div>',
-    );
+    const text = htmlToText('<div><!-- Girona - Elche --><p>Cadiz - Getafe</p></div>');
 
     expect(text).not.toContain('Girona');
     expect(text).toContain('Cadiz - Getafe');
@@ -120,14 +116,12 @@ describe('htmlToText', () => {
   });
 
   it('decodes accented entities to their characters', () => {
-    expect(htmlToText('<p>Alav&eacute;s - Legan&eacute;s</p>')).toBe(
-      'Alavés - Leganés',
-    );
+    expect(htmlToText('<p>Alav&eacute;s - Legan&eacute;s</p>')).toBe('Alavés - Leganés');
   });
 
   it('breaks lines at element boundaries so fixtures stay separated', () => {
     const matches = extractCompositionMatches(
-      '<ul><li>1 Real Madrid - Barcelona</li><li>2 Sevilla - Betis</li></ul>',
+      '<ul><li>1 Real Madrid - Barcelona</li><li>2 Sevilla - Betis</li></ul>'
     );
 
     expect(matches).toEqual([

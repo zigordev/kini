@@ -33,9 +33,7 @@ const initialTheme = (): ThemeMode => {
   if (typeof window === 'undefined') return 'light';
   const stored = window.localStorage.getItem('kini-theme');
   if (stored === 'light' || stored === 'dark') return stored;
-  return window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 };
 
 export function PreferencesProvider({ children }: PropsWithChildren) {
@@ -70,21 +68,16 @@ export function PreferencesProvider({ children }: PropsWithChildren) {
     updateTheme(next);
   }, []);
   const t = useCallback(
-    (key: string, params?: Record<string, string | number>) =>
-      translate(language, key, params),
-    [language],
+    (key: string, params?: Record<string, string | number>) => translate(language, key, params),
+    [language]
   );
 
   const value = useMemo(
     () => ({ language, theme, setLanguage, setTheme, t }),
-    [language, setLanguage, setTheme, t, theme],
+    [language, setLanguage, setTheme, t, theme]
   );
 
-  return (
-    <PreferencesContext.Provider value={value}>
-      {children}
-    </PreferencesContext.Provider>
-  );
+  return <PreferencesContext.Provider value={value}>{children}</PreferencesContext.Provider>;
 }
 
 export const usePreferences = () => {

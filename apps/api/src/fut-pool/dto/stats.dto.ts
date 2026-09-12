@@ -32,8 +32,7 @@ export class StatsDto {
   // longer accepted, and naming the DTO is better documentation anyway — the
   // generated schema now describes the shape instead of saying "an object".
   @ApiProperty({
-    description:
-      'Breakdown of result combinations and their success/failure counts',
+    description: 'Breakdown of result combinations and their success/failure counts',
     type: () => ResultCombinationStatDto,
     isArray: true,
   })

@@ -3,10 +3,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  FutPoolMatch,
-  Result,
-} from '../fut-pool-match/entities/fut-pool-match.entity';
+import { FutPoolMatch, Result } from '../fut-pool-match/entities/fut-pool-match.entity';
 import { User } from '../users/user.entity';
 import { FutPool } from './entities/fut-pool.entity';
 import { FutPoolRepository } from './fut-pool.repository';
@@ -69,9 +66,7 @@ describe('FutPoolRepository', () => {
     }).compile();
 
     repository = module.get<FutPoolRepository>(FutPoolRepository);
-    typeormRepository = module.get(getRepositoryToken(FutPool)) as Mocked<
-      Repository<FutPool>
-    >;
+    typeormRepository = module.get(getRepositoryToken(FutPool)) as Mocked<Repository<FutPool>>;
   });
 
   it('should be defined', () => {
@@ -234,9 +229,9 @@ describe('FutPoolRepository', () => {
     it('should throw NotFoundException when pool not found', async () => {
       typeormRepository.findOne.mockResolvedValue(null);
 
-      await expect(
-        repository.updatePool('pool-123', { doubles: 3 }),
-      ).rejects.toThrow(NotFoundException);
+      await expect(repository.updatePool('pool-123', { doubles: 3 })).rejects.toThrow(
+        NotFoundException
+      );
     });
 
     it('should validate doubles against existing results', async () => {
@@ -258,12 +253,12 @@ describe('FutPoolRepository', () => {
 
       typeormRepository.findOne.mockResolvedValue(pool);
 
-      await expect(
-        repository.updatePool('pool-123', { doubles: 1 }),
-      ).rejects.toThrow(BadRequestException);
-      await expect(
-        repository.updatePool('pool-123', { doubles: 1 }),
-      ).rejects.toThrow(/already 2 matches with double results/);
+      await expect(repository.updatePool('pool-123', { doubles: 1 })).rejects.toThrow(
+        BadRequestException
+      );
+      await expect(repository.updatePool('pool-123', { doubles: 1 })).rejects.toThrow(
+        /already 2 matches with double results/
+      );
     });
 
     it('should validate triples against existing results', async () => {
@@ -276,9 +271,9 @@ describe('FutPoolRepository', () => {
 
       typeormRepository.findOne.mockResolvedValue(pool);
 
-      await expect(
-        repository.updatePool('pool-123', { triples: 0 }),
-      ).rejects.toThrow(BadRequestException);
+      await expect(repository.updatePool('pool-123', { triples: 0 })).rejects.toThrow(
+        BadRequestException
+      );
     });
 
     it('should handle date conversion', async () => {
@@ -313,7 +308,7 @@ describe('FutPoolRepository', () => {
       expect(typeormRepository.create).toHaveBeenCalledWith(
         expect.objectContaining({
           cost: expectedCost,
-        }),
+        })
       );
     });
 
@@ -347,13 +342,11 @@ describe('FutPoolRepository', () => {
       typeormRepository.create.mockReturnValue(mockPool);
       typeormRepository.save.mockResolvedValue(mockPool);
       typeormRepository.findOne.mockResolvedValue(mockPool);
-      typeormRepository.manager.getRepository = vi
-        .fn()
-        .mockImplementation((entity) => {
-          if (entity === FutPoolMatch) return matchRepository;
-          if (entity === User) return userRepository;
-          return null;
-        });
+      typeormRepository.manager.getRepository = vi.fn().mockImplementation((entity) => {
+        if (entity === FutPoolMatch) return matchRepository;
+        if (entity === User) return userRepository;
+        return null;
+      });
 
       await repository.createPool(payload);
 
@@ -390,13 +383,11 @@ describe('FutPoolRepository', () => {
       typeormRepository.create.mockReturnValue(mockPool);
       typeormRepository.save.mockResolvedValue(mockPool);
       typeormRepository.findOne.mockResolvedValue(mockPool);
-      typeormRepository.manager.getRepository = vi
-        .fn()
-        .mockImplementation((entity) => {
-          if (entity === FutPoolMatch) return matchRepository;
-          if (entity === User) return userRepository;
-          return null;
-        });
+      typeormRepository.manager.getRepository = vi.fn().mockImplementation((entity) => {
+        if (entity === FutPoolMatch) return matchRepository;
+        if (entity === User) return userRepository;
+        return null;
+      });
 
       await repository.createPool(payload);
 
@@ -408,17 +399,13 @@ describe('FutPoolRepository', () => {
       const payload = {
         doubles: 2,
         date: '2024-01-15',
-        matches: [
-          { homeTeam: '', awayTeam: 'Team B', order: 1, userId: 'user-123' },
-        ],
+        matches: [{ homeTeam: '', awayTeam: 'Team B', order: 1, userId: 'user-123' }],
       };
 
       typeormRepository.create.mockReturnValue(mockPool);
       typeormRepository.save.mockResolvedValue(mockPool);
 
-      await expect(repository.createPool(payload)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(repository.createPool(payload)).rejects.toThrow(BadRequestException);
     });
   });
 });

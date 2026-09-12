@@ -59,20 +59,12 @@ function runPush(repoRoot, workspace, env) {
   return new Promise((resolve) => {
     const child = spawn(
       'node',
-      [
-        'apps/api/scripts/openbao-run.mjs',
-        '--',
-        'npm',
-        'run',
-        'i18n:push',
-        '-w',
-        workspace,
-      ],
+      ['apps/api/scripts/openbao-run.mjs', '--', 'npm', 'run', 'i18n:push', '-w', workspace],
       {
         cwd: repoRoot,
         stdio: 'inherit',
         env,
-      },
+      }
     );
 
     child.on('exit', (code, signal) => {
@@ -88,17 +80,12 @@ function runPush(repoRoot, workspace, env) {
 
 async function main() {
   const { watch: watchMode, workspace } = parseArgs(process.argv.slice(2));
-  const repoRoot = path.resolve(
-    path.dirname(fileURLToPath(import.meta.url)),
-    '..',
-  );
+  const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
   const envFile = path.join(repoRoot, 'docker/.env.app.local');
   const localesDir = path.join(repoRoot, 'apps/web/messages');
 
   if (!existsSync(envFile)) {
-    die(
-      `Missing ${path.relative(repoRoot, envFile)}. Create it before running Tolgee sync.`,
-    );
+    die(`Missing ${path.relative(repoRoot, envFile)}. Create it before running Tolgee sync.`);
   }
   if (!existsSync(localesDir)) {
     die(`Missing ${path.relative(repoRoot, localesDir)} directory.`);
@@ -107,9 +94,7 @@ async function main() {
   const envFromFile = parseEnvFile(envFile);
   const openbaoToken = envFromFile.OPENBAO_TOKEN?.trim();
   if (!openbaoToken || openbaoToken === 'CHANGE_ME_LOCAL_OPENBAO_TOKEN') {
-    die(
-      'docker/.env.app.local must contain a real OPENBAO_TOKEN before Tolgee sync can run.',
-    );
+    die('docker/.env.app.local must contain a real OPENBAO_TOKEN before Tolgee sync can run.');
   }
 
   const childEnv = {
@@ -139,9 +124,7 @@ async function main() {
     return;
   }
 
-  console.log(
-    `Watching ${path.relative(repoRoot, localesDir)} for Tolgee sync...`,
-  );
+  console.log(`Watching ${path.relative(repoRoot, localesDir)} for Tolgee sync...`);
 
   let timer = null;
   let inFlight = false;

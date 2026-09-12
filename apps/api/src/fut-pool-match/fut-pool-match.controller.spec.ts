@@ -61,12 +61,7 @@ describe('FutPoolMatchController', () => {
 
       service.update.mockResolvedValue(expectedMatch);
 
-      const result = await controller.update(
-        poolId,
-        matchId,
-        updateDto,
-        mockRequest,
-      );
+      const result = await controller.update(poolId, matchId, updateDto, mockRequest);
 
       expect(result).toEqual(expectedMatch);
       expect(service.update).toHaveBeenCalledWith(poolId, matchId, updateDto, {
@@ -85,12 +80,7 @@ describe('FutPoolMatchController', () => {
 
       await controller.update(poolId, matchId, updateDto, mockRequest);
 
-      expect(service.update).toHaveBeenCalledWith(
-        poolId,
-        matchId,
-        updateDto,
-        undefined,
-      );
+      expect(service.update).toHaveBeenCalledWith(poolId, matchId, updateDto, undefined);
     });
   });
 });

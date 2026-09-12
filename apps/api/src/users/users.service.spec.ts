@@ -45,9 +45,7 @@ describe('UsersService', () => {
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    repository = module.get(getRepositoryToken(User)) as Mocked<
-      Repository<User>
-    >;
+    repository = module.get(getRepositoryToken(User)) as Mocked<Repository<User>>;
   });
 
   it('should be defined', () => {
@@ -139,7 +137,7 @@ describe('UsersService', () => {
         expect.objectContaining({
           googleId: 'google-123',
           email: 'test@example.com',
-        }),
+        })
       );
     });
 
@@ -159,7 +157,7 @@ describe('UsersService', () => {
         expect.objectContaining({
           textColor: '#000000',
           backgroundColor: '#FFFFFF',
-        }),
+        })
       );
     });
 
@@ -174,7 +172,7 @@ describe('UsersService', () => {
       expect(repository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'test@example.com',
-        }),
+        })
       );
     });
 
@@ -198,7 +196,7 @@ describe('UsersService', () => {
           avatarUrl: null,
           givenName: null,
           familyName: null,
-        }),
+        })
       );
     });
   });
@@ -244,7 +242,7 @@ describe('UsersService', () => {
       expect(repository.find).toHaveBeenCalledWith(
         expect.objectContaining({
           order: { name: 'ASC' },
-        }),
+        })
       );
     });
   });
@@ -266,9 +264,9 @@ describe('UsersService', () => {
     it('should throw when user not found', async () => {
       repository.findOne.mockResolvedValue(null);
 
-      await expect(
-        service.updateUser('user-123', { name: 'New Name' }),
-      ).rejects.toThrow('User not found');
+      await expect(service.updateUser('user-123', { name: 'New Name' })).rejects.toThrow(
+        'User not found'
+      );
     });
 
     it('should only update provided fields', async () => {
@@ -281,7 +279,7 @@ describe('UsersService', () => {
       expect(repository.save).toHaveBeenCalledWith(
         expect.objectContaining({
           language: 'es',
-        }),
+        })
       );
     });
   });

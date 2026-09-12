@@ -16,13 +16,7 @@ import { SessionSerializer } from './session.serializer';
     PassportModule.register({ session: true }),
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    GoogleStrategy,
-    SessionSerializer,
-    AuthenticatedGuard,
-    GoogleAuthGuard,
-  ],
+  providers: [AuthService, GoogleStrategy, SessionSerializer, AuthenticatedGuard, GoogleAuthGuard],
   exports: [AuthService, AuthenticatedGuard],
 })
 export class AuthModule {}

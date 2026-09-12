@@ -10,7 +10,7 @@ import { UsersService } from '../users/users.service';
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   async validateGoogleProfile(profile: Profile): Promise<User> {
@@ -51,11 +51,9 @@ export class AuthService {
   getSuccessRedirectUrl(
     user: User,
     overrideUrl?: string | null,
-    additionalParams?: Record<string, string | undefined>,
+    additionalParams?: Record<string, string | undefined>
   ): string {
-    const fallbackRedirect = this.configService.get<string>(
-      'AUTH_SUCCESS_REDIRECT_URL',
-    );
+    const fallbackRedirect = this.configService.get<string>('AUTH_SUCCESS_REDIRECT_URL');
 
     const url = this.createAllowedRedirectUrl(overrideUrl, fallbackRedirect);
     url.searchParams.set('userId', user.id);
@@ -67,11 +65,9 @@ export class AuthService {
   getFailureRedirectUrl(
     errorCode = 'auth_failed',
     overrideUrl?: string | null,
-    additionalParams?: Record<string, string | undefined>,
+    additionalParams?: Record<string, string | undefined>
   ): string {
-    const fallbackRedirect = this.configService.get<string>(
-      'AUTH_FAILURE_REDIRECT_URL',
-    );
+    const fallbackRedirect = this.configService.get<string>('AUTH_FAILURE_REDIRECT_URL');
 
     const url = this.createAllowedRedirectUrl(overrideUrl, fallbackRedirect);
     url.searchParams.set('error', errorCode);
@@ -82,7 +78,7 @@ export class AuthService {
 
   private createAllowedRedirectUrl(
     overrideUrl: string | null | undefined,
-    fallbackUrl: string,
+    fallbackUrl: string
   ): URL {
     const fallback = this.parseHttpUrl(fallbackUrl);
     if (!fallback) {
@@ -98,10 +94,7 @@ export class AuthService {
     return allowedOrigins.has(candidate.origin) ? candidate : fallback;
   }
 
-  private parseRedirectOverride(
-    value: string | null | undefined,
-    fallback: URL,
-  ): URL | null {
+  private parseRedirectOverride(value: string | null | undefined, fallback: URL): URL | null {
     const trimmed = value?.trim();
     if (!trimmed) {
       return null;
@@ -124,9 +117,7 @@ export class AuthService {
     const configuredValues = [
       this.configService.get<string>('AUTH_SUCCESS_REDIRECT_URL'),
       this.configService.get<string>('AUTH_FAILURE_REDIRECT_URL'),
-      ...(this.configService.get<string>('AUTH_CORS_ORIGINS', '') ?? '').split(
-        ',',
-      ),
+      ...(this.configService.get<string>('AUTH_CORS_ORIGINS', '') ?? '').split(','),
     ];
 
     for (const configuredValue of configuredValues) {
@@ -161,10 +152,7 @@ export class AuthService {
     );
   }
 
-  private appendAdditionalParams(
-    url: URL,
-    params?: Record<string, string | undefined>,
-  ): void {
+  private appendAdditionalParams(url: URL, params?: Record<string, string | undefined>): void {
     if (!params) {
       return;
     }

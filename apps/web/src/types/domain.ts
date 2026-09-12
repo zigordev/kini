@@ -120,8 +120,7 @@ export interface UserStats {
   elige8SuccessesPercentage: number;
 }
 
-export type ResultCombinationKey =
-  '1' | 'X' | '2' | '1X' | '12' | 'X2' | '1X2' | '15' | 'TOTAL';
+export type ResultCombinationKey = '1' | 'X' | '2' | '1X' | '12' | 'X2' | '1X2' | '15' | 'TOTAL';
 
 export interface ResultCombinationStat {
   key: ResultCombinationKey;

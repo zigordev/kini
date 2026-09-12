@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Headers,
-  Post,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Body, Controller, Headers, Post, HttpCode, HttpStatus } from '@nestjs/common';
 
 type RumEvent = {
   type: 'view' | 'error' | 'action';

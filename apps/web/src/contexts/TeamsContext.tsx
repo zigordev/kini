@@ -43,7 +43,7 @@ export function TeamsProvider({ children }: PropsWithChildren) {
         updateUser(nextUser);
       }
     },
-    [updateUser, user?.activeTeamId],
+    [updateUser, user?.activeTeamId]
   );
 
   const refresh = useCallback(async () => {
@@ -56,10 +56,8 @@ export function TeamsProvider({ children }: PropsWithChildren) {
     try {
       const nextTeams = await teamsApi.list();
       setTeams(nextTeams);
-      const preferred =
-        user.activeTeamId ?? window.localStorage.getItem(storageKey);
-      const nextSelected =
-        nextTeams.find((team) => team.id === preferred) ?? nextTeams[0] ?? null;
+      const preferred = user.activeTeamId ?? window.localStorage.getItem(storageKey);
+      const nextSelected = nextTeams.find((team) => team.id === preferred) ?? nextTeams[0] ?? null;
       setSelectedTeamId(nextSelected?.id ?? null);
       if (nextSelected) {
         window.localStorage.setItem(storageKey, nextSelected.id);
@@ -78,7 +76,7 @@ export function TeamsProvider({ children }: PropsWithChildren) {
       if (!teams.some((team) => team.id === teamId)) return;
       await persistSelection(teamId);
     },
-    [persistSelection, teams],
+    [persistSelection, teams]
   );
 
   const create = useCallback(
@@ -88,18 +86,16 @@ export function TeamsProvider({ children }: PropsWithChildren) {
       await persistSelection(team.id);
       return team;
     },
-    [persistSelection],
+    [persistSelection]
   );
 
   const invite = useCallback(
     async (email: string, teamId?: string) => {
-      const selected = teams.find(
-        (team) => team.id === (teamId ?? selectedTeamId),
-      );
+      const selected = teams.find((team) => team.id === (teamId ?? selectedTeamId));
       if (!selected) throw new Error('No team selected');
       await teamsApi.invite(selected.id, email);
     },
-    [selectedTeamId, teams],
+    [selectedTeamId, teams]
   );
 
   const accept = useCallback(
@@ -114,7 +110,7 @@ export function TeamsProvider({ children }: PropsWithChildren) {
       await persistSelection(team.id);
       return team;
     },
-    [persistSelection],
+    [persistSelection]
   );
 
   const selectedTeam = teams.find((team) => team.id === selectedTeamId) ?? null;
@@ -129,12 +125,10 @@ export function TeamsProvider({ children }: PropsWithChildren) {
       invite,
       accept,
     }),
-    [accept, create, invite, loading, refresh, select, selectedTeam, teams],
+    [accept, create, invite, loading, refresh, select, selectedTeam, teams]
   );
 
-  return (
-    <TeamsContext.Provider value={value}>{children}</TeamsContext.Provider>
-  );
+  return <TeamsContext.Provider value={value}>{children}</TeamsContext.Provider>;
 }
 
 export const useTeams = () => {
