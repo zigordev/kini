@@ -67,9 +67,7 @@ describe('GoogleAuthGuard', () => {
         }),
       } as unknown as ExecutionContext;
 
-      await expect(guard.canActivate(context)).rejects.toThrow(
-        ServiceUnavailableException,
-      );
+      await expect(guard.canActivate(context)).rejects.toThrow(ServiceUnavailableException);
     });
 
     it('should allow when OAuth is configured', async () => {
@@ -87,10 +85,9 @@ describe('GoogleAuthGuard', () => {
       } as unknown as ExecutionContext;
 
       // Mock parent canActivate
-      vi.spyOn(
-        Object.getPrototypeOf(GoogleAuthGuard.prototype),
-        'canActivate',
-      ).mockResolvedValue(true);
+      vi.spyOn(Object.getPrototypeOf(GoogleAuthGuard.prototype), 'canActivate').mockResolvedValue(
+        true
+      );
 
       const result = await guard.canActivate(context);
 
@@ -103,8 +100,7 @@ describe('GoogleAuthGuard', () => {
       configService.get.mockImplementation((key: string) => {
         if (key === 'GOOGLE_CLIENT_ID') return 'test-client-id';
         if (key === 'GOOGLE_CLIENT_SECRET') return 'test-secret';
-        if (key === 'GOOGLE_CALLBACK_URL')
-          return 'http://localhost:3012/auth/google/callback';
+        if (key === 'GOOGLE_CALLBACK_URL') return 'http://localhost:3012/auth/google/callback';
         return undefined;
       });
     });
@@ -124,7 +120,7 @@ describe('GoogleAuthGuard', () => {
 
       vi.spyOn(
         Object.getPrototypeOf(GoogleAuthGuard.prototype),
-        'getAuthenticateOptions',
+        'getAuthenticateOptions'
       ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
@@ -136,7 +132,7 @@ describe('GoogleAuthGuard', () => {
           mockRequest.session as unknown as {
             oauthSuccessRedirect?: string;
           }
-        ).oauthSuccessRedirect,
+        ).oauthSuccessRedirect
       ).toBe('https://app.example.com/success');
     });
 
@@ -155,7 +151,7 @@ describe('GoogleAuthGuard', () => {
 
       vi.spyOn(
         Object.getPrototypeOf(GoogleAuthGuard.prototype),
-        'getAuthenticateOptions',
+        'getAuthenticateOptions'
       ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
@@ -166,7 +162,7 @@ describe('GoogleAuthGuard', () => {
           mockRequest.session as unknown as {
             oauthFailureRedirect?: string;
           }
-        ).oauthFailureRedirect,
+        ).oauthFailureRedirect
       ).toBe('https://app.example.com/error');
     });
 
@@ -185,7 +181,7 @@ describe('GoogleAuthGuard', () => {
 
       vi.spyOn(
         Object.getPrototypeOf(GoogleAuthGuard.prototype),
-        'getAuthenticateOptions',
+        'getAuthenticateOptions'
       ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
@@ -208,14 +204,12 @@ describe('GoogleAuthGuard', () => {
 
       vi.spyOn(
         Object.getPrototypeOf(GoogleAuthGuard.prototype),
-        'getAuthenticateOptions',
+        'getAuthenticateOptions'
       ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
 
-      expect(options.callbackURL).toBe(
-        'http://localhost:3012/auth/google/callback',
-      );
+      expect(options.callbackURL).toBe('http://localhost:3012/auth/google/callback');
     });
 
     it('should not derive callback protocol from forwarded headers', () => {
@@ -234,14 +228,12 @@ describe('GoogleAuthGuard', () => {
 
       vi.spyOn(
         Object.getPrototypeOf(GoogleAuthGuard.prototype),
-        'getAuthenticateOptions',
+        'getAuthenticateOptions'
       ).mockReturnValue({});
 
       const options = guard.getAuthenticateOptions(context);
 
-      expect(options.callbackURL).toBe(
-        'http://localhost:3012/auth/google/callback',
-      );
+      expect(options.callbackURL).toBe('http://localhost:3012/auth/google/callback');
     });
   });
 

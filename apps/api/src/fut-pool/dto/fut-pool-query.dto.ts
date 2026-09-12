@@ -1,13 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import {
-  IsIn,
-  IsInt,
-  IsOptional,
-  IsPositive,
-  IsString,
-  IsUUID,
-} from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsPositive, IsString, IsUUID } from 'class-validator';
 
 export class FutPoolQueryDto {
   @IsOptional()

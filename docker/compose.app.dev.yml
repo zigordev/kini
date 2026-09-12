@@ -4,15 +4,7 @@ services:
       target: dev
     environment:
       NODE_ENV: development
-    command:
-      [
-        'node',
-        '/workspace/scripts/openbao-run.mjs',
-        '--',
-        'npm',
-        'run',
-        'start:dev',
-      ]
+    command: ['node', '/workspace/scripts/openbao-run.mjs', '--', 'npm', 'run', 'start:dev']
     healthcheck:
       start_period: 90s
     develop:

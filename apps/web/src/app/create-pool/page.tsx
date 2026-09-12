@@ -65,10 +65,16 @@ function CreatePoolForm() {
     setDoubles(defaults.doubles);
     setTriples(defaults.triples);
     setElige8(defaults.elige8);
-    setPristine(JSON.stringify({
-      name: '', date: todayInputValue(), doubles: defaults.doubles,
-      triples: defaults.triples, elige8: defaults.elige8, matches: emptyMatches(),
-    }));
+    setPristine(
+      JSON.stringify({
+        name: '',
+        date: todayInputValue(),
+        doubles: defaults.doubles,
+        triples: defaults.triples,
+        elige8: defaults.elige8,
+        matches: emptyMatches(),
+      })
+    );
     void usersApi
       .list()
       .then(setUsers)
@@ -97,9 +103,7 @@ function CreatePoolForm() {
 
   const updateMatch = (index: number, update: Partial<MatchDraft>) => {
     setMatches((current) =>
-      current.map((match, matchIndex) =>
-        matchIndex === index ? { ...match, ...update } : match,
-      ),
+      current.map((match, matchIndex) => (matchIndex === index ? { ...match, ...update } : match))
     );
   };
 
@@ -107,8 +111,7 @@ function CreatePoolForm() {
     event.preventDefault();
     if (!selectedTeam) return;
     const incomplete = matches.some(
-      (match) =>
-        Boolean(match.homeTeam.trim()) !== Boolean(match.awayTeam.trim()),
+      (match) => Boolean(match.homeTeam.trim()) !== Boolean(match.awayTeam.trim())
     );
     if (incomplete) {
       showToast(t('pools.match_teams_required'), 'error');
@@ -139,10 +142,7 @@ function CreatePoolForm() {
       showToast(t('pools.created'), 'success');
       router.replace(`/pools?poolId=${encodeURIComponent(created.id)}`);
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setCreating(false);
     }
@@ -183,11 +183,7 @@ function CreatePoolForm() {
             />
           </Field>
           <Field label={t('fields.date')} required>
-            <DateField
-              onChange={(event) => setDate(event.target.value)}
-              required
-              value={date}
-            />
+            <DateField onChange={(event) => setDate(event.target.value)} required value={date} />
           </Field>
           <Field label={t('fields.doubles')} required>
             <Input
@@ -235,9 +231,7 @@ function CreatePoolForm() {
               <label className="field">
                 <span className="sr-only">{t('matches.home_team')}</span>
                 <input
-                  onChange={(event) =>
-                    updateMatch(index, { homeTeam: event.target.value })
-                  }
+                  onChange={(event) => updateMatch(index, { homeTeam: event.target.value })}
                   placeholder={t('matches.home_team')}
                   value={match.homeTeam}
                 />
@@ -245,9 +239,7 @@ function CreatePoolForm() {
               <label className="field">
                 <span className="sr-only">{t('matches.away_team')}</span>
                 <input
-                  onChange={(event) =>
-                    updateMatch(index, { awayTeam: event.target.value })
-                  }
+                  onChange={(event) => updateMatch(index, { awayTeam: event.target.value })}
                   placeholder={t('matches.away_team')}
                   value={match.awayTeam}
                 />
@@ -255,9 +247,7 @@ function CreatePoolForm() {
               <label className="field">
                 <span className="sr-only">{t('users.select')}</span>
                 <select
-                  onChange={(event) =>
-                    updateMatch(index, { userId: event.target.value })
-                  }
+                  onChange={(event) => updateMatch(index, { userId: event.target.value })}
                   value={match.userId}
                 >
                   <option value="">{t('users.select')}</option>
@@ -276,10 +266,7 @@ function CreatePoolForm() {
           <Button variant="secondary" type="button" onClick={cancel}>
             {t('actions.cancel')}
           </Button>
-          <Button variant="primary"
-            disabled={creating}
-            type="submit"
-          >
+          <Button variant="primary" disabled={creating} type="submit">
             {creating ? t('status.preparing') : t('actions.create')}
           </Button>
         </div>

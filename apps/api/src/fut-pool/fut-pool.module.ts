@@ -9,12 +9,7 @@ import { FutPoolRepository } from './fut-pool.repository';
 import { FutPoolService } from './fut-pool.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([FutPool]),
-    EventsModule,
-    NotificationModule,
-    TeamsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([FutPool]), EventsModule, NotificationModule, TeamsModule],
   controllers: [FutPoolController],
   providers: [FutPoolService, FutPoolRepository],
   exports: [FutPoolService],

@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Headers,
-  Post,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Body, Controller, Headers, Post, HttpCode, HttpStatus } from '@nestjs/common';
 
 type UiLog = {
   level: 'debug' | 'info' | 'warn' | 'error';

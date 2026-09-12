@@ -5,8 +5,8 @@ import { translate } from './messages';
 
 const leafKeys = (value: unknown, prefix = ''): string[] => {
   if (!value || typeof value !== 'object') return [prefix];
-  return Object.entries(value as Record<string, unknown>).flatMap(
-    ([key, child]) => leafKeys(child, prefix ? `${prefix}.${key}` : key),
+  return Object.entries(value as Record<string, unknown>).flatMap(([key, child]) =>
+    leafKeys(child, prefix ? `${prefix}.${key}` : key)
   );
 };
 
@@ -16,12 +16,8 @@ describe('translation snapshots', () => {
   });
 
   it('interpolates named parameters', () => {
-    expect(translate('en', 'pools.success_count', { count: 7 })).toBe(
-      '7 successes',
-    );
-    expect(translate('es', 'pools.success_count', { count: 7 })).toBe(
-      '7 aciertos',
-    );
+    expect(translate('en', 'pools.success_count', { count: 7 })).toBe('7 successes');
+    expect(translate('es', 'pools.success_count', { count: 7 })).toBe('7 aciertos');
   });
 
   it('falls back to the key for unknown messages', () => {

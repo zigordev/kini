@@ -43,7 +43,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
         setTheme(next.theme);
       }
     },
-    [setLanguage, setTheme],
+    [setLanguage, setTheme]
   );
 
   const refresh = useCallback(async () => {
@@ -95,16 +95,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
       signOut,
       updateUser: applyUser,
     }),
-    [
-      applyUser,
-      googleAuthEnabled,
-      loading,
-      refresh,
-      signInWithGoogle,
-      signOut,
-      signingIn,
-      user,
-    ],
+    [applyUser, googleAuthEnabled, loading, refresh, signInWithGoogle, signOut, signingIn, user]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -19,10 +19,7 @@ import { User } from '../users/user.entity';
 import { Repository } from 'typeorm';
 import { AvailablePoolJackpotResponseDto } from './dto/available-pool-jackpot-response.dto';
 import { AvailablePoolResponseDto } from './dto/available-pool-response.dto';
-import {
-  AvailablePool,
-  AvailablePoolMatch,
-} from './entities/available-pool.entity';
+import { AvailablePool, AvailablePoolMatch } from './entities/available-pool.entity';
 import {
   EduardoLosillaPool,
   extractEduardoLosillaPoolFromJornada,
@@ -55,7 +52,7 @@ export class AvailablePoolsService implements OnModuleInit {
     private readonly matches: Repository<FutPoolMatch>,
     private readonly config: ConfigService,
     private readonly teams: TeamsService,
-    private readonly events: EventsGateway,
+    private readonly events: EventsGateway
   ) {}
 
   onModuleInit(): void {
@@ -73,27 +70,18 @@ export class AvailablePoolsService implements OnModuleInit {
         const status = String(pool.status ?? '').toUpperCase();
         const drawDate = new Date(pool.drawDate);
         drawDate.setHours(0, 0, 0, 0);
-        const closingDate = pool.closingDate
-          ? new Date(pool.closingDate)
-          : null;
+        const closingDate = pool.closingDate ? new Date(pool.closingDate) : null;
         const isActive = ['OPEN', 'ACTIVE', 'IN_PROGRESS'].includes(status);
-        const isUpcoming =
-          drawDate >= today && (!closingDate || closingDate > new Date());
+        const isUpcoming = drawDate >= today && (!closingDate || closingDate > new Date());
 
-        return (
-          !['CLOSED', 'FINISHED', 'ARCHIVED'].includes(status) &&
-          (isActive || isUpcoming)
-        );
+        return !['CLOSED', 'FINISHED', 'ARCHIVED'].includes(status) && (isActive || isUpcoming);
       })
       .map((pool) => this.toAvailablePoolResponse(pool));
   }
 
   @Cron('0 8 * * 1', { name: 'sync-available-pools-weekly' })
   async scheduledSync(): Promise<void> {
-    if (
-      this.config.get<string>('EDUARDO_LOSILLA_SYNC_ENABLED', 'true') ===
-      'false'
-    ) {
+    if (this.config.get<string>('EDUARDO_LOSILLA_SYNC_ENABLED', 'true') === 'false') {
       return;
     }
 
@@ -120,8 +108,7 @@ export class AvailablePoolsService implements OnModuleInit {
     if (
       !pools.some(
         (candidate) =>
-          candidate.provider === PROVIDER &&
-          (candidate.jackpotFormatted ?? candidate.jackpot),
+          candidate.provider === PROVIDER && (candidate.jackpotFormatted ?? candidate.jackpot)
       )
     ) {
       await this.syncUpcomingPools();
@@ -130,30 +117,22 @@ export class AvailablePoolsService implements OnModuleInit {
         order: { drawDate: 'ASC', createdAt: 'DESC' },
       });
     }
-    const providerPools = pools.filter(
-      (candidate) => candidate.provider === PROVIDER,
-    );
+    const providerPools = pools.filter((candidate) => candidate.provider === PROVIDER);
     const candidates = providerPools.length > 0 ? providerPools : pools;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const activeCandidates = candidates.filter((candidate) =>
-      ['OPEN', 'ACTIVE', 'IN_PROGRESS'].includes(
-        String(candidate.status ?? '').toUpperCase(),
-      ),
+      ['OPEN', 'ACTIVE', 'IN_PROGRESS'].includes(String(candidate.status ?? '').toUpperCase())
     );
     const upcomingCandidates = activeCandidates.filter(
-      (candidate) => new Date(candidate.drawDate).getTime() >= today.getTime(),
+      (candidate) => new Date(candidate.drawDate).getTime() >= today.getTime()
     );
     const preferredCandidates =
       upcomingCandidates.length > 0 ? upcomingCandidates : activeCandidates;
     const pool =
-      preferredCandidates.find(
-        (candidate) => candidate.jackpotFormatted ?? candidate.jackpot,
-      ) ??
+      preferredCandidates.find((candidate) => candidate.jackpotFormatted ?? candidate.jackpot) ??
       preferredCandidates[0] ??
-      candidates.find(
-        (candidate) => candidate.jackpotFormatted ?? candidate.jackpot,
-      ) ??
+      candidates.find((candidate) => candidate.jackpotFormatted ?? candidate.jackpot) ??
       candidates[0] ??
       null;
 
@@ -170,7 +149,7 @@ export class AvailablePoolsService implements OnModuleInit {
   async addToTeam(
     availablePoolId: string,
     teamId: string,
-    actor: Pick<User, 'id'>,
+    actor: Pick<User, 'id'>
   ): Promise<FutPoolResponseDto> {
     await this.teams.assertMember(teamId, actor.id);
     const availablePool = await this.availablePools.findOne({
@@ -194,13 +173,8 @@ export class AvailablePoolsService implements OnModuleInit {
     }
 
     const sourceMatches =
-      availablePool.matches.length > 0
-        ? availablePool.matches
-        : this.emptyMatches();
-    const assignmentOrder = await this.buildRotatedAssignmentOrder(
-      teamId,
-      sourceMatches.length,
-    );
+      availablePool.matches.length > 0 ? availablePool.matches : this.emptyMatches();
+    const assignmentOrder = await this.buildRotatedAssignmentOrder(teamId, sourceMatches.length);
 
     const pool = await this.futPools.save(
       this.futPools.create({
@@ -213,7 +187,7 @@ export class AvailablePoolsService implements OnModuleInit {
         active: true,
         cost: 0.75,
         earning: null,
-      }),
+      })
     );
 
     for (const [index, source] of sourceMatches.entries()) {
@@ -225,13 +199,12 @@ export class AvailablePoolsService implements OnModuleInit {
           homeTeam: source.homeTeam || `Local ${source.order}`,
           awayTeam: source.awayTeam || `Visitante ${source.order}`,
           results: [],
-          officialResults: (source.officialResults ??
-            []) as FutPoolMatch['officialResults'],
+          officialResults: (source.officialResults ?? []) as FutPoolMatch['officialResults'],
           success: null,
           elige8: false,
           full15: Boolean(source.full15) || index === sourceMatches.length - 1,
           userId: assignedUserId,
-        }),
+        })
       );
     }
 
@@ -248,7 +221,7 @@ export class AvailablePoolsService implements OnModuleInit {
   async updateAvailablePoolMatchResult(
     availablePoolId: string,
     order: number,
-    officialResults: string[],
+    officialResults: string[]
   ): Promise<AvailablePoolResponseDto> {
     const availablePool = await this.availablePools.findOne({
       where: { id: availablePoolId },
@@ -258,9 +231,7 @@ export class AvailablePoolsService implements OnModuleInit {
     }
 
     const matches =
-      availablePool.matches.length > 0
-        ? [...availablePool.matches]
-        : this.emptyMatches();
+      availablePool.matches.length > 0 ? [...availablePool.matches] : this.emptyMatches();
     const index = matches.findIndex((match) => Number(match.order) === order);
     if (index < 0) {
       throw new NotFoundException('Available pool match not found');
@@ -278,9 +249,7 @@ export class AvailablePoolsService implements OnModuleInit {
         })
       : officialResults
           .map((result) => String(result).toUpperCase())
-          .filter(
-            (result) => result === '1' || result === 'X' || result === '2',
-          );
+          .filter((result) => result === '1' || result === 'X' || result === '2');
 
     matches[index] = {
       ...matches[index],
@@ -302,13 +271,8 @@ export class AvailablePoolsService implements OnModuleInit {
         if (match.poolOrder !== order) {
           continue;
         }
-        match.officialResults =
-          normalizedResults as FutPoolMatch['officialResults'];
-        match.success = this.computeSuccess(
-          match.results,
-          normalizedResults,
-          match.full15,
-        );
+        match.officialResults = normalizedResults as FutPoolMatch['officialResults'];
+        match.success = this.computeSuccess(match.results, normalizedResults, match.full15);
         await this.matches.save(match);
         changed = true;
       }
@@ -322,7 +286,7 @@ export class AvailablePoolsService implements OnModuleInit {
 
   private async buildRotatedAssignmentOrder(
     teamId: string,
-    matchCount: number,
+    matchCount: number
   ): Promise<(string | null)[]> {
     const members = await this.teams.listActiveMemberUsers(teamId);
     const memberIds = members.map((member) => member.id).filter(Boolean);
@@ -347,22 +311,16 @@ export class AvailablePoolsService implements OnModuleInit {
         .map((match) => match.userId)
         .filter((userId): userId is string => Boolean(userId)) ?? [];
 
-    const baseOrder =
-      previousAssignments.length > 0 ? previousAssignments : memberIds;
-    const rotated =
-      baseOrder.length > 1 ? [...baseOrder.slice(1), baseOrder[0]] : baseOrder;
+    const baseOrder = previousAssignments.length > 0 ? previousAssignments : memberIds;
+    const rotated = baseOrder.length > 1 ? [...baseOrder.slice(1), baseOrder[0]] : baseOrder;
 
     return Array.from(
       { length: matchCount },
-      (_, index) =>
-        rotated[index % rotated.length] ?? memberIds[index % memberIds.length],
+      (_, index) => rotated[index % rotated.length] ?? memberIds[index % memberIds.length]
     );
   }
 
-  async checkTeamPoolResults(
-    poolId: string,
-    actor: Pick<User, 'id'>,
-  ): Promise<FutPoolResponseDto> {
+  async checkTeamPoolResults(poolId: string, actor: Pick<User, 'id'>): Promise<FutPoolResponseDto> {
     const pool = await this.futPools.findOne({
       where: { id: poolId },
       relations: { availablePool: true, matches: { user: true } },
@@ -391,9 +349,7 @@ export class AvailablePoolsService implements OnModuleInit {
       throw new BadRequestException('Official results are not available yet');
     }
 
-    const sortedMatches = [...(refreshed?.matches ?? [])].sort(
-      (a, b) => a.poolOrder - b.poolOrder,
-    );
+    const sortedMatches = [...(refreshed?.matches ?? [])].sort((a, b) => a.poolOrder - b.poolOrder);
 
     for (const match of sortedMatches) {
       const nextOfficial = officialResults[match.poolOrder - 1];
@@ -401,11 +357,7 @@ export class AvailablePoolsService implements OnModuleInit {
         continue;
       }
       match.officialResults = nextOfficial as FutPoolMatch['officialResults'];
-      match.success = this.computeSuccess(
-        match.results,
-        nextOfficial,
-        match.full15,
-      );
+      match.success = this.computeSuccess(match.results, nextOfficial, match.full15);
       await this.matches.save(match);
     }
 
@@ -443,11 +395,11 @@ export class AvailablePoolsService implements OnModuleInit {
     const urls = [
       this.config.get<string>(
         'EDUARDO_LOSILLA_QUINIELA_TICKET_URL',
-        'https://www.eduardolosilla.es/quiniela/boletos',
+        'https://www.eduardolosilla.es/quiniela/boletos'
       ),
       this.config.get<string>(
         'EDUARDO_LOSILLA_QUINIELA_RESULTS_URL',
-        'https://www.eduardolosilla.es/quiniela/ayudas/escrutinio',
+        'https://www.eduardolosilla.es/quiniela/ayudas/escrutinio'
       ),
     ];
     const seenJornadas = new Map<number, number | null>();
@@ -457,12 +409,10 @@ export class AvailablePoolsService implements OnModuleInit {
         const sourceUrl = new URL(value);
         if (!this.isEduardoLosillaUrl(sourceUrl)) {
           throw new BadRequestException(
-            'Eduardo Losilla source URL must use the public eduardolosilla.es domain',
+            'Eduardo Losilla source URL must use the public eduardolosilla.es domain'
           );
         }
-        const pools = extractEduardoLosillaPools(
-          await this.fetchEduardoLosillaText(sourceUrl),
-        );
+        const pools = extractEduardoLosillaPools(await this.fetchEduardoLosillaText(sourceUrl));
         for (const source of pools) {
           if (seenJornadas.has(source.jornada)) {
             continue;
@@ -472,9 +422,7 @@ export class AvailablePoolsService implements OnModuleInit {
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        this.logger.warn(
-          `Eduardo Losilla sync failed for ${value}: ${message}`,
-        );
+        this.logger.warn(`Eduardo Losilla sync failed for ${value}: ${message}`);
       }
     }
 
@@ -482,7 +430,7 @@ export class AvailablePoolsService implements OnModuleInit {
   }
 
   private async syncEduardoLosillaJornadaApiPools(
-    seenJornadas: Map<number, number | null>,
+    seenJornadas: Map<number, number | null>
   ): Promise<void> {
     const candidates = new Map(seenJornadas);
     const existing = await this.availablePools.find({
@@ -498,15 +446,12 @@ export class AvailablePoolsService implements OnModuleInit {
       candidates.set(jornada, season ?? candidates.get(jornada) ?? null);
     }
 
-    const sortedJornadas = [...candidates.keys()].sort(
-      (left, right) => left - right,
-    );
+    const sortedJornadas = [...candidates.keys()].sort((left, right) => left - right);
     if (sortedJornadas.length >= 2) {
       const first = sortedJornadas[0];
       const last = sortedJornadas[sortedJornadas.length - 1];
       if (last - first <= 6) {
-        const fallbackSeason =
-          candidates.get(last) ?? candidates.get(first) ?? null;
+        const fallbackSeason = candidates.get(last) ?? candidates.get(first) ?? null;
         for (let jornada = first; jornada <= last; jornada += 1) {
           candidates.set(jornada, candidates.get(jornada) ?? fallbackSeason);
         }
@@ -514,7 +459,7 @@ export class AvailablePoolsService implements OnModuleInit {
     }
 
     for (const [jornada, season] of [...candidates.entries()].sort(
-      ([left], [right]) => left - right,
+      ([left], [right]) => left - right
     )) {
       try {
         const url = new URL('https://api.eduardolosilla.es/jornada');
@@ -523,7 +468,7 @@ export class AvailablePoolsService implements OnModuleInit {
           url.searchParams.set('temporada', String(season));
         }
         const source = extractEduardoLosillaPoolFromJornada(
-          JSON.parse(await this.fetchEduardoLosillaText(url)),
+          JSON.parse(await this.fetchEduardoLosillaText(url))
         );
         if (source) {
           await this.upsertEduardoLosillaPool(source, url.toString());
@@ -531,7 +476,7 @@ export class AvailablePoolsService implements OnModuleInit {
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         this.logger.warn(
-          `Eduardo Losilla jornada API sync failed for jornada ${jornada}: ${message}`,
+          `Eduardo Losilla jornada API sync failed for jornada ${jornada}: ${message}`
         );
       }
     }
@@ -539,7 +484,7 @@ export class AvailablePoolsService implements OnModuleInit {
 
   private async upsertEduardoLosillaPool(
     source: EduardoLosillaPool,
-    sourceUrl: string,
+    sourceUrl: string
   ): Promise<void> {
     const existing = await this.findEduardoLosillaPool(source.jornada);
     const now = new Date();
@@ -578,9 +523,7 @@ export class AvailablePoolsService implements OnModuleInit {
     }
   }
 
-  private async applyEduardoLosillaOfficialResults(
-    availablePool: AvailablePool,
-  ): Promise<void> {
+  private async applyEduardoLosillaOfficialResults(availablePool: AvailablePool): Promise<void> {
     const officialResults = [...availablePool.matches]
       .sort((left, right) => left.order - right.order)
       .map((match) => match.officialResults ?? []);
@@ -601,11 +544,7 @@ export class AvailablePoolsService implements OnModuleInit {
           continue;
         }
         match.officialResults = results as FutPoolMatch['officialResults'];
-        match.success = this.computeSuccess(
-          match.results,
-          results,
-          match.full15,
-        );
+        match.success = this.computeSuccess(match.results, results, match.full15);
         await this.matches.save(match);
         changed = true;
       }
@@ -615,9 +554,7 @@ export class AvailablePoolsService implements OnModuleInit {
     }
   }
 
-  private async findEduardoLosillaPool(
-    jornada: number,
-  ): Promise<AvailablePool | null> {
+  private async findEduardoLosillaPool(jornada: number): Promise<AvailablePool | null> {
     return this.availablePools.findOne({
       where: {
         provider: PROVIDER,
@@ -627,9 +564,7 @@ export class AvailablePoolsService implements OnModuleInit {
     });
   }
 
-  private extractJornadaNumber(
-    value: string | null | undefined,
-  ): number | null {
+  private extractJornadaNumber(value: string | null | undefined): number | null {
     const match = String(value ?? '').match(/jornada-(\d+)/i);
     if (!match) {
       return null;
@@ -639,19 +574,16 @@ export class AvailablePoolsService implements OnModuleInit {
   }
 
   private extractEduardoLosillaSeason(pool: AvailablePool): number | null {
-    const metadata = (pool.rawPayload as Record<string, unknown> | null)
-      ?.eduardoLosilla as Record<string, unknown> | undefined;
+    const metadata = (pool.rawPayload as Record<string, unknown> | null)?.eduardoLosilla as
+      Record<string, unknown> | undefined;
     const season = metadata?.season;
-    return typeof season === 'number' && Number.isFinite(season)
-      ? season
-      : null;
+    return typeof season === 'number' && Number.isFinite(season) ? season : null;
   }
 
   private isEduardoLosillaUrl(url: URL): boolean {
     return (
       url.protocol === 'https:' &&
-      (url.hostname === 'eduardolosilla.es' ||
-        url.hostname === 'www.eduardolosilla.es')
+      (url.hostname === 'eduardolosilla.es' || url.hostname === 'www.eduardolosilla.es')
     );
   }
 
@@ -663,9 +595,7 @@ export class AvailablePoolsService implements OnModuleInit {
       },
     });
     if (!response.ok) {
-      throw new BadRequestException(
-        `Eduardo Losilla request failed with ${response.status}`,
-      );
+      throw new BadRequestException(`Eduardo Losilla request failed with ${response.status}`);
     }
     return response.text();
   }
@@ -674,16 +604,13 @@ export class AvailablePoolsService implements OnModuleInit {
     const noticesUrl = new URL(
       this.config.get<string>(
         'SELAE_QUINIELA_NOTICES_URL',
-        'https://www.loteriasyapuestas.es/es/avisos-de-interes',
-      ),
+        'https://www.loteriasyapuestas.es/es/avisos-de-interes'
+      )
     );
 
     try {
       const noticesHtml = await this.fetchSelaeText(noticesUrl);
-      const documentUrls = await this.findSelaeCompositionDocuments(
-        noticesHtml,
-        noticesUrl,
-      );
+      const documentUrls = await this.findSelaeCompositionDocuments(noticesHtml, noticesUrl);
       if (documentUrls.length === 0) {
         this.logger.warn('SELAE returned no Quiniela composition documents');
         return;
@@ -697,7 +624,7 @@ export class AvailablePoolsService implements OnModuleInit {
           const matches = extractCompositionMatches(documentText);
           if (!drawDate || matches.length < 14) {
             this.logger.warn(
-              `SELAE composition document could not be mapped: ${documentUrl.toString()}`,
+              `SELAE composition document could not be mapped: ${documentUrl.toString()}`
             );
             continue;
           }
@@ -710,10 +637,9 @@ export class AvailablePoolsService implements OnModuleInit {
             sourceType: 'composition-document',
           });
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : String(error);
+          const message = error instanceof Error ? error.message : String(error);
           this.logger.warn(
-            `SELAE composition document sync failed for ${documentUrl.toString()}: ${message}`,
+            `SELAE composition document sync failed for ${documentUrl.toString()}: ${message}`
           );
         }
       }
@@ -727,34 +653,29 @@ export class AvailablePoolsService implements OnModuleInit {
     const feedUrl = new URL(
       this.config.get<string>(
         'SELAE_QUINIELA_JACKPOT_RSS_URL',
-        'https://www.loteriasyapuestas.es/es/la-quiniela/botes/.formatoRSS',
-      ),
+        'https://www.loteriasyapuestas.es/es/la-quiniela/botes/.formatoRSS'
+      )
     );
 
     try {
       const items = parseSelaeRss(await this.fetchSelaeText(feedUrl));
       if (items.length === 0) {
-        this.logger.warn(
-          `SELAE jackpot RSS returned no items: ${feedUrl.toString()}`,
-        );
+        this.logger.warn(`SELAE jackpot RSS returned no items: ${feedUrl.toString()}`);
         return;
       }
       const jackpots = items
         .map((item) => ({ item, jackpot: extractSelaeJackpot(item) }))
         .filter(
           (
-            entry,
+            entry
           ): entry is {
             item: SelaeRssItem;
             jackpot: NonNullable<ReturnType<typeof extractSelaeJackpot>>;
-          } => entry.jackpot !== null,
+          } => entry.jackpot !== null
         );
 
       for (const { item, jackpot } of jackpots.slice(0, 3)) {
-        const pool = await this.findSelaePool(
-          jackpot.jornada,
-          jackpot.drawDate,
-        );
+        const pool = await this.findSelaePool(jackpot.jornada, jackpot.drawDate);
         if (!pool) {
           if (!jackpot.drawDate) {
             continue;
@@ -791,24 +712,20 @@ export class AvailablePoolsService implements OnModuleInit {
     const feedUrl = new URL(
       this.config.get<string>(
         'SELAE_QUINIELA_RESULTS_RSS_URL',
-        'https://www.loteriasyapuestas.es/es/la-quiniela/resultados/.formatoRSS',
-      ),
+        'https://www.loteriasyapuestas.es/es/la-quiniela/resultados/.formatoRSS'
+      )
     );
 
     try {
       const items = parseSelaeRss(await this.fetchSelaeText(feedUrl));
       if (items.length === 0) {
-        this.logger.warn(
-          `SELAE results RSS returned no items: ${feedUrl.toString()}`,
-        );
+        this.logger.warn(`SELAE results RSS returned no items: ${feedUrl.toString()}`);
         return;
       }
       for (const item of items.slice(0, 8)) {
         try {
           const resultUrl = item.link ? this.selaeUrl(item.link) : null;
-          const resultText = resultUrl
-            ? await this.fetchSelaeText(resultUrl)
-            : item.description;
+          const resultText = resultUrl ? await this.fetchSelaeText(resultUrl) : item.description;
           const officialResults = extractSelaeOfficialResults(resultText);
           if (officialResults.length < 14) {
             continue;
@@ -817,20 +734,15 @@ export class AvailablePoolsService implements OnModuleInit {
           const source = `${item.title}\n${item.description}\n${resultText}`;
           const targetPool = await this.findSelaePool(
             extractSelaeJornada(source),
-            extractSelaeDate(source) ?? item.publishedAt,
+            extractSelaeDate(source) ?? item.publishedAt
           );
           if (!targetPool) {
             continue;
           }
 
-          await this.applySelaeOfficialResults(
-            targetPool,
-            officialResults,
-            item,
-          );
+          await this.applySelaeOfficialResults(targetPool, officialResults, item);
         } catch (error) {
-          const message =
-            error instanceof Error ? error.message : String(error);
+          const message = error instanceof Error ? error.message : String(error);
           this.logger.warn(`SELAE result item sync failed: ${message}`);
         }
       }
@@ -865,10 +777,8 @@ export class AvailablePoolsService implements OnModuleInit {
       closingDate: existing?.closingDate ?? null,
       status: isUpcoming ? 'OPEN' : (existing?.status ?? 'COMPLETED'),
       jackpot: input.jackpot ?? existing?.jackpot ?? null,
-      jackpotFormatted:
-        input.jackpotFormatted ?? existing?.jackpotFormatted ?? null,
-      matches:
-        input.matches.length > 0 ? input.matches : (existing?.matches ?? []),
+      jackpotFormatted: input.jackpotFormatted ?? existing?.jackpotFormatted ?? null,
+      matches: input.matches.length > 0 ? input.matches : (existing?.matches ?? []),
       rawPayload: this.withSelaeMetadata(existing, {
         jornada: input.jornada,
         [`${input.sourceType}Url`]: input.sourceUrl,
@@ -882,12 +792,10 @@ export class AvailablePoolsService implements OnModuleInit {
   private async applySelaeOfficialResults(
     availablePool: AvailablePool,
     officialResults: string[][],
-    item: SelaeRssItem,
+    item: SelaeRssItem
   ): Promise<void> {
     const currentMatches =
-      availablePool.matches.length > 0
-        ? [...availablePool.matches]
-        : this.emptyMatches();
+      availablePool.matches.length > 0 ? [...availablePool.matches] : this.emptyMatches();
     availablePool.matches = currentMatches.map((match, index) => ({
       ...match,
       officialResults: officialResults[index] ?? match.officialResults ?? [],
@@ -912,11 +820,7 @@ export class AvailablePoolsService implements OnModuleInit {
           continue;
         }
         match.officialResults = results as FutPoolMatch['officialResults'];
-        match.success = this.computeSuccess(
-          match.results,
-          results,
-          match.full15,
-        );
+        match.success = this.computeSuccess(match.results, results, match.full15);
         await this.matches.save(match);
       }
       this.events.emitPoolUpdated({ poolId: teamPool.id, pool: teamPool });
@@ -926,13 +830,11 @@ export class AvailablePoolsService implements OnModuleInit {
   private computeSuccess(
     userResults: unknown,
     officialResults: string[],
-    full15: boolean,
+    full15: boolean
   ): boolean | null {
     const official = full15
       ? officialResults.map((value) => String(value).toUpperCase())
-      : officialResults
-          .map((value) => String(value).toUpperCase())
-          .filter(Boolean);
+      : officialResults.map((value) => String(value).toUpperCase()).filter(Boolean);
 
     if (full15 && official.filter(Boolean).length < 2) {
       return null;
@@ -957,40 +859,28 @@ export class AvailablePoolsService implements OnModuleInit {
 
   private async findSelaeCompositionDocuments(
     noticesHtml: string,
-    noticesUrl: URL,
+    noticesUrl: URL
   ): Promise<URL[]> {
-    const directDocuments = this.extractSelaeLinks(
-      noticesHtml,
-      noticesUrl,
-      true,
-    );
+    const directDocuments = this.extractSelaeLinks(noticesHtml, noticesUrl, true);
     const detailPages = this.extractSelaeLinks(noticesHtml, noticesUrl, false);
     const discoveredDocuments = [...directDocuments];
 
     for (const detailUrl of detailPages.slice(0, 8)) {
       try {
         const detailHtml = await this.fetchSelaeText(detailUrl);
-        discoveredDocuments.push(
-          ...this.extractSelaeLinks(detailHtml, detailUrl, true),
-        );
+        discoveredDocuments.push(...this.extractSelaeLinks(detailHtml, detailUrl, true));
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         this.logger.warn(
-          `SELAE notice detail fetch failed for ${detailUrl.toString()}: ${message}`,
+          `SELAE notice detail fetch failed for ${detailUrl.toString()}: ${message}`
         );
       }
     }
 
-    return Array.from(
-      new Map(discoveredDocuments.map((url) => [url.toString(), url])).values(),
-    );
+    return Array.from(new Map(discoveredDocuments.map((url) => [url.toString(), url])).values());
   }
 
-  private extractSelaeLinks(
-    html: string,
-    baseUrl: URL,
-    documentsOnly: boolean,
-  ): URL[] {
+  private extractSelaeLinks(html: string, baseUrl: URL, documentsOnly: boolean): URL[] {
     const links: URL[] = [];
     const pattern = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
     let match = pattern.exec(html);
@@ -998,13 +888,8 @@ export class AvailablePoolsService implements OnModuleInit {
       const href = match[1].replace(/&amp;/g, '&').trim();
       const label = htmlToText(match[2]);
       const isDocument = /\.pdf(?:[?#]|$)/i.test(href);
-      const isQuinielaNotice = /quiniela|composici[oó]n|boletos?|jornada/i.test(
-        `${label} ${href}`,
-      );
-      if (
-        (documentsOnly && isDocument) ||
-        (!documentsOnly && !isDocument && isQuinielaNotice)
-      ) {
+      const isQuinielaNotice = /quiniela|composici[oó]n|boletos?|jornada/i.test(`${label} ${href}`);
+      if ((documentsOnly && isDocument) || (!documentsOnly && !isDocument && isQuinielaNotice)) {
         try {
           const url = new URL(href, baseUrl);
           if (this.isSelaeUrl(url)) {
@@ -1031,14 +916,13 @@ export class AvailablePoolsService implements OnModuleInit {
   private isSelaeUrl(url: URL): boolean {
     return (
       url.protocol === 'https:' &&
-      (url.hostname === 'loteriasyapuestas.es' ||
-        url.hostname === 'www.loteriasyapuestas.es')
+      (url.hostname === 'loteriasyapuestas.es' || url.hostname === 'www.loteriasyapuestas.es')
     );
   }
 
   private async findSelaePool(
     jornada: number | null,
-    drawDate: Date | null,
+    drawDate: Date | null
   ): Promise<AvailablePool | null> {
     const pools = await this.availablePools.find({
       where: { gameType: GAME_TYPE },
@@ -1061,9 +945,7 @@ export class AvailablePoolsService implements OnModuleInit {
       return null;
     }
     const metadata = (raw as Record<string, unknown>).selae;
-    return metadata && typeof metadata === 'object'
-      ? (metadata as Record<string, unknown>)
-      : null;
+    return metadata && typeof metadata === 'object' ? (metadata as Record<string, unknown>) : null;
   }
 
   private selaeJornada(pool: AvailablePool): number | null {
@@ -1071,8 +953,8 @@ export class AvailablePoolsService implements OnModuleInit {
     if (typeof selaeJornada === 'number') {
       return selaeJornada;
     }
-    const legacyMetadata = (pool.rawPayload as Record<string, unknown> | null)
-      ?.metadata as Record<string, unknown> | undefined;
+    const legacyMetadata = (pool.rawPayload as Record<string, unknown> | null)?.metadata as
+      Record<string, unknown> | undefined;
     if (typeof legacyMetadata?.jornada === 'number') {
       return legacyMetadata.jornada;
     }
@@ -1082,7 +964,7 @@ export class AvailablePoolsService implements OnModuleInit {
 
   private withSelaeMetadata(
     pool: AvailablePool | undefined,
-    metadata: Record<string, unknown>,
+    metadata: Record<string, unknown>
   ): Record<string, unknown> {
     return {
       ...(pool?.rawPayload ?? {}),
@@ -1105,16 +987,13 @@ export class AvailablePoolsService implements OnModuleInit {
   private async fetchSelaeText(url: URL): Promise<string> {
     const response = await fetch(url, {
       headers: {
-        Accept:
-          'application/rss+xml, application/xml, text/xml, text/html;q=0.9',
+        Accept: 'application/rss+xml, application/xml, text/xml, text/html;q=0.9',
         'User-Agent': 'Kini/0.1 (+https://github.com/zigordev/kini)',
       },
     });
 
     if (!response.ok) {
-      throw new BadRequestException(
-        `SELAE request failed with ${response.status}`,
-      );
+      throw new BadRequestException(`SELAE request failed with ${response.status}`);
     }
 
     return response.text();
@@ -1128,9 +1007,7 @@ export class AvailablePoolsService implements OnModuleInit {
       },
     });
     if (!response.ok) {
-      throw new BadRequestException(
-        `SELAE PDF request failed with ${response.status}`,
-      );
+      throw new BadRequestException(`SELAE PDF request failed with ${response.status}`);
     }
     const parser = new PDFParse({
       data: Buffer.from(await response.arrayBuffer()),
@@ -1156,9 +1033,7 @@ export class AvailablePoolsService implements OnModuleInit {
     return value.toISOString().slice(0, 10);
   }
 
-  private toAvailablePoolResponse(
-    pool: AvailablePool,
-  ): AvailablePoolResponseDto {
+  private toAvailablePoolResponse(pool: AvailablePool): AvailablePoolResponseDto {
     return {
       id: pool.id,
       provider: pool.provider,
@@ -1207,8 +1082,6 @@ export class AvailablePoolsService implements OnModuleInit {
     }
     const deadlineTime = deadline.getTime();
 
-    return Number.isFinite(deadlineTime) && deadlineTime <= Date.now()
-      ? 'active'
-      : 'programmed';
+    return Number.isFinite(deadlineTime) && deadlineTime <= Date.now() ? 'active' : 'programmed';
   }
 }

@@ -105,43 +105,35 @@ describe('AuthController', () => {
 
     it('should redirect to success URL on successful auth', async () => {
       authService.getSuccessRedirectUrl.mockReturnValue(
-        'https://example.com/success?userId=user-123',
+        'https://example.com/success?userId=user-123'
       );
 
       await controller.googleCallback(mockRequest, mockResponse);
 
-      expect(authService.getSuccessRedirectUrl).toHaveBeenCalledWith(
-        mockUser,
-        null,
-      );
+      expect(authService.getSuccessRedirectUrl).toHaveBeenCalledWith(mockUser, null);
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        'https://example.com/success?userId=user-123',
+        'https://example.com/success?userId=user-123'
       );
     });
 
     it('should redirect to failure URL when user is missing', async () => {
       mockRequest.user = undefined;
       authService.getFailureRedirectUrl.mockReturnValue(
-        'https://example.com/error?error=missing_user',
+        'https://example.com/error?error=missing_user'
       );
 
       await controller.googleCallback(mockRequest, mockResponse);
 
-      expect(authService.getFailureRedirectUrl).toHaveBeenCalledWith(
-        'missing_user',
-        null,
-      );
+      expect(authService.getFailureRedirectUrl).toHaveBeenCalledWith('missing_user', null);
       expect(mockResponse.redirect).toHaveBeenCalledWith(
-        'https://example.com/error?error=missing_user',
+        'https://example.com/error?error=missing_user'
       );
     });
 
     it('should clean up session redirects', async () => {
       mockSession.oauthSuccessRedirect = 'https://custom.com/success';
       mockSession.oauthFailureRedirect = 'https://custom.com/error';
-      authService.getSuccessRedirectUrl.mockReturnValue(
-        'https://example.com/success',
-      );
+      authService.getSuccessRedirectUrl.mockReturnValue('https://example.com/success');
 
       await controller.googleCallback(mockRequest, mockResponse);
 
@@ -151,37 +143,35 @@ describe('AuthController', () => {
 
     it('should ignore query state and use only the session redirect', async () => {
       mockRequest.query = {
-        state: Buffer.from(
-          JSON.stringify({ redirectUri: 'https://attacker.example' }),
-        ).toString('base64url'),
+        state: Buffer.from(JSON.stringify({ redirectUri: 'https://attacker.example' })).toString(
+          'base64url'
+        ),
       };
-      mockSession.oauthSuccessRedirect =
-        'https://app.example.com/auth/callback';
+      mockSession.oauthSuccessRedirect = 'https://app.example.com/auth/callback';
       authService.getSuccessRedirectUrl.mockReturnValue(
-        'https://app.example.com/auth/callback?userId=user-123',
+        'https://app.example.com/auth/callback?userId=user-123'
       );
 
       await controller.googleCallback(mockRequest, mockResponse);
 
       expect(authService.getSuccessRedirectUrl).toHaveBeenCalledWith(
         mockUser,
-        'https://app.example.com/auth/callback',
+        'https://app.example.com/auth/callback'
       );
     });
 
     it('should ignore malformed OAuth state and use the session redirect', async () => {
       mockRequest.query = { state: 'tampered-not-base64-json' };
-      mockSession.oauthSuccessRedirect =
-        'https://app.example.com/auth/callback';
+      mockSession.oauthSuccessRedirect = 'https://app.example.com/auth/callback';
       authService.getSuccessRedirectUrl.mockReturnValue(
-        'https://app.example.com/auth/callback?userId=user-123',
+        'https://app.example.com/auth/callback?userId=user-123'
       );
 
       await controller.googleCallback(mockRequest, mockResponse);
 
       expect(authService.getSuccessRedirectUrl).toHaveBeenCalledWith(
         mockUser,
-        'https://app.example.com/auth/callback',
+        'https://app.example.com/auth/callback'
       );
     });
   });

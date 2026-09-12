@@ -22,7 +22,10 @@ export function ThemeButton() {
     // Local preference is already applied via setTheme; this syncs it to the
     // account too. If it fails, the user's next explicit change retries it —
     // not worth a toast for a background preference sync.
-    void usersApi.update({ theme: next }).then(updateUser).catch(() => {});
+    void usersApi
+      .update({ theme: next })
+      .then(updateUser)
+      .catch(() => {});
   };
 
   return (
@@ -45,7 +48,10 @@ export function LanguageButton() {
   const { updateUser } = useAuth();
 
   const change = (next: Language) => {
-    void usersApi.update({ language: next }).then(updateUser).catch(() => {});
+    void usersApi
+      .update({ language: next })
+      .then(updateUser)
+      .catch(() => {});
   };
 
   return (
@@ -65,10 +71,20 @@ export function LanguageButton() {
     >
       {({ close }: { close: () => void }) => (
         <>
-          <MenuItem onClick={() => { close(); change('en'); }}>
+          <MenuItem
+            onClick={() => {
+              close();
+              change('en');
+            }}
+          >
             <Flag code="gb" /> {t('language.english')}
           </MenuItem>
-          <MenuItem onClick={() => { close(); change('es'); }}>
+          <MenuItem
+            onClick={() => {
+              close();
+              change('es');
+            }}
+          >
             <Flag code="es" /> {t('language.spanish')}
           </MenuItem>
         </>
@@ -103,11 +119,18 @@ export function UserButton() {
         <>
           <div
             style={{
-              padding: '6px 10px 8px', marginBottom: 4,
+              padding: '6px 10px 8px',
+              marginBottom: 4,
               borderBottom: '1px solid var(--ds-color-border)',
             }}
           >
-            <div style={{ fontSize: 'var(--ds-text-sm)', fontWeight: 'var(--ds-weight-semibold)', color: 'var(--ds-color-fg)' }}>
+            <div
+              style={{
+                fontSize: 'var(--ds-text-sm)',
+                fontWeight: 'var(--ds-weight-semibold)',
+                color: 'var(--ds-color-fg)',
+              }}
+            >
               {user.name}
             </div>
             <div style={{ fontSize: 'var(--ds-text-xs)', color: 'var(--ds-color-fg-subtle)' }}>
@@ -116,7 +139,12 @@ export function UserButton() {
           </div>
           {/* Account settings belong beside Sign out, not as a primary-nav
               destination competing with it. */}
-          <MenuItem onClick={() => { close(); router.push('/profile'); }}>
+          <MenuItem
+            onClick={() => {
+              close();
+              router.push('/profile');
+            }}
+          >
             <Icon name="settings" /> {t('tabs.profile')}
           </MenuItem>
           <MenuItem

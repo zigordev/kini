@@ -6,9 +6,7 @@ export const full15Results: ResultValue[] = ['0', '1', '2', 'M'];
 export const poolStatus = (pool: FutPool) => {
   if (pool.status) return pool.status;
   if (!pool.active) return 'closed' as const;
-  return new Date(pool.date).getTime() > Date.now()
-    ? ('programmed' as const)
-    : ('active' as const);
+  return new Date(pool.date).getTime() > Date.now() ? ('programmed' as const) : ('active' as const);
 };
 
 export const poolOutcome = (pool: FutPool) => {
@@ -25,11 +23,7 @@ export const poolOutcome = (pool: FutPool) => {
   };
 };
 
-export const formatDate = (
-  value: string,
-  locale = 'en',
-  includeTime = false,
-) => {
+export const formatDate = (value: string, locale = 'en', includeTime = false) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat(locale, {

@@ -82,7 +82,7 @@ try {
       // `npm ls` exits non-zero on peer warnings while still printing valid
       // JSON, so the output matters more than the status.
       stdio: ['ignore', 'pipe', 'ignore'],
-    }),
+    })
   );
 } catch (error) {
   if (!error.stdout) throw error;
@@ -94,8 +94,7 @@ const seen = new Map();
   for (const [name, dep] of Object.entries(node.dependencies ?? {})) {
     // Workspace packages are this repository's own code — `UNLICENSED` on them
     // is the intent, not a finding.
-    const isLocal =
-      typeof dep.resolved === 'string' && dep.resolved.startsWith('file:');
+    const isLocal = typeof dep.resolved === 'string' && dep.resolved.startsWith('file:');
     if (dep.version && !isLocal && !seen.has(`${name}@${dep.version}`)) {
       seen.set(`${name}@${dep.version}`, { name, path: dep.path ?? null });
     }
@@ -115,12 +114,9 @@ const seen = new Map();
 function resolveManifest(name) {
   const candidates = [
     join(root, 'node_modules', name, 'package.json'),
-    ...[
-      'apps/api',
-      'apps/web',
-      'apps/control-plane',
-      'apps/operator-console',
-    ].map((w) => join(root, w, 'node_modules', name, 'package.json')),
+    ...['apps/api', 'apps/web', 'apps/control-plane', 'apps/operator-console'].map((w) =>
+      join(root, w, 'node_modules', name, 'package.json')
+    ),
   ];
   return candidates.find((c) => existsSync(c)) ?? null;
 }
@@ -159,12 +155,8 @@ for (const [spec, { name, path: dir }] of seen) {
 if (offenders.length > 0) {
   console.error('Production dependencies with a non-allow-listed licence:');
   for (const o of offenders.sort()) console.error(`- ${o}`);
-  console.error(
-    '\nAdd the licence to ALLOWED, or the package to ALLOWED_PACKAGES with a reason.',
-  );
+  console.error('\nAdd the licence to ALLOWED, or the package to ALLOWED_PACKAGES with a reason.');
   process.exit(1);
 }
 
-console.log(
-  `Licence check passed: ${checked} production packages, all permissive.`,
-);
+console.log(`Licence check passed: ${checked} production packages, all permissive.`);

@@ -9,7 +9,7 @@ import { FutPoolMatch } from './entities/fut-pool-match.entity';
 export class FutPoolMatchRepository {
   constructor(
     @InjectRepository(FutPoolMatch)
-    private readonly repository: Repository<FutPoolMatch>,
+    private readonly repository: Repository<FutPoolMatch>
   ) {}
 
   async findById(matchId: string): Promise<FutPoolMatch | null> {
@@ -23,16 +23,10 @@ export class FutPoolMatchRepository {
     const matches = await this.repository.find({
       where: { futPoolId },
     });
-    return (
-      matches.length === 15 &&
-      matches.every((match) => this.hasPrediction(match.results))
-    );
+    return matches.length === 15 && matches.every((match) => this.hasPrediction(match.results));
   }
 
-  async update(
-    matchId: string,
-    matchUpdate: UpdateFutPoolMatchDto,
-  ): Promise<FutPoolMatch> {
+  async update(matchId: string, matchUpdate: UpdateFutPoolMatchDto): Promise<FutPoolMatch> {
     const match = await this.repository.findOne({
       where: { id: matchId },
       relations: { futPool: true, user: true },
@@ -59,15 +53,8 @@ export class FutPoolMatchRepository {
     await this.assertDoubleLimit(match);
     await this.assertTripleLimit(match);
 
-    if (
-      matchUpdate.results !== undefined ||
-      matchUpdate.officialResults !== undefined
-    ) {
-      match.success = this.computeSuccess(
-        match.results,
-        match.officialResults,
-        match.full15,
-      );
+    if (matchUpdate.results !== undefined || matchUpdate.officialResults !== undefined) {
+      match.success = this.computeSuccess(match.results, match.officialResults, match.full15);
     }
 
     await this.repository.save(match);
@@ -87,7 +74,7 @@ export class FutPoolMatchRepository {
       results.some((value) =>
         Array.isArray(value)
           ? value.some((entry) => Boolean(String(entry).trim()))
-          : Boolean(String(value ?? '').trim()),
+          : Boolean(String(value ?? '').trim())
       )
     );
   }
@@ -123,12 +110,11 @@ export class FutPoolMatchRepository {
       .andWhere('cardinality(futPoolMatch.results) = 2')
       .getCount();
 
-    const totalDoubles =
-      doubleCount + (!match.full15 && this.hasTwoResults(match) ? 1 : 0);
+    const totalDoubles = doubleCount + (!match.full15 && this.hasTwoResults(match) ? 1 : 0);
 
     if (totalDoubles > match.futPool.doubles) {
       throw new BadRequestException(
-        `The maximum number of double matches for this pool is ${match.futPool.doubles}`,
+        `The maximum number of double matches for this pool is ${match.futPool.doubles}`
       );
     }
   }
@@ -144,12 +130,11 @@ export class FutPoolMatchRepository {
       .andWhere('cardinality(futPoolMatch.results) = 3')
       .getCount();
 
-    const totalTriples =
-      tripleCount + (!match.full15 && this.hasThreeResults(match) ? 1 : 0);
+    const totalTriples = tripleCount + (!match.full15 && this.hasThreeResults(match) ? 1 : 0);
 
     if (totalTriples > match.futPool.triples) {
       throw new BadRequestException(
-        `The maximum number of triple matches for this pool is ${match.futPool.triples}`,
+        `The maximum number of triple matches for this pool is ${match.futPool.triples}`
       );
     }
   }
@@ -165,7 +150,7 @@ export class FutPoolMatchRepository {
   private computeSuccess(
     userResults: unknown,
     officialResults: unknown,
-    full15: boolean,
+    full15: boolean
   ): boolean | null {
     const selected = Array.isArray(userResults)
       ? userResults.map((value) => String(value).toUpperCase())

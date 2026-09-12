@@ -31,8 +31,7 @@ import { ObservabilityModule } from './observability';
         const sslEnabled = config.get<string>('DATABASE_SSL') === 'true';
         const synchronizeEnv = config.get<string>('DATABASE_SYNCHRONIZE');
         const isProd = config.get<string>('NODE_ENV') === 'production';
-        const synchronize =
-          synchronizeEnv !== undefined ? synchronizeEnv === 'true' : !isProd;
+        const synchronize = synchronizeEnv !== undefined ? synchronizeEnv === 'true' : !isProd;
         const host = config.get<string>('DATABASE_HOST');
         const port = Number(config.get<number>('DATABASE_PORT'));
         const username = config.get<string>('DATABASE_USER');
@@ -65,8 +64,7 @@ import { ObservabilityModule } from './observability';
           ssl: sslEnabled
             ? {
                 rejectUnauthorized:
-                  config.get<string>('DATABASE_SSL_REJECT_UNAUTHORIZED') !==
-                  'false',
+                  config.get<string>('DATABASE_SSL_REJECT_UNAUTHORIZED') !== 'false',
                 ca: config.get<string>('DATABASE_CA_CERT') || undefined,
               }
             : undefined,

@@ -82,9 +82,9 @@ describe('TeamsService', () => {
         status: 'active',
       });
 
-      await expect(
-        service.inviteUser(team.id, 'friend@example.com', actor),
-      ).rejects.toBeInstanceOf(ForbiddenException);
+      await expect(service.inviteUser(team.id, 'friend@example.com', actor)).rejects.toBeInstanceOf(
+        ForbiddenException
+      );
       expect(memberships.save).not.toHaveBeenCalled();
       expect(notifier.sendTeamInvitation).not.toHaveBeenCalled();
     });
@@ -111,7 +111,7 @@ describe('TeamsService', () => {
           to: 'friend@example.com',
           teamId: team.id,
           acceptUrl: 'https://kini.example.com/teams/team-1/accept',
-        }),
+        })
       );
     });
 
@@ -135,20 +135,18 @@ describe('TeamsService', () => {
           role: 'member',
           status: 'pending',
           invitedById: actor.id,
-        }),
+        })
       );
     });
   });
 
   describe('acceptInvitation', () => {
     it('is a 404 when nothing was pending for the actor', async () => {
-      memberships.findOne
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(null);
+      memberships.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
 
-      await expect(
-        service.acceptInvitation(team.id, actor),
-      ).rejects.toBeInstanceOf(NotFoundException);
+      await expect(service.acceptInvitation(team.id, actor)).rejects.toBeInstanceOf(
+        NotFoundException
+      );
       expect(memberships.save).not.toHaveBeenCalled();
     });
 
@@ -176,9 +174,7 @@ describe('TeamsService', () => {
         status: 'pending',
         joinedAt: null as Date | null,
       };
-      memberships.findOne
-        .mockResolvedValueOnce(null)
-        .mockResolvedValueOnce(pending);
+      memberships.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(pending);
 
       const result = await service.acceptInvitation(team.id, actor);
 
@@ -187,10 +183,10 @@ describe('TeamsService', () => {
           userId: actor.id,
           status: 'active',
           joinedAt: expect.any(Date),
-        }),
+        })
       );
       expect(notifier.notifyTeamInvitationAccepted).toHaveBeenCalledWith(
-        expect.objectContaining({ teamId: team.id, userEmail: actor.email }),
+        expect.objectContaining({ teamId: team.id, userEmail: actor.email })
       );
       expect(result.team.role).toBe('member');
     });

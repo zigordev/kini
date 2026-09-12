@@ -3,11 +3,7 @@
 import { useEffect, useState } from 'react';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
-import {
-  DEFAULT_POOL_DEFAULTS,
-  readPoolDefaults,
-  writePoolDefaults,
-} from '@/lib/preferences';
+import { DEFAULT_POOL_DEFAULTS, readPoolDefaults, writePoolDefaults } from '@/lib/preferences';
 import type { PoolDefaults } from '@/types/domain';
 
 export default function ProfilePage() {
@@ -61,9 +57,7 @@ export default function ProfilePage() {
             <input
               checked={defaults.elige8}
               disabled={!selectedTeam}
-              onChange={(event) =>
-                changeDefaults({ ...defaults, elige8: event.target.checked })
-              }
+              onChange={(event) => changeDefaults({ ...defaults, elige8: event.target.checked })}
               type="checkbox"
             />
           </label>
@@ -90,11 +84,7 @@ function ProfileCounter({
     <div className="counter-row">
       <span>{label}</span>
       <div>
-        <button
-          disabled={disabled || value <= 0}
-          onClick={() => onChange(value - 1)}
-          type="button"
-        >
+        <button disabled={disabled || value <= 0} onClick={() => onChange(value - 1)} type="button">
           −
         </button>
         <strong>{value}</strong>

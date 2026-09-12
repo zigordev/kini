@@ -92,11 +92,9 @@ describe('AuthService', () => {
         provider: 'google',
       } as Profile;
 
+      await expect(service.validateGoogleProfile(profile)).rejects.toThrow(UnauthorizedException);
       await expect(service.validateGoogleProfile(profile)).rejects.toThrow(
-        UnauthorizedException,
-      );
-      await expect(service.validateGoogleProfile(profile)).rejects.toThrow(
-        'Google account does not expose email',
+        'Google account does not expose email'
       );
     });
 
@@ -165,8 +163,7 @@ describe('AuthService', () => {
         const values: Record<string, string> = {
           AUTH_SUCCESS_REDIRECT_URL: 'https://default.example.com/success',
           AUTH_FAILURE_REDIRECT_URL: 'https://default.example.com/failure',
-          AUTH_CORS_ORIGINS:
-            'https://custom.example.com,https://app.example.com',
+          AUTH_CORS_ORIGINS: 'https://custom.example.com,https://app.example.com',
         };
         return values[key] ?? fallback;
       });
@@ -180,10 +177,7 @@ describe('AuthService', () => {
     });
 
     it('should handle override URL', () => {
-      const result = service.getSuccessRedirectUrl(
-        mockUser,
-        'https://custom.example.com/auth',
-      );
+      const result = service.getSuccessRedirectUrl(mockUser, 'https://custom.example.com/auth');
 
       expect(result).toContain('https://custom.example.com/auth');
       expect(result).toContain('userId=user-123');
@@ -222,36 +216,21 @@ describe('AuthService', () => {
     });
 
     it('should reject an untrusted redirect', () => {
-      const result = service.getSuccessRedirectUrl(
-        mockUser,
-        'https://attacker.example/phishing',
-      );
+      const result = service.getSuccessRedirectUrl(mockUser, 'https://attacker.example/phishing');
 
-      expect(result).toBe(
-        'https://default.example.com/success?userId=user-123',
-      );
+      expect(result).toBe('https://default.example.com/success?userId=user-123');
     });
 
     it('should reject protocol-relative redirects to an untrusted origin', () => {
-      const result = service.getSuccessRedirectUrl(
-        mockUser,
-        '//attacker.example/phishing',
-      );
+      const result = service.getSuccessRedirectUrl(mockUser, '//attacker.example/phishing');
 
-      expect(result).toBe(
-        'https://default.example.com/success?userId=user-123',
-      );
+      expect(result).toBe('https://default.example.com/success?userId=user-123');
     });
 
     it('should resolve relative redirects on the configured fallback origin', () => {
-      const result = service.getSuccessRedirectUrl(
-        mockUser,
-        '/auth/callback?next=%2Fpools',
-      );
+      const result = service.getSuccessRedirectUrl(mockUser, '/auth/callback?next=%2Fpools');
 
-      expect(result).toContain(
-        'https://default.example.com/auth/callback?next=%2Fpools',
-      );
+      expect(result).toContain('https://default.example.com/auth/callback?next=%2Fpools');
       expect(result).toContain('userId=user-123');
     });
   });
@@ -262,8 +241,7 @@ describe('AuthService', () => {
         const values: Record<string, string> = {
           AUTH_SUCCESS_REDIRECT_URL: 'https://default.example.com/success',
           AUTH_FAILURE_REDIRECT_URL: 'https://default.example.com/failure',
-          AUTH_CORS_ORIGINS:
-            'https://custom.example.com,https://app.example.com',
+          AUTH_CORS_ORIGINS: 'https://custom.example.com,https://app.example.com',
         };
         return values[key] ?? fallback;
       });
@@ -279,7 +257,7 @@ describe('AuthService', () => {
     it('should handle override URL', () => {
       const result = service.getFailureRedirectUrl(
         'custom_error',
-        'https://custom.example.com/error',
+        'https://custom.example.com/error'
       );
 
       expect(result).toContain('https://custom.example.com/error');
@@ -311,12 +289,10 @@ describe('AuthService', () => {
     it('should reject an untrusted failure redirect', () => {
       const result = service.getFailureRedirectUrl(
         'auth_failed',
-        'https://attacker.example/phishing',
+        'https://attacker.example/phishing'
       );
 
-      expect(result).toBe(
-        'https://default.example.com/failure?error=auth_failed',
-      );
+      expect(result).toBe('https://default.example.com/failure?error=auth_failed');
     });
   });
 });

@@ -17,8 +17,7 @@ export default function TeamsPage() {
   const router = useRouter();
   const { user } = useAuth();
   const { t, language } = usePreferences();
-  const { teams, selectedTeam, loading, create, invite, select, refresh } =
-    useTeams();
+  const { teams, selectedTeam, loading, create, invite, select, refresh } = useTeams();
   const showToast = useToast();
   const [newTeamName, setNewTeamName] = useState('');
   const [creating, setCreating] = useState(false);
@@ -45,10 +44,7 @@ export default function TeamsPage() {
       showToast(t('teams.created'), 'success');
       router.push('/pools');
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setCreating(false);
     }
@@ -59,10 +55,7 @@ export default function TeamsPage() {
       await select(team.id);
       router.push(destination);
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     }
   };
 
@@ -76,10 +69,7 @@ export default function TeamsPage() {
       setInvitingTeam(null);
       setInviteEmail('');
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     }
   };
 
@@ -93,11 +83,7 @@ export default function TeamsPage() {
           <h1>{t('teams.title')}</h1>
           <p>{t('teams.subtitle')}</p>
         </div>
-        <Button variant="secondary"
-          disabled={loading}
-          onClick={() => void refresh()}
-          type="button"
-        >
+        <Button variant="secondary" disabled={loading} onClick={() => void refresh()} type="button">
           {t('teams.refresh')}
         </Button>
       </header>
@@ -112,11 +98,7 @@ export default function TeamsPage() {
           }
           hint={jackpot?.drawDate ? formatDate(jackpot.drawDate, language) : undefined}
         />
-        <StatTile
-          label={t('tabs.teams')}
-          value={teams.length}
-          hint={selectedTeam?.name ?? '—'}
-        />
+        <StatTile label={t('tabs.teams')} value={teams.length} hint={selectedTeam?.name ?? '—'} />
       </section>
 
       <section className="panel">
@@ -137,10 +119,7 @@ export default function TeamsPage() {
               value={newTeamName}
             />
           </label>
-          <Button variant="primary"
-            disabled={creating || !newTeamName.trim()}
-            type="submit"
-          >
+          <Button variant="primary" disabled={creating || !newTeamName.trim()} type="submit">
             {creating ? t('status.preparing') : t('actions.create')}
           </Button>
         </form>
@@ -149,10 +128,7 @@ export default function TeamsPage() {
       {loading ? (
         <Loading label={t('teams.loading')} />
       ) : teams.length === 0 ? (
-        <EmptyState
-          description={t('teams.empty_text')}
-          title={t('teams.empty_title')}
-        />
+        <EmptyState description={t('teams.empty_text')} title={t('teams.empty_title')} />
       ) : (
         <section className="card-grid">
           {teams.map((team) => {
@@ -166,14 +142,10 @@ export default function TeamsPage() {
                   <div className="team-icon">{team.name.slice(0, 1)}</div>
                   <div>
                     <h2>{team.name}</h2>
-                    <span className="status-badge">
-                      {t(`teams.role_${team.role}`)}
-                    </span>
+                    <span className="status-badge">{t(`teams.role_${team.role}`)}</span>
                   </div>
                   {active && (
-                    <span className="status-badge status-badge-primary">
-                      {t('teams.current')}
-                    </span>
+                    <span className="status-badge status-badge-primary">{t('teams.current')}</span>
                   )}
                 </div>
                 <p>{t('teams.card_text')}</p>
@@ -183,23 +155,18 @@ export default function TeamsPage() {
                   })}
                 </small>
                 <div className="button-row">
-                  <Button variant="primary"
-                    onClick={() => void handleOpen(team)}
-                    type="button"
-                  >
+                  <Button variant="primary" onClick={() => void handleOpen(team)} type="button">
                     {t('teams.open_pools')}
                   </Button>
-                  <Button variant="secondary"
+                  <Button
+                    variant="secondary"
                     onClick={() => void handleOpen(team, '/stats')}
                     type="button"
                   >
                     {t('teams.show_stats')}
                   </Button>
                   {team.role === 'admin' && (
-                    <Button variant="ghost"
-                      onClick={() => setInvitingTeam(team)}
-                      type="button"
-                    >
+                    <Button variant="ghost" onClick={() => setInvitingTeam(team)} type="button">
                       {t('teams.invite')}
                     </Button>
                   )}
@@ -246,10 +213,7 @@ export default function TeamsPage() {
               />
             </label>
             <div className="button-row button-row-end">
-              <Button variant="secondary"
-                onClick={() => setInvitingTeam(null)}
-                type="button"
-              >
+              <Button variant="secondary" onClick={() => setInvitingTeam(null)} type="button">
                 {t('actions.cancel')}
               </Button>
               <Button variant="primary" type="submit">

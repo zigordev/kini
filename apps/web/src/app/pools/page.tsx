@@ -10,19 +10,8 @@ import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { API_BASE_URL, poolsApi, usersApi } from '@/lib/api';
-import {
-  formatDate,
-  full15Results,
-  poolOutcome,
-  poolStatus,
-  regularResults,
-} from '@/lib/pools';
-import type {
-  FutPool,
-  FutPoolMatch,
-  ResultValue,
-  UserSummary,
-} from '@/types/domain';
+import { formatDate, full15Results, poolOutcome, poolStatus, regularResults } from '@/lib/pools';
+import type { FutPool, FutPoolMatch, ResultValue, UserSummary } from '@/types/domain';
 import { Button } from 'design-system/components/core/Button.jsx';
 import { StatTile } from 'design-system/components/data-display/StatTile.jsx';
 import { Table } from 'design-system/components/data-display/Table.jsx';
@@ -53,14 +42,11 @@ function PoolsContent() {
   const [editDate, setEditDate] = useState('');
   const [editEarning, setEditEarning] = useState('');
 
-  const selectedPool =
-    pools.find((pool) => pool.id === selectedId) ?? pools[0] ?? null;
+  const selectedPool = pools.find((pool) => pool.id === selectedId) ?? pools[0] ?? null;
   const selectedPoolId = selectedPool?.id;
 
   const replacePool = useCallback((updated: FutPool) => {
-    setPools((current) =>
-      current.map((pool) => (pool.id === updated.id ? updated : pool)),
-    );
+    setPools((current) => current.map((pool) => (pool.id === updated.id ? updated : pool)));
   }, []);
 
   const load = useCallback(async () => {
@@ -75,10 +61,7 @@ function PoolsContent() {
       setUsers(userList);
       const requestedId = search.get('poolId');
       setSelectedId((current) => {
-        if (
-          requestedId &&
-          response.data.some((pool) => pool.id === requestedId)
-        ) {
+        if (requestedId && response.data.some((pool) => pool.id === requestedId)) {
           return requestedId;
         }
         if (current && response.data.some((pool) => pool.id === current)) {
@@ -87,10 +70,7 @@ function PoolsContent() {
         return response.data[0]?.id ?? null;
       });
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setLoading(false);
     }
@@ -117,13 +97,13 @@ function PoolsContent() {
               ? {
                   ...pool,
                   matches: pool.matches.map((match) =>
-                    match.id === payload.matchId ? payload.match : match,
+                    match.id === payload.matchId ? payload.match : match
                   ),
                 }
-              : pool,
-          ),
+              : pool
+          )
         );
-      },
+      }
     );
     return () => {
       socket.disconnect();
@@ -139,25 +119,19 @@ function PoolsContent() {
         if (!quiet) showToast(t('pools.results_checked'), 'success');
       } catch (error) {
         if (!quiet) {
-          showToast(
-            error instanceof Error ? error.message : String(error),
-            'error',
-          );
+          showToast(error instanceof Error ? error.message : String(error), 'error');
         }
       } finally {
         setChecking(false);
       }
     },
-    [replacePool, selectedPoolId, showToast, t],
+    [replacePool, selectedPoolId, showToast, t]
   );
 
   useEffect(() => {
     if (!selectedPool?.availablePoolId) return;
     void checkResults(true);
-    const id = window.setInterval(
-      () => void checkResults(true),
-      backgroundRefreshMs,
-    );
+    const id = window.setInterval(() => void checkResults(true), backgroundRefreshMs);
     return () => window.clearInterval(id);
   }, [checkResults, selectedPool?.availablePoolId]);
 
@@ -176,10 +150,7 @@ function PoolsContent() {
       replacePool(updated);
       showToast(t('pools.updated'), 'success');
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setSaving(null);
     }
@@ -187,7 +158,7 @@ function PoolsContent() {
 
   const updateMatch = async (
     match: FutPoolMatch,
-    payload: Parameters<typeof poolsApi.updateMatch>[2],
+    payload: Parameters<typeof poolsApi.updateMatch>[2]
   ) => {
     if (!selectedPool) return;
     if (payload.results && match.userId && match.userId !== user?.id) {
@@ -196,43 +167,29 @@ function PoolsContent() {
     }
     setSaving(`match:${match.id}`);
     try {
-      const updated = await poolsApi.updateMatch(
-        selectedPool.id,
-        match.id,
-        payload,
-      );
+      const updated = await poolsApi.updateMatch(selectedPool.id, match.id, payload);
       setPools((current) =>
         current.map((pool) =>
           pool.id === selectedPool.id
             ? {
                 ...pool,
-                matches: pool.matches.map((entry) =>
-                  entry.id === updated.id ? updated : entry,
-                ),
+                matches: pool.matches.map((entry) => (entry.id === updated.id ? updated : entry)),
               }
-            : pool,
-        ),
+            : pool
+        )
       );
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setSaving(null);
     }
   };
 
-  const toggleResult = (
-    match: FutPoolMatch,
-    value: ResultValue,
-    splitIndex?: number,
-  ) => {
+  const toggleResult = (match: FutPoolMatch, value: ResultValue, splitIndex?: number) => {
     if (typeof splitIndex === 'number') {
       const next = [...(match.results ?? [])];
       while (next.length < 2) next.push('' as ResultValue);
-      next[splitIndex] =
-        next[splitIndex] === value ? ('' as ResultValue) : value;
+      next[splitIndex] = next[splitIndex] === value ? ('' as ResultValue) : value;
       void updateMatch(match, { results: next });
       return;
     }
@@ -280,15 +237,14 @@ function PoolsContent() {
   const outcome = poolOutcome(selectedPool);
   const status = poolStatus(selectedPool);
   const canEdit = status === 'programmed';
-  const assignedToMe = selectedPool.matches.filter(
-    (match) => match.userId === user.id,
-  ).length;
+  const assignedToMe = selectedPool.matches.filter((match) => match.userId === user.id).length;
 
   return (
     <div className="page">
       <header className="page-header button-row button-row-end">
         <div className="button-row">
-          <Button variant="secondary"
+          <Button
+            variant="secondary"
             disabled={checking}
             onClick={() => void checkResults()}
             type="button"
@@ -305,7 +261,11 @@ function PoolsContent() {
         <StatTile
           label={t('pools.metric_successes')}
           value={outcome.successes}
-          hint={<>{t('pools.metric_success_rate')}: {outcome.successRate}%</>}
+          hint={
+            <>
+              {t('pools.metric_success_rate')}: {outcome.successRate}%
+            </>
+          }
         />
         <StatTile
           label={t('pools.metric_pending')}
@@ -315,11 +275,21 @@ function PoolsContent() {
         <StatTile
           label={t('pools.metric_assigned_to_me')}
           value={assignedToMe}
-          hint={<>{selectedPool.matches.length} {t('pools.matches')}</>}
+          hint={
+            <>
+              {selectedPool.matches.length} {t('pools.matches')}
+            </>
+          }
         />
         <StatTile
           label={t('pools.earning')}
-          value={<>{new Intl.NumberFormat(language, { style: 'currency', currency: 'EUR', }).format(selectedPool.earning ?? 0)}</>}
+          value={
+            <>
+              {new Intl.NumberFormat(language, { style: 'currency', currency: 'EUR' }).format(
+                selectedPool.earning ?? 0
+              )}
+            </>
+          }
           hint={<>{t(`status.${status}`)}</>}
         />
       </section>
@@ -340,9 +310,7 @@ function PoolsContent() {
                 ))}
               </select>
             </label>
-            <span className={`status-pill status-${status}`}>
-              {t(`status.${status}`)}
-            </span>
+            <span className={`status-pill status-${status}`}>{t(`status.${status}`)}</span>
           </div>
 
           <Table density="compact" hoverable={false} minWidth={520} className="matches-table">
@@ -355,25 +323,23 @@ function PoolsContent() {
               </tr>
             </thead>
             <tbody>
-            {selectedPool.matches.map((match, index) => (
-              <MatchRow
-                canEdit={canEdit}
-                currentUserId={user.id}
-                elige8Enabled={selectedPool.elige8}
-                key={match.id}
-                match={match}
-                number={index + 1}
-                saving={saving === `match:${match.id}`}
-                users={users}
-                assignedPlayerLabel={t('matches.assigned_player')}
-                unassignedLabel={t('matches.unassigned')}
-                onAssign={(userId) => void updateMatch(match, { userId })}
-                onToggleE8={(elige8) => void updateMatch(match, { elige8 })}
-                onToggleResult={(value, splitIndex) =>
-                  toggleResult(match, value, splitIndex)
-                }
-              />
-            ))}
+              {selectedPool.matches.map((match, index) => (
+                <MatchRow
+                  canEdit={canEdit}
+                  currentUserId={user.id}
+                  elige8Enabled={selectedPool.elige8}
+                  key={match.id}
+                  match={match}
+                  number={index + 1}
+                  saving={saving === `match:${match.id}`}
+                  users={users}
+                  assignedPlayerLabel={t('matches.assigned_player')}
+                  unassignedLabel={t('matches.unassigned')}
+                  onAssign={(userId) => void updateMatch(match, { userId })}
+                  onToggleE8={(elige8) => void updateMatch(match, { elige8 })}
+                  onToggleResult={(value, splitIndex) => toggleResult(match, value, splitIndex)}
+                />
+              ))}
             </tbody>
           </Table>
         </section>
@@ -438,9 +404,7 @@ function PoolsContent() {
             <input
               checked={selectedPool.elige8}
               disabled={!canEdit}
-              onChange={(event) =>
-                void updatePool({ elige8: event.target.checked })
-              }
+              onChange={(event) => void updatePool({ elige8: event.target.checked })}
               type="checkbox"
             />
           </label>
@@ -451,13 +415,13 @@ function PoolsContent() {
             </span>
             <input
               checked={selectedPool.active}
-              onChange={(event) =>
-                void updatePool({ active: event.target.checked })
-              }
+              onChange={(event) => void updatePool({ active: event.target.checked })}
               type="checkbox"
             />
           </label>
-          <Button variant="primary" style={{ width: '100%' }}
+          <Button
+            variant="primary"
+            style={{ width: '100%' }}
             disabled={saving === `pool:${selectedPool.id}`}
             onClick={() =>
               void updatePool({
@@ -503,14 +467,9 @@ function MatchRow({
   onToggleE8: (value: boolean) => void;
   onAssign: (userId: string) => void;
 }) {
-  const editableByUser =
-    canEdit && (!match.userId || match.userId === currentUserId);
+  const editableByUser = canEdit && (!match.userId || match.userId === currentUserId);
   const resultClass =
-    match.success === true
-      ? 'match-success'
-      : match.success === false
-        ? 'match-failure'
-        : '';
+    match.success === true ? 'match-success' : match.success === false ? 'match-failure' : '';
 
   return (
     <tr className={`match-row ${resultClass}`}>
@@ -537,36 +496,36 @@ function MatchRow({
         </label>
       </td>
       <td>
-      {match.full15 || number === 15 ? (
-        <div className="full15-picker">
-          {[0, 1].map((splitIndex) => (
-            <div className="result-buttons" key={splitIndex}>
-              <span>{splitIndex === 0 ? match.homeTeam : match.awayTeam}</span>
-              {full15Results.map((value) => (
-                <ResultButton
-                  active={match.results?.[splitIndex] === value}
-                  disabled={!editableByUser || saving}
-                  key={value}
-                  onClick={() => onToggleResult(value, splitIndex)}
-                  value={value}
-                />
-              ))}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="result-buttons">
-          {regularResults.map((value) => (
-            <ResultButton
-              active={match.results?.includes(value)}
-              disabled={!editableByUser || saving}
-              key={value}
-              onClick={() => onToggleResult(value)}
-              value={value}
-            />
-          ))}
-        </div>
-      )}
+        {match.full15 || number === 15 ? (
+          <div className="full15-picker">
+            {[0, 1].map((splitIndex) => (
+              <div className="result-buttons" key={splitIndex}>
+                <span>{splitIndex === 0 ? match.homeTeam : match.awayTeam}</span>
+                {full15Results.map((value) => (
+                  <ResultButton
+                    active={match.results?.[splitIndex] === value}
+                    disabled={!editableByUser || saving}
+                    key={value}
+                    onClick={() => onToggleResult(value, splitIndex)}
+                    value={value}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="result-buttons">
+            {regularResults.map((value) => (
+              <ResultButton
+                active={match.results?.includes(value)}
+                disabled={!editableByUser || saving}
+                key={value}
+                onClick={() => onToggleResult(value)}
+                value={value}
+              />
+            ))}
+          </div>
+        )}
       </td>
       {elige8Enabled && (
         <td className="e8-check">
@@ -601,9 +560,7 @@ function ResultButton({
   return (
     <button
       aria-pressed={active}
-      className={
-        active ? 'result-button result-button-active' : 'result-button'
-      }
+      className={active ? 'result-button result-button-active' : 'result-button'}
       disabled={disabled}
       onClick={onClick}
       type="button"
@@ -630,11 +587,7 @@ function Stepper({
     <div className="stepper">
       <span>{label}</span>
       <div>
-        <button
-          disabled={disabled || value <= 0}
-          onClick={() => onChange(value - 1)}
-          type="button"
-        >
+        <button disabled={disabled || value <= 0} onClick={() => onChange(value - 1)} type="button">
           −
         </button>
         <strong>{value}</strong>

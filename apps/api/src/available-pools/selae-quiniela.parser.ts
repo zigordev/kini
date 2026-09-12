@@ -90,11 +90,7 @@ export const parseSelaeRss = (xml: string): SelaeRssItem[] => {
     rss?: { channel?: { item?: unknown | unknown[] } };
   };
   const sourceItems = parsed.rss?.channel?.item;
-  const items = Array.isArray(sourceItems)
-    ? sourceItems
-    : sourceItems
-      ? [sourceItems]
-      : [];
+  const items = Array.isArray(sourceItems) ? sourceItems : sourceItems ? [sourceItems] : [];
 
   return items.map((item) => {
     const entry = item as Record<string, unknown>;
@@ -102,50 +98,35 @@ export const parseSelaeRss = (xml: string): SelaeRssItem[] => {
     const publishedAt = publishedValue ? new Date(publishedValue) : null;
     return {
       title: textValue(entry.title),
-      description: htmlToText(
-        textValue(entry.description ?? entry.encoded ?? entry.content),
-      ),
+      description: htmlToText(textValue(entry.description ?? entry.encoded ?? entry.content)),
       link: textValue(entry.link) || null,
-      publishedAt:
-        publishedAt && !Number.isNaN(publishedAt.getTime())
-          ? publishedAt
-          : null,
+      publishedAt: publishedAt && !Number.isNaN(publishedAt.getTime()) ? publishedAt : null,
     };
   });
 };
 
 export const extractSelaeJornada = (value: string): number | null => {
-  const match = normalizeAccents(value).match(
-    /\bjornada\s*(?:n[.o]?\s*)?(\d{1,3})\b/,
-  );
+  const match = normalizeAccents(value).match(/\bjornada\s*(?:n[.o]?\s*)?(\d{1,3})\b/);
   return match ? Number(match[1]) : null;
 };
 
 export const extractSelaeDate = (value: string): Date | null => {
   const iso = value.match(/\b(20\d{2})[-/](\d{1,2})[-/](\d{1,2})\b/);
   if (iso) {
-    return new Date(
-      Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]), 12),
-    );
+    return new Date(Date.UTC(Number(iso[1]), Number(iso[2]) - 1, Number(iso[3]), 12));
   }
 
-  const spanish = normalizeAccents(value).match(
-    /\b(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(20\d{2})\b/,
-  );
+  const spanish = normalizeAccents(value).match(/\b(\d{1,2})\s+de\s+([a-z]+)\s+de\s+(20\d{2})\b/);
   if (!spanish || MONTHS[spanish[2]] === undefined) {
     return null;
   }
-  return new Date(
-    Date.UTC(Number(spanish[3]), MONTHS[spanish[2]], Number(spanish[1]), 12),
-  );
+  return new Date(Date.UTC(Number(spanish[3]), MONTHS[spanish[2]], Number(spanish[1]), 12));
 };
 
-export const extractSelaeJackpot = (
-  item: SelaeRssItem,
-): SelaeJackpot | null => {
+export const extractSelaeJackpot = (item: SelaeRssItem): SelaeJackpot | null => {
   const source = `${item.title}\n${item.description}`;
   const match = source.match(
-    /(?:bote[^\d]{0,80})?(\d{1,3}(?:[.\s]\d{3})+(?:,\d{2})?\s*(?:EUR|euros?|\u20ac))/i,
+    /(?:bote[^\d]{0,80})?(\d{1,3}(?:[.\s]\d{3})+(?:,\d{2})?\s*(?:EUR|euros?|\u20ac))/i
   );
   if (!match) {
     return null;
@@ -159,9 +140,7 @@ export const extractSelaeJackpot = (
   };
 };
 
-export const extractCompositionMatches = (
-  documentText: string,
-): AvailablePoolMatch[] => {
+export const extractCompositionMatches = (documentText: string): AvailablePoolMatch[] => {
   const matchesByOrder = new Map<number, AvailablePoolMatch>();
   const normalized = htmlToText(documentText);
   const pattern =
@@ -188,11 +167,8 @@ export const extractCompositionMatches = (
 
 export const extractOfficialResults = (documentText: string): string[][] => {
   const normalized = htmlToText(documentText);
-  const full15Index = normalizeAccents(normalized).search(
-    /pleno\s+(?:al\s+)?quince/,
-  );
-  const beforeFull15 =
-    full15Index >= 0 ? normalized.slice(0, full15Index) : normalized;
+  const full15Index = normalizeAccents(normalized).search(/pleno\s+(?:al\s+)?quince/);
+  const beforeFull15 = full15Index >= 0 ? normalized.slice(0, full15Index) : normalized;
   const signs = Array.from(beforeFull15.matchAll(/\b([1X2])\b/gi))
     .map((match) => match[1].toUpperCase())
     .slice(-14)

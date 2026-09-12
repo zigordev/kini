@@ -171,11 +171,7 @@ describe('FutPoolController', () => {
 
       service.updatePool.mockResolvedValue(expectedPool);
 
-      const result = await controller.updatePool(
-        'pool-123',
-        payload,
-        mockRequest,
-      );
+      const result = await controller.updatePool('pool-123', payload, mockRequest);
 
       expect(result).toEqual(expectedPool);
       expect(service.updatePool).toHaveBeenCalledWith('pool-123', payload, {

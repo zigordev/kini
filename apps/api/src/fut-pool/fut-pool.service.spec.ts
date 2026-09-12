@@ -129,10 +129,7 @@ describe('FutPoolService', () => {
       const result = await service.findAll(query, actor);
 
       expect(result).toEqual(expected);
-      expect(teamsService.assertMember).toHaveBeenCalledWith(
-        'team-123',
-        'user-123',
-      );
+      expect(teamsService.assertMember).toHaveBeenCalledWith('team-123', 'user-123');
       expect(repository.findAll).toHaveBeenCalledWith(query);
     });
   });
@@ -201,10 +198,7 @@ describe('FutPoolService', () => {
       const result = await service.getStats('team-123', { id: 'user-123' });
 
       expect(result).toEqual(stats);
-      expect(teamsService.assertMember).toHaveBeenCalledWith(
-        'team-123',
-        'user-123',
-      );
+      expect(teamsService.assertMember).toHaveBeenCalledWith('team-123', 'user-123');
       expect(repository.getStats).toHaveBeenCalledWith('team-123');
     });
   });
@@ -244,11 +238,7 @@ describe('FutPoolService', () => {
 
       await service.createPool(createDto, actor);
 
-      expect(notifier.notifyPoolCreated).toHaveBeenCalledWith(
-        mockPool,
-        createDto,
-        actor,
-      );
+      expect(notifier.notifyPoolCreated).toHaveBeenCalledWith(mockPool, createDto, actor);
     });
   });
 
@@ -284,7 +274,7 @@ describe('FutPoolService', () => {
         updatedPool,
         mockPool,
         updateDto,
-        actor,
+        actor
       );
     });
   });

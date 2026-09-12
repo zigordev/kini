@@ -1,8 +1,4 @@
-import {
-  ExecutionContext,
-  Injectable,
-  ServiceUnavailableException,
-} from '@nestjs/common';
+import { ExecutionContext, Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
@@ -16,9 +12,7 @@ export class GoogleAuthGuard extends AuthGuard('google') {
 
   override async canActivate(context: ExecutionContext): Promise<boolean> {
     if (!this.hasOAuthCredentials()) {
-      const response = context
-        .switchToHttp()
-        .getResponse<Response | undefined>();
+      const response = context.switchToHttp().getResponse<Response | undefined>();
 
       if (response) {
         response.status(503).json({
@@ -45,28 +39,22 @@ export class GoogleAuthGuard extends AuthGuard('google') {
       }
     >();
 
-    const options =
-      (super.getAuthenticateOptions(context) as Record<string, unknown>) ?? {};
+    const options = (super.getAuthenticateOptions(context) as Record<string, unknown>) ?? {};
 
     const redirectUri = this.extractStringParam(request.query?.redirect_uri);
-    const failureRedirect = this.extractStringParam(
-      request.query?.failure_redirect,
-    );
+    const failureRedirect = this.extractStringParam(request.query?.failure_redirect);
     const prompt = this.extractStringParam(request.query?.prompt);
-    const callbackURL =
-      this.configService.get<string>('GOOGLE_CALLBACK_URL') ?? undefined;
+    const callbackURL = this.configService.get<string>('GOOGLE_CALLBACK_URL') ?? undefined;
 
     if (redirectUri && request.session) {
       (
-        request.session as Session &
-          SessionData & { oauthSuccessRedirect?: string }
+        request.session as Session & SessionData & { oauthSuccessRedirect?: string }
       ).oauthSuccessRedirect = redirectUri;
     }
 
     if (failureRedirect && request.session) {
       (
-        request.session as Session &
-          SessionData & { oauthFailureRedirect?: string }
+        request.session as Session & SessionData & { oauthFailureRedirect?: string }
       ).oauthFailureRedirect = failureRedirect;
     }
 
@@ -80,7 +68,7 @@ export class GoogleAuthGuard extends AuthGuard('google') {
 
   override handleRequest<TUser = unknown>(
     error: unknown,
-    user: TUser | false | null,
+    user: TUser | false | null
   ): TUser | undefined {
     if (error) {
       throw error;
@@ -93,9 +81,7 @@ export class GoogleAuthGuard extends AuthGuard('google') {
   }
 
   private extractStringParam(value: unknown): string | undefined {
-    return typeof value === 'string' && value.trim().length > 0
-      ? value
-      : undefined;
+    return typeof value === 'string' && value.trim().length > 0 ? value : undefined;
   }
 
   private hasOAuthCredentials(): boolean {

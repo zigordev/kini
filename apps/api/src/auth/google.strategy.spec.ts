@@ -36,8 +36,7 @@ describe('GoogleStrategy', () => {
               const config: Record<string, string> = {
                 GOOGLE_CLIENT_ID: 'test-client-id',
                 GOOGLE_CLIENT_SECRET: 'test-client-secret',
-                GOOGLE_CALLBACK_URL:
-                  'http://localhost:3012/auth/google/callback',
+                GOOGLE_CALLBACK_URL: 'http://localhost:3012/auth/google/callback',
               };
               return config[key];
             }),
@@ -60,16 +59,12 @@ describe('GoogleStrategy', () => {
         _stateStore: {
           store: (
             request: Request,
-            callback: (error: Error | null, state?: string) => void,
+            callback: (error: Error | null, state?: string) => void
           ) => void;
           verify: (
             request: Request,
             state: string,
-            callback: (
-              error: Error | null,
-              verified: boolean,
-              info?: { message?: string },
-            ) => void,
+            callback: (error: Error | null, verified: boolean, info?: { message?: string }) => void
           ) => void;
         };
       }
@@ -94,7 +89,7 @@ describe('GoogleStrategy', () => {
           }
           resolve(verified);
         });
-      }),
+      })
     ).resolves.toBe(false);
   });
 
@@ -109,10 +104,7 @@ describe('GoogleStrategy', () => {
 
       strategy.authenticate(mockRequest);
 
-      expect(failSpy).toHaveBeenCalledWith(
-        'Google OAuth is not configured',
-        500,
-      );
+      expect(failSpy).toHaveBeenCalledWith('Google OAuth is not configured', 500);
     });
   });
 
@@ -139,17 +131,15 @@ describe('GoogleStrategy', () => {
         mockRequest,
         'access-token',
         'refresh-token',
-        mockProfile,
+        mockProfile
       );
 
       expect(result).toEqual(mockUser);
-      expect(authService.validateGoogleProfile).toHaveBeenCalledWith(
-        mockProfile,
-      );
+      expect(authService.validateGoogleProfile).toHaveBeenCalledWith(mockProfile);
       expect(mockRequest.logIn).toHaveBeenCalledWith(
         mockUser,
         { session: true, keepSessionInfo: true },
-        expect.any(Function),
+        expect.any(Function)
       );
     });
 
@@ -158,12 +148,7 @@ describe('GoogleStrategy', () => {
       (strategy as any).isConfigured = false;
 
       await expect(
-        strategy.validate(
-          mockRequest,
-          'access-token',
-          'refresh-token',
-          mockProfile,
-        ),
+        strategy.validate(mockRequest, 'access-token', 'refresh-token', mockProfile)
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -178,12 +163,7 @@ describe('GoogleStrategy', () => {
       }) as any;
 
       await expect(
-        strategy.validate(
-          mockRequest,
-          'access-token',
-          'refresh-token',
-          mockProfile,
-        ),
+        strategy.validate(mockRequest, 'access-token', 'refresh-token', mockProfile)
       ).rejects.toThrow(loginError);
     });
   });
