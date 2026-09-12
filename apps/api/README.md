@@ -43,7 +43,7 @@ SESSION_COOKIE_SAME_SITE=lax
 `GOOGLE_CLIENT_SECRET`, `SESSION_SECRET`, and `SESSION_COOKIE_SECRET` are read
 from OpenBao by the Compose entrypoint. Production web and API origins must use
 compatible cookie `SameSite`, `Secure`, domain, HTTPS, CORS, and Socket.IO
-settings; see [`../../docs/web-cutover.md`](../../docs/web-cutover.md).
+settings; see [`../../docs/architecture/web-cutover.md`](../../docs/architecture/web-cutover.md).
 
 Sessions are stored in Postgres via `connect-pg-simple`, in the `user_sessions`
 table, using the same connection values as the ORM. The table is created on

@@ -61,18 +61,32 @@ npm run build
 npm run test
 ```
 
+## Release + deploy model
+
+- `Release Please` manages versioning/changelog + release PR.
+- On release publish, `Deploy AWS App (EC2 Compose)` builds and pushes the API and
+  web images to ECR, signs and attests them by digest, uploads the release bundle
+  to S3 and deploys remotely over AWS SSM.
+- Runtime env comes from the SSM prefix in `AWS_SSM_APP_PREFIX` (conventionally
+  `/kini/prod/app`) rendered into `docker/.env.app.prod` on the host, with
+  `OPENBAO_TOKEN` read from that same prefix and the rest of the secrets from
+  `kv/kini` in OpenBao.
+- The production host is powered on only inside its weekday window, so a deploy
+  outside it has nothing to reach.
+- Platform infra/ops services are owned by `platform-ops`; this repo only ships
+  app stack compose + app config under `docker/`.
+
+See:
+
+- `docs/local-first-start.md`
+- `docs/cloud-first-deploy.md`
+
 ## Git model
 
 - The root folder is the repository boundary.
 - Old standalone git metadata is preserved under `.legacy-git/` and ignored by the new repo.
 - Commit messages are checked with Commitlint.
 - Husky runs the local precommit quality gate when dependencies are installed.
-
-## Release + deploy model
-
-- Release Please manages versioning and changelog updates.
-- CI validates lint, typecheck, build, API tests, compose config, and secret scanning.
-- The deploy workflow is intentionally a manual placeholder until the production target is selected.
 
 ## Local Secrets
 
@@ -116,6 +130,6 @@ and use a secure session cookie. `NEXT_PUBLIC_API_BASE_URL` is a build-time
 value; changing only the container environment does not rewrite an existing
 browser bundle.
 
-See [`docs/web-cutover.md`](docs/web-cutover.md) for route coverage, removed
+See [`docs/architecture/web-cutover.md`](docs/architecture/web-cutover.md) for route coverage, removed
 native capabilities, deployment assumptions, and the remaining browser-E2E
 gap.
