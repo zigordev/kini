@@ -4,7 +4,7 @@ WORKDIR /workspace
 FROM base AS dependencies
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
-COPY apps/ui/package.json apps/ui/package.json
+COPY apps/web/package.json apps/web/package.json
 COPY scripts/prepare-husky.mjs scripts/prepare-husky.mjs
 RUN HUSKY=0 npm ci --workspace @kini/api --include-workspace-root --ignore-scripts
 RUN mkdir -p /workspace/apps/api/node_modules
@@ -12,7 +12,7 @@ RUN mkdir -p /workspace/apps/api/node_modules
 FROM base AS production-dependencies
 COPY package.json package-lock.json ./
 COPY apps/api/package.json apps/api/package.json
-COPY apps/ui/package.json apps/ui/package.json
+COPY apps/web/package.json apps/web/package.json
 COPY scripts/prepare-husky.mjs scripts/prepare-husky.mjs
 RUN HUSKY=0 npm ci --workspace @kini/api --include-workspace-root --omit=dev --ignore-scripts
 

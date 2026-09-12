@@ -28,7 +28,7 @@ apps/api/
 ├── sonar-project.properties    ← SonarQube project config
 └── package.json                ← Added sonar:scan scripts
 
-apps/ui/
+apps/web/
 ├── sonar-project.properties    ← SonarQube project config
 └── package.json                ← Added sonar:scan scripts
 ```
@@ -78,7 +78,7 @@ cd apps/api
 npm run sonar:install
 npm run sonar:scan
 
-cd ../../apps/ui
+cd ../../apps/web
 npm run sonar:install
 npm run sonar:scan
 ```

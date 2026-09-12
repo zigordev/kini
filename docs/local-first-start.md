@@ -77,7 +77,7 @@ npm run local:up
 ```
 
 `local:up` pulls Tolgee back into the tracked files under
-`apps/ui/messages/*.json`.
+`apps/web/messages/*.json`.
 
 ## Create The Local OpenBao Token
 
@@ -139,6 +139,6 @@ the secret with the required keys listed at the start of this runbook.
 ## Translation Workflow
 
 - Local Tolgee from `platform-ops` is the development authoring source.
-- Tracked snapshots live in `apps/ui/messages/{language}.json`.
+- Tracked snapshots live in `apps/web/messages/{language}.json`.
 - `npm run i18n:push:local` pushes the tracked snapshots into local Tolgee.
 - `npm run local:up` pulls local Tolgee snapshots back into the tracked files when `TOLGEE_PROJECT_ID` is set.
