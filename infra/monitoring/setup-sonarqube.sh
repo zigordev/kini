@@ -91,14 +91,14 @@ case $choice in
         run_analysis "../../apps/api" "Kini API"
         ;;
     2)
-        install_scanner "../../apps/ui"
-        run_analysis "../../apps/ui" "Kini Web"
+        install_scanner "../../apps/web"
+        run_analysis "../../apps/web" "Kini Web"
         ;;
     3)
         install_scanner "../../apps/api"
-        install_scanner "../../apps/ui"
+        install_scanner "../../apps/web"
         run_analysis "../../apps/api" "Kini API"
-        run_analysis "../../apps/ui" "Kini Web"
+        run_analysis "../../apps/web" "Kini Web"
         ;;
     4)
         echo -e "${YELLOW}👋 Exiting...${NC}"

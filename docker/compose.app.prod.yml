@@ -93,7 +93,7 @@ services:
       [
         'sh',
         '-lc',
-        'until wget -qO- http://kini-api:3000/health >/dev/null 2>&1; do sleep 2; done; exec node apps/ui/server.js',
+        'until wget -qO- http://kini-api:3000/health >/dev/null 2>&1; do sleep 2; done; exec node apps/web/server.js',
       ]
     logging: *default-logging
     networks:

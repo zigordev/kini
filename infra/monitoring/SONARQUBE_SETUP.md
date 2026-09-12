@@ -77,7 +77,7 @@ npx sonar-scanner
 #### For kini-web (Next.js web):
 
 ```bash
-cd ../../apps/ui
+cd ../../apps/web
 
 # Install SonarQube Scanner
 npm install -D sonarqube-scanner
@@ -163,7 +163,7 @@ jobs:
 ```bash
 # Add to crontab: Run analysis daily at 2 AM
 0 2 * * * cd /path/../../apps/api && npx sonar-scanner
-0 2 * * * cd /path/../../apps/ui && npx sonar-scanner
+0 2 * * * cd /path/../../apps/web && npx sonar-scanner
 ```
 
 ## Troubleshooting

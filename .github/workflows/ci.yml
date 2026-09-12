@@ -145,13 +145,13 @@ jobs:
           if-no-files-found: error
 
       - name: Regenerate web API contract
-        run: npm run contract:gen:web -- artifacts/openapi.test.json apps/ui/src/lib/api/generated.ts
+        run: npm run contract:gen:web -- artifacts/openapi.test.json apps/web/src/lib/api/generated.ts
 
       # The contract is generated from the running API, so a route added or
       # renamed without regenerating it shows up here as a diff rather than as a
       # runtime 404 in the browser months later.
       - name: Enforce API contract drift
-        run: git diff --exit-code -- apps/ui/src/lib/api/generated.ts
+        run: git diff --exit-code -- apps/web/src/lib/api/generated.ts
 
       - name: Wait for web
         run: |
@@ -198,8 +198,8 @@ jobs:
         with:
           name: playwright-report-web
           path: |
-            apps/ui/playwright-report
-            apps/ui/test-results
+            apps/web/playwright-report
+            apps/web/test-results
           retention-days: 7
 
       - name: Compose logs (on failure)
@@ -238,7 +238,7 @@ jobs:
         run: |
           docker build -f apps/api/Dockerfile --target prod -t kini-api:ci . &
           pid_0=$!
-          docker build -f apps/ui/Dockerfile --target prod -t kini-web:ci . &
+          docker build -f apps/web/Dockerfile --target prod -t kini-web:ci . &
           pid_1=$!
           wait "$pid_0"
           wait "$pid_1"

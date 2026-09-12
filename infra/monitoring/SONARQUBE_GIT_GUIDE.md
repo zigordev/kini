@@ -29,7 +29,7 @@
 .scannerwork/
 ```
 
-#### apps/ui/.gitignore
+#### apps/web/.gitignore
 ```gitignore
 # SonarQube  
 .scannerwork/

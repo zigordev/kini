@@ -4,7 +4,7 @@ Kini is now a browser-only product with the same top-level application shape as
 GPool:
 
 - `apps/api`: NestJS API
-- `apps/ui`: Next.js web application
+- `apps/web`: Next.js web application
 
 The Expo Router application, native iOS and Android projects, native control
 bridges, mobile OAuth token exchange, Expo push-token storage, and legacy mobile
