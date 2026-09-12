@@ -15,8 +15,7 @@ export const AppDataSource = new DataSource({
   synchronize: false,
   ssl: sslEnabled
     ? {
-        rejectUnauthorized:
-          process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false',
+        rejectUnauthorized: process.env.DATABASE_SSL_REJECT_UNAUTHORIZED !== 'false',
         ca: process.env.DATABASE_CA_CERT || undefined,
       }
     : undefined,

@@ -1,18 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FutPoolMatch } from 'src/fut-pool-match/entities/fut-pool-match.entity';
 import { User } from 'src/users/user.entity';
 import { FindOptionsOrder, FindOptionsWhere, Repository } from 'typeorm';
 import { CreateFutPoolDto } from './dto/create-fut-pool.dto';
 import { FutPoolQueryDto } from './dto/fut-pool-query.dto';
-import {
-  FutPoolPaginatedResponseDto,
-  FutPoolResponseDto,
-} from './dto/fut-pool-response.dto';
+import { FutPoolPaginatedResponseDto, FutPoolResponseDto } from './dto/fut-pool-response.dto';
 import { convertMatchToResponseDto } from './dto/match-conversion.util';
 import { ResultCombinationStatDto, StatsDto } from './dto/stats.dto';
 import { UpdateFutPoolDto } from './dto/update-fut-pool.dto';
@@ -32,12 +25,11 @@ interface LoadedPoolsResult {
 export class FutPoolRepository {
   constructor(
     @InjectRepository(FutPool)
-    private readonly repository: Repository<FutPool>,
+    private readonly repository: Repository<FutPool>
   ) {}
 
   async findAll(query: FutPoolQueryDto): Promise<FutPoolPaginatedResponseDto> {
-    const { items, total, page, limit, sortBy, sortOrder } =
-      await this.loadPools(query);
+    const { items, total, page, limit, sortBy, sortOrder } = await this.loadPools(query);
 
     return {
       data: items.map((item) => this.toResponseDto(item)),
@@ -64,9 +56,7 @@ export class FutPoolRepository {
       matches = matches.concat(pool.matches);
     });
     // Consider only matches with success defined
-    const validMatches = matches.filter(
-      (m) => m.success !== null && m.success !== undefined,
-    );
+    const validMatches = matches.filter((m) => m.success !== null && m.success !== undefined);
     const nonFull15Matches = validMatches.filter((m) => !m.full15);
     const full15Matches = validMatches.filter((m) => m.full15);
 
@@ -87,31 +77,26 @@ export class FutPoolRepository {
       };
     });
 
-    stats.resultBreakdown = this.getResultCombinationStats(
-      nonFull15Matches,
-      full15Matches,
-    );
+    stats.resultBreakdown = this.getResultCombinationStats(nonFull15Matches, full15Matches);
 
     // Compute ranking totals across all users
     const totalNonFull15 = nonFull15Matches.length;
-    const totalNonFull15Successes = nonFull15Matches.filter(
-      (m) => m.success,
-    ).length;
+    const totalNonFull15Successes = nonFull15Matches.filter((m) => m.success).length;
     const totalNonFull15Failures = totalNonFull15 - totalNonFull15Successes;
 
     const totalDouble = nonFull15Matches.filter(
-      (m) => Array.isArray(m.results) && m.results.length === 2,
+      (m) => Array.isArray(m.results) && m.results.length === 2
     ).length;
     const totalDoubleSuccesses = nonFull15Matches.filter(
-      (m) => Array.isArray(m.results) && m.results.length === 2 && m.success,
+      (m) => Array.isArray(m.results) && m.results.length === 2 && m.success
     ).length;
     const totalDoubleFailures = totalDouble - totalDoubleSuccesses;
 
     const totalTriple = nonFull15Matches.filter(
-      (m) => Array.isArray(m.results) && m.results.length === 3,
+      (m) => Array.isArray(m.results) && m.results.length === 3
     ).length;
     const totalTripleSuccesses = nonFull15Matches.filter(
-      (m) => Array.isArray(m.results) && m.results.length === 3 && m.success,
+      (m) => Array.isArray(m.results) && m.results.length === 3 && m.success
     ).length;
     const totalTripleFailures = totalTriple - totalTripleSuccesses;
 
@@ -129,25 +114,19 @@ export class FutPoolRepository {
       successes: totalNonFull15Successes,
       failures: totalNonFull15Failures,
       successesPercentage:
-        totalNonFull15 > 0
-          ? (totalNonFull15Successes / totalNonFull15) * 100
-          : 0,
+        totalNonFull15 > 0 ? (totalNonFull15Successes / totalNonFull15) * 100 : 0,
       doubleSuccesses: totalDoubleSuccesses,
       doubleFailures: totalDoubleFailures,
-      doubleSuccessesPercentage:
-        totalDouble > 0 ? (totalDoubleSuccesses / totalDouble) * 100 : 0,
+      doubleSuccessesPercentage: totalDouble > 0 ? (totalDoubleSuccesses / totalDouble) * 100 : 0,
       tripleSuccesses: totalTripleSuccesses,
       tripleFailures: totalTripleFailures,
-      tripleSuccessesPercentage:
-        totalTriple > 0 ? (totalTripleSuccesses / totalTriple) * 100 : 0,
+      tripleSuccessesPercentage: totalTriple > 0 ? (totalTripleSuccesses / totalTriple) * 100 : 0,
       full15Successes: totalFull15Successes,
       full15Failures: totalFull15Failures,
-      full15SuccessesPercentage:
-        totalFull15 > 0 ? (totalFull15Successes / totalFull15) * 100 : 0,
+      full15SuccessesPercentage: totalFull15 > 0 ? (totalFull15Successes / totalFull15) * 100 : 0,
       elige8Successes: totalElige8Successes,
       elige8Failures: totalElige8Failures,
-      elige8SuccessesPercentage:
-        totalElige8 > 0 ? (totalElige8Successes / totalElige8) * 100 : 0,
+      elige8SuccessesPercentage: totalElige8 > 0 ? (totalElige8Successes / totalElige8) * 100 : 0,
     };
 
     return stats;
@@ -173,49 +152,36 @@ export class FutPoolRepository {
       const elige8 = nonFull15.filter((m) => Boolean(m.elige8));
       const full15 = matches.filter((m) => m.full15);
       const doubleMatches = nonFull15.filter(
-        (match) => Array.isArray(match.results) && match.results.length === 2,
+        (match) => Array.isArray(match.results) && match.results.length === 2
       );
-      const doubleSuccessMatches = doubleMatches.filter(
-        (match) => match.success,
-      );
+      const doubleSuccessMatches = doubleMatches.filter((match) => match.success);
 
       const tripleMatches = nonFull15.filter(
-        (match) => Array.isArray(match.results) && match.results.length === 3,
+        (match) => Array.isArray(match.results) && match.results.length === 3
       );
-      const tripleSuccessMatches = tripleMatches.filter(
-        (match) => match.success,
-      );
+      const tripleSuccessMatches = tripleMatches.filter((match) => match.success);
 
-      const nonFull15Successes = nonFull15.filter(
-        (match) => match.success,
-      ).length;
+      const nonFull15Successes = nonFull15.filter((match) => match.success).length;
       const nonFull15Failures = nonFull15.length - nonFull15Successes;
       const elige8Successes = elige8.filter((match) => match.success).length;
       const elige8Failures = elige8.length - elige8Successes;
       const full15Successes = full15.filter((match) => match.success).length;
       const full15Failures = full15.length - full15Successes;
 
-      const doubleSuccesses = doubleSuccessMatches.filter(
-        (match) => match.success,
-      ).length;
+      const doubleSuccesses = doubleSuccessMatches.filter((match) => match.success).length;
       const doubleFailures = doubleMatches.length - doubleSuccesses;
 
-      const tripleSuccesses = tripleSuccessMatches.filter(
-        (match) => match.success,
-      ).length;
+      const tripleSuccesses = tripleSuccessMatches.filter((match) => match.success).length;
       const tripleFailures = tripleMatches.length - tripleSuccesses;
 
       const totalSuccesses = nonFull15Successes; // keep main successes as nonFull15 to match main column semantics
       const totalSuccessesPercetage =
         nonFull15.length > 0 ? (totalSuccesses / nonFull15.length) * 100 : 0;
 
-      const doubleSuccessesPercentage =
-        (doubleSuccesses / doubleMatches.length) * 100;
+      const doubleSuccessesPercentage = (doubleSuccesses / doubleMatches.length) * 100;
 
       const tripleSuccessesPercentage =
-        tripleMatches.length > 0
-          ? (tripleSuccesses / tripleMatches.length) * 100
-          : 0;
+        tripleMatches.length > 0 ? (tripleSuccesses / tripleMatches.length) * 100 : 0;
 
       const user = matches.find((match) => match.user)?.user;
 
@@ -232,12 +198,10 @@ export class FutPoolRepository {
         tripleFailures: tripleFailures,
         full15Successes: full15Successes,
         full15Failures: full15Failures,
-        full15SuccessesPercentage:
-          full15.length > 0 ? (full15Successes / full15.length) * 100 : 0,
+        full15SuccessesPercentage: full15.length > 0 ? (full15Successes / full15.length) * 100 : 0,
         elige8Successes: elige8Successes,
         elige8Failures: elige8Failures,
-        elige8SuccessesPercentage:
-          elige8.length > 0 ? (elige8Successes / elige8.length) * 100 : 0,
+        elige8SuccessesPercentage: elige8.length > 0 ? (elige8Successes / elige8.length) * 100 : 0,
       });
     }
 
@@ -248,10 +212,7 @@ export class FutPoolRepository {
 
   private getBalance(pools: FutPool[]): number {
     const totalCost = pools.reduce((sum, pool) => sum + (pool.cost ?? 0), 0);
-    const totalEarning = pools.reduce(
-      (sum, pool) => sum + (pool.earning ?? 0),
-      0,
-    );
+    const totalEarning = pools.reduce((sum, pool) => sum + (pool.earning ?? 0), 0);
 
     const result = totalEarning - totalCost;
 
@@ -260,7 +221,7 @@ export class FutPoolRepository {
 
   private getResultCombinationStats(
     matches: FutPoolMatch[],
-    full15: FutPoolMatch[],
+    full15: FutPoolMatch[]
   ): ResultCombinationStatDto[] {
     type Key = '1' | 'X' | '2' | '1X' | '12' | 'X2' | '1X2' | '15' | 'TOTAL';
 
@@ -275,8 +236,8 @@ export class FutPoolRepository {
         new Set(
           list
             .map((v) => String(v).toUpperCase())
-            .filter((v) => v === '1' || v === 'X' || v === '2'),
-        ),
+            .filter((v) => v === '1' || v === 'X' || v === '2')
+        )
       );
       // Sort in logical order: 1, X, 2 (not alphabetical)
       values.sort((a, b) => {
@@ -319,8 +280,7 @@ export class FutPoolRepository {
     const full15Total = full15.length;
     const full15Successes = full15.filter((m) => m.success).length;
     const full15Failures = full15Total - full15Successes;
-    const full15SuccessRate =
-      full15Total > 0 ? (full15Successes / full15Total) * 100 : 0;
+    const full15SuccessRate = full15Total > 0 ? (full15Successes / full15Total) * 100 : 0;
     result.push({
       key: '15',
       total: full15Total,
@@ -336,8 +296,7 @@ export class FutPoolRepository {
     const tripleTotal = counters.get('1X2')?.total ?? 0;
     const tripleSuccesses = counters.get('1X2')?.successes ?? 0;
     const tripleFailures = tripleTotal - tripleSuccesses;
-    const tripleSuccessRate =
-      tripleTotal > 0 ? (tripleSuccesses / tripleTotal) * 100 : 0;
+    const tripleSuccessRate = tripleTotal > 0 ? (tripleSuccesses / tripleTotal) * 100 : 0;
     result.push({
       key: '1X2',
       total: tripleTotal,
@@ -351,14 +310,11 @@ export class FutPoolRepository {
 
     // Ensure deterministic order for UI (TOTAL handled below)
     const order: Key[] = ['1', 'X', '2', '1X', '12', 'X2', '1X2', '15'];
-    result.sort(
-      (a, b) => order.indexOf(a.key as Key) - order.indexOf(b.key as Key),
-    );
+    result.sort((a, b) => order.indexOf(a.key as Key) - order.indexOf(b.key as Key));
 
     // Append TOTAL row at the end
     const totalFailures = grandTotal - grandSuccesses;
-    const totalSuccessRate =
-      grandTotal > 0 ? (grandSuccesses / grandTotal) * 100 : 0;
+    const totalSuccessRate = grandTotal > 0 ? (grandSuccesses / grandTotal) * 100 : 0;
     result.push({
       key: 'TOTAL',
       total: grandTotal,
@@ -390,30 +346,24 @@ export class FutPoolRepository {
     // Validate doubles and triples against existing results
     if (update.doubles !== undefined) {
       const doubleResultsCount = pool.matches.filter(
-        (match) =>
-          Array.isArray(match.results) &&
-          match.results.length === 2 &&
-          !match.full15,
+        (match) => Array.isArray(match.results) && match.results.length === 2 && !match.full15
       ).length;
 
       if (update.doubles < doubleResultsCount) {
         throw new BadRequestException(
-          `Cannot set doubles to ${update.doubles}. There are already ${doubleResultsCount} matches with double results.`,
+          `Cannot set doubles to ${update.doubles}. There are already ${doubleResultsCount} matches with double results.`
         );
       }
     }
 
     if (update.triples !== undefined) {
       const tripleResultsCount = pool.matches.filter(
-        (match) =>
-          Array.isArray(match.results) &&
-          match.results.length === 3 &&
-          !match.full15,
+        (match) => Array.isArray(match.results) && match.results.length === 3 && !match.full15
       ).length;
 
       if (update.triples < tripleResultsCount) {
         throw new BadRequestException(
-          `Cannot set triples to ${update.triples}. There are already ${tripleResultsCount} matches with triple results.`,
+          `Cannot set triples to ${update.triples}. There are already ${tripleResultsCount} matches with triple results.`
         );
       }
     }
@@ -462,19 +412,14 @@ export class FutPoolRepository {
       // Validate that all matches have required fields
       for (const match of payload.matches) {
         if (!match.homeTeam || !match.homeTeam.trim()) {
-          throw new BadRequestException(
-            'Home team is required for all matches',
-          );
+          throw new BadRequestException('Home team is required for all matches');
         }
         if (!match.awayTeam || !match.awayTeam.trim()) {
-          throw new BadRequestException(
-            'Away team is required for all matches',
-          );
+          throw new BadRequestException('Away team is required for all matches');
         }
       }
 
-      const matchRepository =
-        this.repository.manager.getRepository(FutPoolMatch);
+      const matchRepository = this.repository.manager.getRepository(FutPoolMatch);
       const userRepository = this.repository.manager.getRepository(User);
 
       // Create matches one by one to handle user relations
@@ -525,9 +470,7 @@ export class FutPoolRepository {
       sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
 
     const [items, total] = await this.repository.findAndCount({
-      where: teamId
-        ? ({ teamId } satisfies FindOptionsWhere<FutPool>)
-        : undefined,
+      where: teamId ? ({ teamId } satisfies FindOptionsWhere<FutPool>) : undefined,
       relations: { availablePool: true, matches: { user: true } },
       order,
       skip,
@@ -568,8 +511,6 @@ export class FutPoolRepository {
     }
     const deadlineTime = deadline.getTime();
 
-    return Number.isFinite(deadlineTime) && deadlineTime <= Date.now()
-      ? 'active'
-      : 'programmed';
+    return Number.isFinite(deadlineTime) && deadlineTime <= Date.now() ? 'active' : 'programmed';
   }
 }

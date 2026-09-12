@@ -75,9 +75,7 @@ describe('FutPoolMatchService', () => {
     }).compile();
 
     service = module.get<FutPoolMatchService>(FutPoolMatchService);
-    repository = module.get(
-      FutPoolMatchRepository,
-    ) as Mocked<FutPoolMatchRepository>;
+    repository = module.get(FutPoolMatchRepository) as Mocked<FutPoolMatchRepository>;
     events = module.get(EventsGateway) as Mocked<EventsGateway>;
     notifier = module.get(NotifierService) as Mocked<NotifierService>;
     teams = module.get(TeamsService) as Mocked<TeamsService>;
@@ -123,7 +121,7 @@ describe('FutPoolMatchService', () => {
         updatedMatch,
         mockMatch,
         updateDto,
-        actor,
+        actor
       );
     });
 
@@ -131,7 +129,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
 
       await expect(
-        service.update('another-pool', 'match-123', { success: true }),
+        service.update('another-pool', 'match-123', { success: true })
       ).rejects.toMatchObject({
         status: 404,
         response: { code: 'FUT_POOL_MATCH.NOT_FOUND' },
@@ -144,9 +142,7 @@ describe('FutPoolMatchService', () => {
 
       repository.findById.mockResolvedValue(mockMatch);
 
-      await expect(
-        service.update(POOL_ID, 'match-123', updateDto, actor),
-      ).rejects.toMatchObject({
+      await expect(service.update(POOL_ID, 'match-123', updateDto, actor)).rejects.toMatchObject({
         status: 403,
         response: { code: 'FUT_POOL_MATCH.NOT_ASSIGNED' },
       });
@@ -160,12 +156,7 @@ describe('FutPoolMatchService', () => {
       repository.findById.mockResolvedValue(mockMatch);
       repository.update.mockResolvedValue(updatedMatch);
 
-      const result = await service.update(
-        POOL_ID,
-        'match-123',
-        updateDto,
-        actor,
-      );
+      const result = await service.update(POOL_ID, 'match-123', updateDto, actor);
 
       expect(result.results).toEqual([Result.DRAW]);
     });

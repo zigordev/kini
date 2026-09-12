@@ -19,7 +19,7 @@ export class ApiError extends Error {
     message: string,
     readonly status: number,
     readonly code?: string,
-    readonly params?: Record<string, unknown>,
+    readonly params?: Record<string, unknown>
   ) {
     super(message);
     this.name = 'ApiError';
@@ -49,7 +49,7 @@ const request = async <T>(path: string, init: RequestInit = {}): Promise<T> => {
       payload?.detail || `Request failed (${response.status})`,
       response.status,
       payload?.code,
-      payload?.params,
+      payload?.params
     );
   }
 
@@ -71,8 +71,7 @@ export const authApi = {
       throw error;
     }
   },
-  googleConfig: () =>
-    request<{ enabled?: boolean; clientId?: string }>('/auth/google/config'),
+  googleConfig: () => request<{ enabled?: boolean; clientId?: string }>('/auth/google/config'),
   loginUrl: (callbackUrl: string) => {
     const url = new URL(`${API_BASE_URL}/auth/google`);
     url.searchParams.set('redirect_uri', callbackUrl);
@@ -106,7 +105,7 @@ export const teamsApi = {
   accept: async (teamId: string) => {
     const response = await request<{ team: Team }>(
       `/teams/${encodeURIComponent(teamId)}/accept-invitation`,
-      { method: 'POST' },
+      { method: 'POST' }
     );
     return response.team;
   },
@@ -165,38 +164,30 @@ export const poolsApi = {
       userId?: string;
       homeTeam?: string;
       awayTeam?: string;
-    },
+    }
   ) =>
     request<FutPoolMatchResponse>(
       `/fut-pools/${encodeURIComponent(poolId)}/matches/${encodeURIComponent(matchId)}`,
-      { method: 'PATCH', body: JSON.stringify(payload) },
+      { method: 'PATCH', body: JSON.stringify(payload) }
     ),
   checkResults: (poolId: string) =>
-    request<FutPool>(
-      `/fut-pools/${encodeURIComponent(poolId)}/check-results`,
-      { method: 'POST' },
-    ),
+    request<FutPool>(`/fut-pools/${encodeURIComponent(poolId)}/check-results`, { method: 'POST' }),
 };
 
 type FutPoolMatchResponse = FutPool['matches'][number];
 
 export const availablePoolsApi = {
   list: () => request<AvailablePool[]>('/available-pools'),
-  sync: () =>
-    request<AvailablePool[]>('/available-pools/sync', { method: 'POST' }),
+  sync: () => request<AvailablePool[]>('/available-pools/sync', { method: 'POST' }),
   jackpot: () => request<AvailablePoolJackpot>('/available-pools/jackpot'),
   addToTeam: (availablePoolId: string, teamId: string) =>
-    request<FutPool>(
-      `/available-pools/${encodeURIComponent(availablePoolId)}/add-to-team`,
-      { method: 'POST', body: JSON.stringify({ teamId }) },
-    ),
-  updateResult: (
-    availablePoolId: string,
-    order: number,
-    officialResults: ResultValue[],
-  ) =>
+    request<FutPool>(`/available-pools/${encodeURIComponent(availablePoolId)}/add-to-team`, {
+      method: 'POST',
+      body: JSON.stringify({ teamId }),
+    }),
+  updateResult: (availablePoolId: string, order: number, officialResults: ResultValue[]) =>
     request<AvailablePool>(
       `/available-pools/${encodeURIComponent(availablePoolId)}/matches/${order}/result`,
-      { method: 'PATCH', body: JSON.stringify({ officialResults }) },
+      { method: 'PATCH', body: JSON.stringify({ officialResults }) }
     ),
 };

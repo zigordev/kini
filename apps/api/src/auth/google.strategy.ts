@@ -13,7 +13,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   constructor(
     configService: ConfigService,
-    private readonly authService: AuthService,
+    private readonly authService: AuthService
   ) {
     const clientID = configService.get<string>('GOOGLE_CLIENT_ID');
     const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET');
@@ -25,9 +25,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     // Connect provider the browser suite signs in against. Left undefined,
     // passport-google-oauth20 uses Google's own endpoints, so production
     // configuration and the production image are unchanged.
-    const authorizationURL = configService.get<string>(
-      'GOOGLE_AUTHORIZATION_URL',
-    );
+    const authorizationURL = configService.get<string>('GOOGLE_AUTHORIZATION_URL');
     const tokenURL = configService.get<string>('GOOGLE_TOKEN_URL');
     const userProfileURL = configService.get<string>('GOOGLE_USERINFO_URL');
 
@@ -73,7 +71,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     request: Request,
     _accessToken: string,
     _refreshToken: string,
-    profile: Profile,
+    profile: Profile
   ): Promise<User> {
     if (!this.isConfigured) {
       throw new UnauthorizedException('Google OAuth is not configured');
@@ -89,7 +87,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         } else {
           resolve();
         }
-      }),
+      })
     );
 
     return user;

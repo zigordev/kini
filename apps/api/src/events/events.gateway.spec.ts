@@ -31,9 +31,7 @@ describe('EventsGateway', () => {
 
       gateway.handleConnection(mockClient);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'WebSocket client connected: client-123',
-      );
+      expect(loggerSpy).toHaveBeenCalledWith('WebSocket client connected: client-123');
     });
   });
 
@@ -44,9 +42,7 @@ describe('EventsGateway', () => {
 
       gateway.handleDisconnect(mockClient);
 
-      expect(loggerSpy).toHaveBeenCalledWith(
-        'WebSocket client disconnected: client-123',
-      );
+      expect(loggerSpy).toHaveBeenCalledWith('WebSocket client disconnected: client-123');
     });
   });
 
@@ -73,10 +69,7 @@ describe('EventsGateway', () => {
 
       gateway.emitMatchUpdated(payload);
 
-      expect(gateway.server.emit).toHaveBeenCalledWith(
-        'match.updated',
-        payload,
-      );
+      expect(gateway.server.emit).toHaveBeenCalledWith('match.updated', payload);
     });
   });
 });

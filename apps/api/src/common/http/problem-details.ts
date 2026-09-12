@@ -42,16 +42,12 @@ export const problemTypeFor = (code: string): string =>
 const titleFor = (status: number): string => TITLES[status] ?? 'Error';
 
 const codeFor = (status: number): string =>
-  DEFAULT_CODES[status] ??
-  (status >= 500 ? 'HTTP.INTERNAL_ERROR' : 'HTTP.ERROR');
+  DEFAULT_CODES[status] ?? (status >= 500 ? 'HTTP.INTERNAL_ERROR' : 'HTTP.ERROR');
 
 const detailFrom = (message: unknown): string | undefined => {
   if (typeof message === 'string' && message.trim()) return message;
   if (Array.isArray(message) && message.length > 0) {
-    return (
-      message.filter((entry) => typeof entry === 'string').join('; ') ||
-      undefined
-    );
+    return message.filter((entry) => typeof entry === 'string').join('; ') || undefined;
   }
   return undefined;
 };
@@ -63,7 +59,7 @@ const paramsFrom = (value: unknown): Record<string, unknown> | undefined =>
 
 export const problemFromException = (
   exception: HttpException,
-  instance: string,
+  instance: string
 ): ProblemDetails => {
   const status = exception.getStatus();
   const payload = exception.getResponse();
@@ -88,8 +84,7 @@ export const problemFromException = (
   // A 5xx body says what failed and nothing about why: an ORM message or a
   // driver error text reaching a browser is how internals leak.
   if (status < HttpStatus.INTERNAL_SERVER_ERROR) {
-    const detail =
-      typeof payload === 'string' ? payload : detailFrom(body.message);
+    const detail = typeof payload === 'string' ? payload : detailFrom(body.message);
     if (detail) problem.detail = detail;
 
     const params = paramsFrom(body.params);

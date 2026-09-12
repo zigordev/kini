@@ -30,7 +30,7 @@ const SERVICE = 'kini-api';
 export class HealthController {
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
-    private readonly publisher: EmailNotificationPublisher,
+    private readonly publisher: EmailNotificationPublisher
   ) {}
 
   @Get()

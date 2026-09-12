@@ -17,9 +17,7 @@ interface Toast {
   kind: ToastKind;
 }
 
-const ToastContext = createContext<
-  ((message: string, kind?: ToastKind) => void) | null
->(null);
+const ToastContext = createContext<((message: string, kind?: ToastKind) => void) | null>(null);
 
 export function ToastProvider({ children }: PropsWithChildren) {
   const sequence = useRef(0);
@@ -29,7 +27,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
     setToasts((current) => [...current, { id, message, kind }]);
     window.setTimeout(
       () => setToasts((current) => current.filter((toast) => toast.id !== id)),
-      4500,
+      4500
     );
   }, []);
   const value = useMemo(() => show, [show]);
@@ -42,11 +40,7 @@ export function ToastProvider({ children }: PropsWithChildren) {
           <button
             className={`toast toast-${toast.kind}`}
             key={toast.id}
-            onClick={() =>
-              setToasts((current) =>
-                current.filter((entry) => entry.id !== toast.id),
-              )
-            }
+            onClick={() => setToasts((current) => current.filter((entry) => entry.id !== toast.id))}
             type="button"
           >
             {toast.message}

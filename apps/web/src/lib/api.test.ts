@@ -1,11 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import {
-  ApiError,
-  authApi,
-  availablePoolsApi,
-  poolsApi,
-  teamsApi,
-} from './api';
+import { ApiError, authApi, availablePoolsApi, poolsApi, teamsApi } from './api';
 
 const fetchMock = vi.fn<typeof fetch>();
 
@@ -26,9 +20,7 @@ describe('API client', () => {
   });
 
   it('maps an unauthenticated session response to null', async () => {
-    fetchMock.mockResolvedValueOnce(
-      jsonResponse({ status: 401, code: 'HTTP.UNAUTHORIZED' }, 401),
-    );
+    fetchMock.mockResolvedValueOnce(jsonResponse({ status: 401, code: 'HTTP.UNAUTHORIZED' }, 401));
 
     await expect(authApi.me()).resolves.toBeNull();
   });
@@ -51,8 +43,8 @@ describe('API client', () => {
           code: 'VALIDATION.FAILED',
           params: { field: 'email' },
         },
-        400,
-      ),
+        400
+      )
     );
 
     const error = await teamsApi.list().catch((reason: unknown) => reason);
@@ -75,7 +67,7 @@ describe('API client', () => {
         role: 'admin',
         createdAt: '2026-07-26T00:00:00.000Z',
         updatedAt: '2026-07-26T00:00:00.000Z',
-      }),
+      })
     );
 
     await teamsApi.create('Weekend');
@@ -87,9 +79,7 @@ describe('API client', () => {
       credentials: 'include',
       body: JSON.stringify({ name: 'Weekend' }),
     });
-    expect(new Headers(init?.headers).get('Content-Type')).toBe(
-      'application/json',
-    );
+    expect(new Headers(init?.headers).get('Content-Type')).toBe('application/json');
   });
 
   it('encodes pool list filters into the request URL', async () => {
@@ -104,7 +94,7 @@ describe('API client', () => {
           sortBy: 'date',
           sortOrder: 'desc',
         },
-      }),
+      })
     );
 
     await poolsApi.list('team with spaces', 2, 25);
@@ -121,16 +111,12 @@ describe('API client', () => {
   });
 
   it('encodes available-pool path segments and result payloads', async () => {
-    fetchMock.mockResolvedValueOnce(
-      jsonResponse({ id: 'pool/1', matches: [] }),
-    );
+    fetchMock.mockResolvedValueOnce(jsonResponse({ id: 'pool/1', matches: [] }));
 
     await availablePoolsApi.updateResult('pool/1', 15, ['M']);
 
     const [url, init] = fetchMock.mock.calls[0]!;
-    expect(String(url)).toMatch(
-      /\/available-pools\/pool%2F1\/matches\/15\/result$/,
-    );
+    expect(String(url)).toMatch(/\/available-pools\/pool%2F1\/matches\/15\/result$/);
     expect(init?.body).toBe(JSON.stringify({ officialResults: ['M'] }));
   });
 });

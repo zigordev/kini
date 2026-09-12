@@ -1,10 +1,7 @@
 import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
-import {
-  NotificationPayload,
-  NotificationProducer,
-} from './notification.producer';
+import { NotificationPayload, NotificationProducer } from './notification.producer';
 
 describe('NotificationProducer', () => {
   let producer: NotificationProducer;
@@ -65,10 +62,7 @@ describe('NotificationProducer', () => {
       await producer.emit(fullPayload);
 
       expect(gateway.server.emit).toHaveBeenCalledTimes(1);
-      expect(gateway.server.emit).toHaveBeenCalledWith(
-        'notification',
-        fullPayload,
-      );
+      expect(gateway.server.emit).toHaveBeenCalledWith('notification', fullPayload);
     });
   });
 });

@@ -15,13 +15,13 @@ export class NotifierService {
   constructor(
     private readonly notifications: NotificationProducer,
     private readonly emailNotifications: EmailNotificationPublisher,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   async notifyPoolCreated(
     pool: FutPool,
     payload: CreateFutPoolDto,
-    actor?: { id: string; name?: string },
+    actor?: { id: string; name?: string }
   ): Promise<void> {
     const body = actor?.name
       ? `${actor.name} ha creado una nueva quiniela`
@@ -43,25 +43,16 @@ export class NotifierService {
     updated: FutPool,
     oldPool: FutPool | null,
     payload: UpdateFutPoolDto,
-    actor?: { id: string; name?: string },
+    actor?: { id: string; name?: string }
   ): Promise<void> {
     const changes: string[] = [];
-    if (
-      oldPool &&
-      payload.doubles !== undefined &&
-      payload.doubles !== oldPool.doubles
-    ) {
+    if (oldPool && payload.doubles !== undefined && payload.doubles !== oldPool.doubles) {
       changes.push(`dobles a ${payload.doubles}`);
     }
-    if (
-      oldPool &&
-      payload.elige8 !== undefined &&
-      payload.elige8 !== oldPool.elige8
-    ) {
+    if (oldPool && payload.elige8 !== undefined && payload.elige8 !== oldPool.elige8) {
       changes.push(`E8 ${payload.elige8 ? 'activado' : 'desactivado'}`);
     }
-    const changeDescription =
-      changes.length > 0 ? ` (${changes.join(', ')})` : '';
+    const changeDescription = changes.length > 0 ? ` (${changes.join(', ')})` : '';
     const body = actor?.name
       ? `${actor.name} ha actualizado la quiniela${changeDescription}`
       : `Se han realizado cambios en la quiniela${changeDescription}`;
@@ -82,7 +73,7 @@ export class NotifierService {
     updated: FutPoolMatch,
     oldMatch: FutPoolMatch | null,
     matchUpdate: UpdateFutPoolMatchDto,
-    actor?: { id: string; name?: string },
+    actor?: { id: string; name?: string }
   ): Promise<void> {
     const changes: string[] = [];
     if (
@@ -92,35 +83,20 @@ export class NotifierService {
     ) {
       changes.push(`resultados a [${matchUpdate.results.join(', ')}]`);
     }
-    if (
-      oldMatch &&
-      matchUpdate.success !== undefined &&
-      matchUpdate.success !== oldMatch.success
-    ) {
+    if (oldMatch && matchUpdate.success !== undefined && matchUpdate.success !== oldMatch.success) {
       changes.push(`éxito a ${matchUpdate.success ? 'sí' : 'no'}`);
     }
-    if (
-      oldMatch &&
-      matchUpdate.elige8 !== undefined &&
-      matchUpdate.elige8 !== oldMatch.elige8
-    ) {
+    if (oldMatch && matchUpdate.elige8 !== undefined && matchUpdate.elige8 !== oldMatch.elige8) {
       changes.push(`E8 ${matchUpdate.elige8 ? 'activado' : 'desactivado'}`);
     }
-    if (
-      oldMatch &&
-      matchUpdate.userId !== undefined &&
-      matchUpdate.userId !== oldMatch.userId
-    ) {
+    if (oldMatch && matchUpdate.userId !== undefined && matchUpdate.userId !== oldMatch.userId) {
       const oldUserName = oldMatch.user?.name || 'Sin asignar';
       const newUserName = updated.user?.name || 'Sin asignar';
       changes.push(`usuario de ${oldUserName} a ${newUserName}`);
     }
 
-    const changeDescription =
-      changes.length > 0 ? ` (${changes.join(', ')})` : '';
-    const matchInfo = oldMatch
-      ? ` (${oldMatch.homeTeam} vs ${oldMatch.awayTeam})`
-      : '';
+    const changeDescription = changes.length > 0 ? ` (${changes.join(', ')})` : '';
+    const matchInfo = oldMatch ? ` (${oldMatch.homeTeam} vs ${oldMatch.awayTeam})` : '';
     const body = actor?.name
       ? `${actor.name} ha actualizado un partido${matchInfo}${changeDescription}`
       : `Se han realizado cambios en un partido${matchInfo}${changeDescription}`;
@@ -146,9 +122,7 @@ export class NotifierService {
     recipientUserIds: string[];
     actor?: { id: string; name?: string };
   }): Promise<void> {
-    const poolUrl = `${this.frontendUrl()}/pools?poolId=${encodeURIComponent(
-      data.poolId,
-    )}`;
+    const poolUrl = `${this.frontendUrl()}/pools?poolId=${encodeURIComponent(data.poolId)}`;
     const formattedDate = data.poolDate
       ? new Intl.DateTimeFormat('es-ES', {
           day: '2-digit',
@@ -187,7 +161,7 @@ export class NotifierService {
     locale?: string;
   }): Promise<void> {
     this.logger.log(
-      `Team invitation requested for ${data.to} to ${data.teamName}. Accept URL: ${data.acceptUrl}`,
+      `Team invitation requested for ${data.to} to ${data.teamName}. Accept URL: ${data.acceptUrl}`
     );
 
     await this.notifications.emit({
@@ -207,7 +181,7 @@ export class NotifierService {
     });
 
     await this.emailNotifications.publishEmail(
-      this.emailNotifications.buildTeamInvitationEvent(data),
+      this.emailNotifications.buildTeamInvitationEvent(data)
     );
   }
 
@@ -232,8 +206,9 @@ export class NotifierService {
   }
 
   private frontendUrl(): string {
-    return (
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013'
-    ).replace(/\/$/, '');
+    return (this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013').replace(
+      /\/$/,
+      ''
+    );
   }
 }

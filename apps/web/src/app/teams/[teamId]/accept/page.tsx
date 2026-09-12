@@ -50,10 +50,7 @@ export default function AcceptInvitationPage() {
       <div className="empty-state-icon">✓</div>
       <h1>{t('teams.accept_title')}</h1>
       <p>{message}</p>
-      <Button variant="primary"
-        onClick={() => router.replace('/pools')}
-        type="button"
-      >
+      <Button variant="primary" onClick={() => router.replace('/pools')} type="button">
         {t('teams.go_to_team')}
       </Button>
     </section>

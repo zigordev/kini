@@ -8,12 +8,7 @@ import {
   Req,
   UseGuards,
 } from '@nestjs/common';
-import {
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { FutPoolResponseDto } from '../fut-pool/dto/fut-pool-response.dto';
 import { User } from '../users/user.entity';
@@ -34,7 +29,7 @@ export class FutPoolResultsController {
   @ApiOkResponse({ type: FutPoolResponseDto })
   checkResults(
     @Param('poolId', new ParseUUIDPipe({ version: '4' })) poolId: string,
-    @Req() req: any,
+    @Req() req: any
   ): Promise<FutPoolResponseDto> {
     return this.availablePools.checkTeamPoolResults(poolId, req.user as User);
   }

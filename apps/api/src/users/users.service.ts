@@ -21,7 +21,7 @@ export class UsersService {
 
   constructor(
     @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
+    private readonly usersRepository: Repository<User>
   ) {}
 
   findById(id: string): Promise<User | null> {
@@ -67,9 +67,7 @@ export class UsersService {
     return savedUser;
   }
 
-  async listUsers(): Promise<
-    Array<Pick<User, 'id' | 'name' | 'textColor' | 'backgroundColor'>>
-  > {
+  async listUsers(): Promise<Array<Pick<User, 'id' | 'name' | 'textColor' | 'backgroundColor'>>> {
     const users = await this.usersRepository.find({
       select: { id: true, name: true, textColor: true, backgroundColor: true },
       order: { name: 'ASC' },
@@ -82,10 +80,7 @@ export class UsersService {
     }));
   }
 
-  async updateUser(
-    userId: string,
-    updateData: UpdateUserDto,
-  ): Promise<UserResponseDto> {
+  async updateUser(userId: string, updateData: UpdateUserDto): Promise<UserResponseDto> {
     const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException({

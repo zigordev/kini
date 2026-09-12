@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-} from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
@@ -23,7 +14,7 @@ import { GoogleAuthGuard } from './google-auth.guard';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   @Get('google/config')
@@ -60,10 +51,7 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
-  async googleCallback(
-    @Req() req: Request,
-    @Res() res: Response,
-  ): Promise<void> {
+  async googleCallback(@Req() req: Request, @Res() res: Response): Promise<void> {
     const user = req.user as User | undefined;
     const session = req.session as
       | (Session &
@@ -78,9 +66,7 @@ export class AuthController {
         delete session.oauthSuccessRedirect;
         delete session.oauthFailureRedirect;
       }
-      res.redirect(
-        this.authService.getFailureRedirectUrl('missing_user', failureOverride),
-      );
+      res.redirect(this.authService.getFailureRedirectUrl('missing_user', failureOverride));
       return;
     }
 
@@ -90,10 +76,7 @@ export class AuthController {
       delete session.oauthSuccessRedirect;
       delete session.oauthFailureRedirect;
     }
-    const successUrl = this.authService.getSuccessRedirectUrl(
-      user,
-      successOverride,
-    );
+    const successUrl = this.authService.getSuccessRedirectUrl(user, successOverride);
 
     res.redirect(successUrl);
   }
@@ -112,10 +95,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthenticatedGuard)
   async logout(@Req() req: Request, @Res() res: Response): Promise<void> {
-    const cookieName = this.configService.get<string>(
-      'SESSION_COOKIE_NAME',
-      'kini.sid',
-    );
+    const cookieName = this.configService.get<string>('SESSION_COOKIE_NAME', 'kini.sid');
 
     await new Promise<void>((resolve, reject) =>
       (
@@ -128,7 +108,7 @@ export class AuthController {
         } else {
           resolve();
         }
-      }),
+      })
     );
 
     req.session?.destroy(() => undefined);

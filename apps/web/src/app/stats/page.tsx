@@ -41,10 +41,7 @@ export default function StatsPage() {
     try {
       setStats(await poolsApi.stats(selectedTeam.id));
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setLoading(false);
     }
@@ -64,13 +61,13 @@ export default function StatsPage() {
           failures: current.failures + value.failures,
         };
       },
-      { successes: 0, failures: 0 },
+      { successes: 0, failures: 0 }
     );
   }, [stats]);
   const resolved = totals.successes + totals.failures;
   const rate = resolved ? Math.round((totals.successes / resolved) * 100) : 0;
   const best = [...(stats?.resultBreakdown ?? [])].sort(
-    (left, right) => right.successRate - left.successRate,
+    (left, right) => right.successRate - left.successRate
   )[0];
 
   if (!user) return null;
@@ -94,10 +91,7 @@ export default function StatsPage() {
   return (
     <div className="page">
       <header className="page-header button-row button-row-end">
-        <Button variant="secondary"
-          onClick={() => void load()}
-          type="button"
-        >
+        <Button variant="secondary" onClick={() => void load()} type="button">
           {t('actions.refresh')}
         </Button>
       </header>

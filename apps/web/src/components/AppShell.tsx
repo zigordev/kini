@@ -62,8 +62,7 @@ function KiniLogo({
 export function AppShell({ children }: PropsWithChildren) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading, signingIn, googleAuthEnabled, signInWithGoogle } =
-    useAuth();
+  const { user, loading, signingIn, googleAuthEnabled, signInWithGoogle } = useAuth();
   const { selectedTeam, teams, loading: teamsLoading, select } = useTeams();
   const { t } = usePreferences();
 
@@ -82,7 +81,14 @@ export function AppShell({ children }: PropsWithChildren) {
 
   if (!user) {
     return (
-      <AuthShell utilities={<><ThemeButton /><LanguageButton /></>}>
+      <AuthShell
+        utilities={
+          <>
+            <ThemeButton />
+            <LanguageButton />
+          </>
+        }
+      >
         <AuthCard
           logo={<KiniLogo />}
           eyebrow={t('login.eyebrow')}
@@ -96,9 +102,7 @@ export function AppShell({ children }: PropsWithChildren) {
             size="lg"
             style={{ width: '100%' }}
             disabled={!googleAuthEnabled || signingIn}
-            onClick={() =>
-              signInWithGoogle(`${pathname}${window.location.search}`)
-            }
+            onClick={() => signInWithGoogle(`${pathname}${window.location.search}`)}
             type="button"
           >
             <GoogleMark />
@@ -135,7 +139,12 @@ export function AppShell({ children }: PropsWithChildren) {
             onSelect: (id: string) => void select(id),
           }))}
           footer={({ close }: { close: () => void }) => (
-            <MenuItem onClick={() => { close(); router.push('/teams'); }}>
+            <MenuItem
+              onClick={() => {
+                close();
+                router.push('/teams');
+              }}
+            >
               <Icon name="users" /> {t('tabs.teams')}
             </MenuItem>
           )}

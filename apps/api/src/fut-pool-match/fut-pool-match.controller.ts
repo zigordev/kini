@@ -1,18 +1,5 @@
-import {
-  Body,
-  Controller,
-  Param,
-  ParseUUIDPipe,
-  Patch,
-  Req,
-  UseGuards,
-} from '@nestjs/common';
-import {
-  ApiOkResponse,
-  ApiOperation,
-  ApiParam,
-  ApiTags,
-} from '@nestjs/swagger';
+import { Body, Controller, Param, ParseUUIDPipe, Patch, Req, UseGuards } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiParam, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { FutPoolMatchResponseDto } from './dto/fut-pool-match-response.dto';
 import { UpdateFutPoolMatchDto } from './dto/update-fut-pool-match.dto';
@@ -36,7 +23,7 @@ export class FutPoolMatchController {
     @Param('poolId', new ParseUUIDPipe({ version: '4' })) poolId: string,
     @Param('matchId', new ParseUUIDPipe({ version: '4' })) matchId: string,
     @Body() match: UpdateFutPoolMatchDto,
-    @Req() req: any,
+    @Req() req: any
   ): Promise<FutPoolMatchResponseDto> {
     const actor = req.user as { id: string; name?: string } | undefined;
     return this.futPoolMatchService.update(poolId, matchId, match, actor);

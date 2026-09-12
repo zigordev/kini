@@ -8,15 +8,7 @@ const output = process.argv[3] ?? 'apps/web/src/lib/api/generated.ts';
 const raw = fs.readFileSync(input, 'utf8');
 const spec = JSON.parse(raw);
 const paths = spec.paths ?? {};
-const httpMethods = [
-  'get',
-  'post',
-  'put',
-  'patch',
-  'delete',
-  'head',
-  'options',
-];
+const httpMethods = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options'];
 
 const operations = [];
 
@@ -38,9 +30,7 @@ for (const [route, methods] of Object.entries(paths)) {
 }
 
 operations.sort((a, b) =>
-  `${a.method}:${a.path}:${a.operationId}`.localeCompare(
-    `${b.method}:${b.path}:${b.operationId}`,
-  ),
+  `${a.method}:${a.path}:${a.operationId}`.localeCompare(`${b.method}:${b.path}:${b.operationId}`)
 );
 
 const file = `// Auto-generated from OpenAPI. Do not edit by hand.
@@ -57,7 +47,7 @@ export type ApiOperation = ${
   path: '${op.path}';
   operationId: '${op.operationId}';
   responseCodes: [${op.responseCodes.map((code) => `'${code}'`).join(', ')}];
-}`,
+}`
         )
         .join(' | ')
 };
@@ -69,6 +59,4 @@ export const API_OPERATIONS = ${JSON.stringify(operations, null, 2)} as const;
 
 fs.mkdirSync(path.dirname(output), { recursive: true });
 fs.writeFileSync(output, file, 'utf8');
-console.log(
-  `Generated ${output} from ${input} (${operations.length} operations)`,
-);
+console.log(`Generated ${output} from ${input} (${operations.length} operations)`);

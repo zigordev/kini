@@ -33,7 +33,7 @@ export class UsersController {
   })
   async updateUser(
     @Req() req: Request,
-    @Body() updateUserDto: UpdateUserDto,
+    @Body() updateUserDto: UpdateUserDto
   ): Promise<UserResponseDto> {
     const user = req.user as any;
     return this.usersService.updateUser(user.id, updateUserDto);

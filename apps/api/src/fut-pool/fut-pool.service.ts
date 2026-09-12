@@ -20,12 +20,12 @@ export class FutPoolService {
     private readonly futPoolRepository: FutPoolRepository,
     private readonly events: EventsGateway,
     private readonly notifier: NotifierService,
-    private readonly teamsService: TeamsService,
+    private readonly teamsService: TeamsService
   ) {}
 
   async findAll(
     query: FutPoolQueryDto,
-    actor?: { id: string },
+    actor?: { id: string }
   ): Promise<FutPoolPaginatedResponseDto> {
     if (query.teamId && actor?.id) {
       await this.teamsService.assertMember(query.teamId, actor.id);
@@ -42,7 +42,7 @@ export class FutPoolService {
 
   async createPool(
     payload: CreateFutPoolDto,
-    actor?: { id: string; name?: string },
+    actor?: { id: string; name?: string }
   ): Promise<FutPoolResponseDto> {
     if (payload.teamId && actor?.id) {
       await this.teamsService.assertMember(payload.teamId, actor.id);
@@ -56,7 +56,7 @@ export class FutPoolService {
   async updatePool(
     poolId: string,
     payload: UpdateFutPoolDto,
-    actor?: { id: string; name?: string },
+    actor?: { id: string; name?: string }
   ): Promise<FutPoolResponseDto> {
     const oldPool = await this.futPoolRepository.findById(poolId);
     const updated = await this.futPoolRepository.updatePool(poolId, payload);
@@ -96,8 +96,6 @@ export class FutPoolService {
     }
     const deadlineTime = deadline.getTime();
 
-    return Number.isFinite(deadlineTime) && deadlineTime <= Date.now()
-      ? 'active'
-      : 'programmed';
+    return Number.isFinite(deadlineTime) && deadlineTime <= Date.now() ? 'active' : 'programmed';
   }
 }

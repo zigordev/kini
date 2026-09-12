@@ -15,7 +15,7 @@ export class UserSummaryDto {
   backgroundColor?: string;
 
   static fromEntity(
-    user: Pick<User, 'id' | 'name' | 'textColor' | 'backgroundColor'>,
+    user: Pick<User, 'id' | 'name' | 'textColor' | 'backgroundColor'>
   ): UserSummaryDto {
     const dto = new UserSummaryDto();
     dto.id = user.id;

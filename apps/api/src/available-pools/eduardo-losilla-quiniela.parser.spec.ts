@@ -28,7 +28,7 @@ describe('Eduardo Losilla Quiniela parser', () => {
       },
     };
     const html = `<script id="eduardo-losilla-state" type="application/json">${JSON.stringify(
-      state,
+      state
     ).replaceAll('"', '&q;')}</script>`;
 
     const [pool] = extractEduardoLosillaPools(html);
@@ -71,7 +71,7 @@ describe('Eduardo Losilla Quiniela parser', () => {
       },
     };
     const html = `<script id="eduardo-losilla-state" type="application/json">${JSON.stringify(
-      state,
+      state
     ).replaceAll('"', '&q;')}</script>`;
 
     const [pool] = extractEduardoLosillaPools(html);
@@ -107,9 +107,7 @@ describe('Eduardo Losilla Quiniela parser', () => {
       completed: false,
     });
     expect(pool?.matches).toHaveLength(15);
-    expect(
-      pool?.matches.filter((match) => match.officialResults?.length),
-    ).toHaveLength(10);
+    expect(pool?.matches.filter((match) => match.officialResults?.length)).toHaveLength(10);
     expect(pool?.matches[9].officialResults).toEqual([]);
     expect(pool?.matches[14].officialResults).toEqual(['1', '0']);
   });

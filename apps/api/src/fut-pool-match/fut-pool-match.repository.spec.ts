@@ -157,9 +157,7 @@ describe('FutPoolMatchRepository', () => {
       typeormRepository.findOne.mockResolvedValue(mockMatch);
       typeormRepository.count.mockResolvedValue(8); // Already 8 E8 matches
 
-      await expect(repository.update('match-123', updateDto)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(repository.update('match-123', updateDto)).rejects.toThrow(BadRequestException);
     });
 
     it('should allow elige8 when under limit', async () => {
@@ -197,11 +195,9 @@ describe('FutPoolMatchRepository', () => {
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
+      await expect(repository.update('match-123', updateDto)).rejects.toThrow(BadRequestException);
       await expect(repository.update('match-123', updateDto)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(repository.update('match-123', updateDto)).rejects.toThrow(
-        /maximum number of double matches/,
+        /maximum number of double matches/
       );
     });
 
@@ -244,11 +240,9 @@ describe('FutPoolMatchRepository', () => {
       };
       typeormRepository.createQueryBuilder.mockReturnValue(qb as any);
 
+      await expect(repository.update('match-123', updateDto)).rejects.toThrow(BadRequestException);
       await expect(repository.update('match-123', updateDto)).rejects.toThrow(
-        BadRequestException,
-      );
-      await expect(repository.update('match-123', updateDto)).rejects.toThrow(
-        /maximum number of triple matches/,
+        /maximum number of triple matches/
       );
     });
 

@@ -70,7 +70,7 @@ const toFull15Result = (score: string): string[] => {
 
 const decodeState = (html: string): LosillaState | null => {
   const state = html.match(
-    /<script id="eduardo-losilla-state" type="application\/json">([\s\S]*?)<\/script>/i,
+    /<script id="eduardo-losilla-state" type="application\/json">([\s\S]*?)<\/script>/i
   );
   if (!state) {
     return null;
@@ -82,7 +82,7 @@ const decodeState = (html: string): LosillaState | null => {
         .replaceAll('&q;', '"')
         .replaceAll('&l;', '<')
         .replaceAll('&g;', '>')
-        .replaceAll('&a;', '&'),
+        .replaceAll('&a;', '&')
     ) as LosillaState;
   } catch {
     return null;
@@ -121,7 +121,7 @@ const extractJackpotValue = (jornada: LosillaJornada): number | null =>
 
 export const extractEduardoLosillaPoolFromJornada = (
   source: unknown,
-  current?: LosillaState['datosGeneralesQuiniela'],
+  current?: LosillaState['datosGeneralesQuiniela']
 ): EduardoLosillaPool | null => {
   if (!source || typeof source !== 'object') {
     return null;
@@ -136,9 +136,7 @@ export const extractEduardoLosillaPoolFromJornada = (
       const order = Number(match.orden ?? index + 1);
       const full15 = order === 15;
       const score = String(match.resultado ?? '');
-      const officialResults = full15
-        ? toFull15Result(score)
-        : toQuinielaSign(score);
+      const officialResults = full15 ? toFull15Result(score) : toQuinielaSign(score);
       return {
         order,
         homeTeam: String(match.local ?? '').trim(),
@@ -149,10 +147,7 @@ export const extractEduardoLosillaPoolFromJornada = (
     })
     .filter((match) => match.order >= 1 && match.order <= 15)
     .sort((left, right) => left.order - right.order);
-  if (
-    matches.length !== 15 ||
-    matches.some((match) => !match.homeTeam || !match.awayTeam)
-  ) {
+  if (matches.length !== 15 || matches.some((match) => !match.homeTeam || !match.awayTeam)) {
     return null;
   }
 
@@ -161,20 +156,15 @@ export const extractEduardoLosillaPoolFromJornada = (
     .filter((date): date is Date => date !== null)
     .sort((left, right) => left.getTime() - right.getTime());
   const drawDate =
-    (current?.jornada === jornada.jornada
-      ? fromUnixSeconds(current.fechaJornada)
-      : null) ?? matchDates[0];
+    (current?.jornada === jornada.jornada ? fromUnixSeconds(current.fechaJornada) : null) ??
+    matchDates[0];
   if (!drawDate) {
     return null;
   }
   const closingDate =
     fromUnixSeconds(jornada.fechaFinApuestas) ??
-    (current?.jornada === jornada.jornada
-      ? fromUnixSeconds(current.fechaFinApuestas)
-      : null);
-  const completed = matches.every((match) =>
-    Boolean(match.officialResults?.length),
-  );
+    (current?.jornada === jornada.jornada ? fromUnixSeconds(current.fechaFinApuestas) : null);
+  const completed = matches.every((match) => Boolean(match.officialResults?.length));
   const jackpotValue = extractJackpotValue(jornada);
 
   return {
@@ -189,9 +179,7 @@ export const extractEduardoLosillaPoolFromJornada = (
   };
 };
 
-export const extractEduardoLosillaPools = (
-  html: string,
-): EduardoLosillaPool[] => {
+export const extractEduardoLosillaPools = (html: string): EduardoLosillaPool[] => {
   const state = decodeState(html);
   if (!state) {
     return [];
@@ -212,6 +200,6 @@ export const extractEduardoLosillaPools = (
   }
 
   return Array.from(pools.values()).sort(
-    (left, right) => left.drawDate.getTime() - right.drawDate.getTime(),
+    (left, right) => left.drawDate.getTime() - right.drawDate.getTime()
   );
 };

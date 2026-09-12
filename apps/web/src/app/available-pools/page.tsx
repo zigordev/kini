@@ -11,11 +11,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { availablePoolsApi, poolsApi } from '@/lib/api';
 import { formatDate, full15Results, regularResults } from '@/lib/pools';
 import { readPoolDefaults } from '@/lib/preferences';
-import type {
-  AvailablePool,
-  AvailablePoolJackpot,
-  ResultValue,
-} from '@/types/domain';
+import type { AvailablePool, AvailablePoolJackpot, ResultValue } from '@/types/domain';
 import { Button } from 'design-system/components/core/Button.jsx';
 import { Table, TableEmpty } from 'design-system/components/data-display/Table.jsx';
 
@@ -45,10 +41,7 @@ export default function AvailablePoolsPage() {
       setPools(nextPools);
       setJackpot(nextJackpot);
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setLoading(false);
     }
@@ -71,10 +64,7 @@ export default function AvailablePoolsPage() {
       setPools(await availablePoolsApi.sync());
       showToast(t('available_pools.synced'), 'success');
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setSyncing(false);
     }
@@ -87,43 +77,26 @@ export default function AvailablePoolsPage() {
     }
     setAddingId(availablePool.id);
     try {
-      const created = await availablePoolsApi.addToTeam(
-        availablePool.id,
-        selectedTeam.id,
-      );
+      const created = await availablePoolsApi.addToTeam(availablePool.id, selectedTeam.id);
       const defaults = readPoolDefaults(selectedTeam.id);
       await poolsApi.update(created.id, defaults);
       showToast(t('available_pools.added'), 'success');
       router.push(`/pools?poolId=${encodeURIComponent(created.id)}`);
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setAddingId(null);
     }
   };
 
-  const updateOfficialResult = async (
-    pool: AvailablePool,
-    order: number,
-    value: ResultValue,
-  ) => {
+  const updateOfficialResult = async (pool: AvailablePool, order: number, value: ResultValue) => {
     const key = `${pool.id}:${order}`;
     setUpdatingMatch(key);
     try {
-      const updated = await availablePoolsApi.updateResult(pool.id, order, [
-        value,
-      ]);
-      setPools((current) =>
-        current.map((entry) => (entry.id === updated.id ? updated : entry)),
-      );
+      const updated = await availablePoolsApi.updateResult(pool.id, order, [value]);
+      setPools((current) => current.map((entry) => (entry.id === updated.id ? updated : entry)));
     } catch (error) {
-      showToast(
-        error instanceof Error ? error.message : String(error),
-        'error',
-      );
+      showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setUpdatingMatch(null);
     }
@@ -138,11 +111,7 @@ export default function AvailablePoolsPage() {
           <Button as={Link} variant="secondary" href="/create-pool?from=/available-pools">
             {t('pools.create_title')}
           </Button>
-          <Button variant="primary"
-            disabled={syncing}
-            onClick={() => void sync()}
-            type="button"
-          >
+          <Button variant="primary" disabled={syncing} onClick={() => void sync()} type="button">
             {syncing ? t('status.preparing') : t('available_pools.sync')}
           </Button>
         </div>
@@ -158,9 +127,7 @@ export default function AvailablePoolsPage() {
                 : t('teams.jackpot_not_published')}
             </strong>
           </div>
-          {jackpot.drawDate && (
-            <small>{formatDate(jackpot.drawDate, language)}</small>
-          )}
+          {jackpot.drawDate && <small>{formatDate(jackpot.drawDate, language)}</small>}
         </section>
       )}
 
@@ -176,10 +143,7 @@ export default function AvailablePoolsPage() {
       ) : pools.length === 0 ? (
         <EmptyState
           action={
-            <Button variant="primary"
-              onClick={() => void sync()}
-              type="button"
-            >
+            <Button variant="primary" onClick={() => void sync()} type="button">
               {t('available_pools.sync')}
             </Button>
           }
@@ -198,24 +162,23 @@ export default function AvailablePoolsPage() {
               caption={
                 <div className="catalog-caption">
                   <div>
-                  <span className="status-badge">{pool.status}</span>
-                  <h2>{pool.name}</h2>
-                  <p>
-                    {formatDate(pool.drawDate, language, true)} ·{' '}
-                    {t('available_pools.match_count', {
-                      count: pool.matches.length,
-                    })}
-                  </p>
-                </div>
-                <Button variant="primary"
-                  disabled={!selectedTeam || addingId === pool.id}
-                  onClick={() => void addToTeam(pool)}
-                  type="button"
-                >
-                  {addingId === pool.id
-                    ? t('status.preparing')
-                    : t('available_pools.play')}
-                </Button>
+                    <span className="status-badge">{pool.status}</span>
+                    <h2>{pool.name}</h2>
+                    <p>
+                      {formatDate(pool.drawDate, language, true)} ·{' '}
+                      {t('available_pools.match_count', {
+                        count: pool.matches.length,
+                      })}
+                    </p>
+                  </div>
+                  <Button
+                    variant="primary"
+                    disabled={!selectedTeam || addingId === pool.id}
+                    onClick={() => void addToTeam(pool)}
+                    type="button"
+                  >
+                    {addingId === pool.id ? t('status.preparing') : t('available_pools.play')}
+                  </Button>
                 </div>
               }
             >
@@ -227,17 +190,17 @@ export default function AvailablePoolsPage() {
                 </tr>
               </thead>
               <tbody>
-              {pool.matches.length === 0 ? (
-                <TableEmpty>{t('available_pools.no_matches')}</TableEmpty>
-              ) : (
-                pool.matches.map((match) => {
+                {pool.matches.length === 0 ? (
+                  <TableEmpty>{t('available_pools.no_matches')}</TableEmpty>
+                ) : (
+                  pool.matches.map((match) => {
                     const matchKey = `${pool.id}:${match.order}`;
-                    const values = match.full15
-                      ? full15Results
-                      : regularResults;
+                    const values = match.full15 ? full15Results : regularResults;
                     return (
                       <tr key={match.order}>
-                        <td className="match-order"><span className="match-order">{match.order}</span></td>
+                        <td className="match-order">
+                          <span className="match-order">{match.order}</span>
+                        </td>
                         <td className="match-teams">
                           <strong>{match.homeTeam}</strong>
                           <span>{match.awayTeam}</span>
@@ -251,37 +214,31 @@ export default function AvailablePoolsPage() {
                               })}
                               className="result-buttons"
                             >
-                            {values.map((value) => (
-                              <button
-                                aria-pressed={match.officialResults?.includes(
-                                  value,
-                                )}
-                                className={
-                                  match.officialResults?.includes(value)
-                                    ? 'result-button result-button-active'
-                                    : 'result-button'
-                                }
-                                disabled={updatingMatch === matchKey}
-                                key={value}
-                                onClick={() =>
-                                  void updateOfficialResult(
-                                    pool,
-                                    match.order,
-                                    value,
-                                  )
-                                }
-                                type="button"
-                              >
-                                {value}
-                              </button>
-                            ))}
+                              {values.map((value) => (
+                                <button
+                                  aria-pressed={match.officialResults?.includes(value)}
+                                  className={
+                                    match.officialResults?.includes(value)
+                                      ? 'result-button result-button-active'
+                                      : 'result-button'
+                                  }
+                                  disabled={updatingMatch === matchKey}
+                                  key={value}
+                                  onClick={() =>
+                                    void updateOfficialResult(pool, match.order, value)
+                                  }
+                                  type="button"
+                                >
+                                  {value}
+                                </button>
+                              ))}
                             </div>
                           </td>
                         )}
                       </tr>
                     );
                   })
-              )}
+                )}
               </tbody>
             </Table>
           ))}

@@ -7,11 +7,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { describe, expect, it } from 'vitest';
-import {
-  internalProblem,
-  problemFromException,
-  problemTypeFor,
-} from './problem-details';
+import { internalProblem, problemFromException, problemTypeFor } from './problem-details';
 
 describe('problemFromException', () => {
   it('carries the code and params a throw supplies', () => {
@@ -21,7 +17,7 @@ describe('problemFromException', () => {
         message: 'Pool 7f3a not found',
         params: { poolId: '7f3a' },
       }),
-      '/fut-pools/7f3a',
+      '/fut-pools/7f3a'
     );
 
     expect(problem).toEqual({
@@ -37,16 +33,12 @@ describe('problemFromException', () => {
 
   it('derives a code from the status when the throw is a bare string', () => {
     const problem = problemFromException(
-      new ForbiddenException(
-        'Only the assigned player can change these results',
-      ),
-      '/fut-pools',
+      new ForbiddenException('Only the assigned player can change these results'),
+      '/fut-pools'
     );
 
     expect(problem.code).toBe('HTTP.FORBIDDEN');
-    expect(problem.detail).toBe(
-      'Only the assigned player can change these results',
-    );
+    expect(problem.detail).toBe('Only the assigned player can change these results');
     expect(problem.type).toBe('https://zigordev.com/problems/http-forbidden');
   });
 
@@ -57,19 +49,17 @@ describe('problemFromException', () => {
         message: ['name should not be empty', 'size must be a number'],
         error: 'Bad Request',
       }),
-      '/fut-pools',
+      '/fut-pools'
     );
 
     expect(problem.code).toBe('VALIDATION.FAILED');
-    expect(problem.detail).toBe(
-      'name should not be empty; size must be a number',
-    );
+    expect(problem.detail).toBe('name should not be empty; size must be a number');
   });
 
   it('says nothing about why a 5xx happened', () => {
     const problem = problemFromException(
       new InternalServerErrorException('relation "pool" does not exist'),
-      '/fut-pools',
+      '/fut-pools'
     );
 
     expect(problem.detail).toBeUndefined();
@@ -80,7 +70,7 @@ describe('problemFromException', () => {
   it('keeps a status that has no table entry', () => {
     const problem = problemFromException(
       new HttpException('teapot', HttpStatus.I_AM_A_TEAPOT),
-      '/fut-pools',
+      '/fut-pools'
     );
 
     expect(problem.status).toBe(418);

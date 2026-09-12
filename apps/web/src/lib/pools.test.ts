@@ -27,12 +27,8 @@ describe('pool helpers', () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-07-26T10:00:00.000Z'));
 
-    expect(poolStatus(pool({ date: '2026-07-27', active: true }))).toBe(
-      'programmed',
-    );
-    expect(poolStatus(pool({ date: '2026-07-25', active: true }))).toBe(
-      'active',
-    );
+    expect(poolStatus(pool({ date: '2026-07-27', active: true }))).toBe('programmed');
+    expect(poolStatus(pool({ date: '2026-07-25', active: true }))).toBe('active');
     expect(poolStatus(pool({ active: false }))).toBe('closed');
   });
 
@@ -45,7 +41,7 @@ describe('pool helpers', () => {
           { id: '3', success: false },
           { id: '4', success: null },
         ] as FutPool['matches'],
-      }),
+      })
     );
 
     expect(result).toEqual({

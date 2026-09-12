@@ -43,7 +43,12 @@ function Probe() {
   );
 }
 
-const mount = () => render(<TeamsProvider><Probe /></TeamsProvider>);
+const mount = () =>
+  render(
+    <TeamsProvider>
+      <Probe />
+    </TeamsProvider>
+  );
 
 describe('TeamsProvider', () => {
   beforeEach(() => {
@@ -59,7 +64,7 @@ describe('TeamsProvider', () => {
 
   afterEach(cleanup);
 
-  it('prefers the account\'s active team over the stored one and over the first', async () => {
+  it("prefers the account's active team over the stored one and over the first", async () => {
     auth.user = { id: 'user-1', activeTeamId: 't2' };
     window.localStorage.setItem('kini-selected-team', 't1');
     mount();

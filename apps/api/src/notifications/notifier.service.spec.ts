@@ -1,10 +1,7 @@
 import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import {
-  FutPoolMatch,
-  Result,
-} from '../fut-pool-match/entities/fut-pool-match.entity';
+import { FutPoolMatch, Result } from '../fut-pool-match/entities/fut-pool-match.entity';
 import { FutPool } from '../fut-pool/entities/fut-pool.entity';
 import { EmailNotificationPublisher } from './email-notification.publisher';
 import { NotificationProducer } from './notification.producer';
@@ -57,9 +54,7 @@ describe('NotifierService', () => {
 
     service = module.get<NotifierService>(NotifierService);
     producer = module.get(NotificationProducer) as Mocked<NotificationProducer>;
-    emailPublisher = module.get(
-      EmailNotificationPublisher,
-    ) as Mocked<EmailNotificationPublisher>;
+    emailPublisher = module.get(EmailNotificationPublisher) as Mocked<EmailNotificationPublisher>;
     emailPublisher.buildTeamInvitationEvent.mockReturnValue({
       messageId: 'message-123',
       idempotencyKey: 'kini:team:team-123:invite:invitee@example.com',
@@ -94,7 +89,7 @@ describe('NotifierService', () => {
           body: 'Se ha creado una nueva quiniela',
           poolId: 'pool-123',
           recipientUserIds: [],
-        }),
+        })
       );
     });
 
@@ -109,7 +104,7 @@ describe('NotifierService', () => {
           body: 'Test User ha creado una nueva quiniela',
           actorId: 'user-123',
           actorName: 'Test User',
-        }),
+        })
       );
     });
   });
@@ -126,7 +121,7 @@ describe('NotifierService', () => {
           type: 'pool',
           title: 'Quiniela actualizada',
           poolId: 'pool-123',
-        }),
+        })
       );
     });
 
@@ -140,7 +135,7 @@ describe('NotifierService', () => {
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('dobles a 3'),
-        }),
+        })
       );
     });
 
@@ -154,7 +149,7 @@ describe('NotifierService', () => {
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('E8 activado'),
-        }),
+        })
       );
     });
   });
@@ -172,7 +167,7 @@ describe('NotifierService', () => {
           title: 'Partido actualizado',
           poolId: 'pool-123',
           matchId: 'match-123',
-        }),
+        })
       );
     });
 
@@ -189,7 +184,7 @@ describe('NotifierService', () => {
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('resultados a [1, X]'),
-        }),
+        })
       );
     });
 
@@ -203,7 +198,7 @@ describe('NotifierService', () => {
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('éxito a sí'),
-        }),
+        })
       );
     });
 
@@ -217,7 +212,7 @@ describe('NotifierService', () => {
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('E8 activado'),
-        }),
+        })
       );
     });
 
@@ -237,7 +232,7 @@ describe('NotifierService', () => {
       expect(producer.emit).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.stringContaining('usuario de Old User a New User'),
-        }),
+        })
       );
     });
   });
@@ -266,16 +261,14 @@ describe('NotifierService', () => {
             teamName: 'My Team',
             acceptUrl: 'http://localhost:3013/teams/team-123/accept',
           }),
-        }),
+        })
       );
-      expect(emailPublisher.buildTeamInvitationEvent).toHaveBeenCalledWith(
-        invitation,
-      );
+      expect(emailPublisher.buildTeamInvitationEvent).toHaveBeenCalledWith(invitation);
       expect(emailPublisher.publishEmail).toHaveBeenCalledWith(
         expect.objectContaining({
           templateId: 'kini.team-invitation',
           recipient: { email: 'invitee@example.com' },
-        }),
+        })
       );
     });
   });

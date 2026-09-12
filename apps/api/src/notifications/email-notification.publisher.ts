@@ -1,10 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import {
-  Injectable,
-  Logger,
-  OnModuleDestroy,
-  OnModuleInit,
-} from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Admin, Kafka, logLevel, Producer } from 'kafkajs';
 import { kafkaLogCreator } from '../observability';
@@ -25,9 +20,7 @@ export interface EmailNotificationEvent {
 }
 
 @Injectable()
-export class EmailNotificationPublisher
-  implements OnModuleInit, OnModuleDestroy
-{
+export class EmailNotificationPublisher implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(EmailNotificationPublisher.name);
   private readonly topic: string;
   private readonly brokers: string[];
@@ -64,18 +57,13 @@ export class EmailNotificationPublisher
   constructor(private readonly configService: ConfigService) {
     this.topic = this.configService.get<string>(
       'NOTIFICATIONS_EMAIL_TOPIC',
-      'notification.email.requested.v1',
+      'notification.email.requested.v1'
     );
-    this.brokers = (
-      this.configService.get<string>('NOTIFICATIONS_KAFKA_BROKERS', '') || ''
-    )
+    this.brokers = (this.configService.get<string>('NOTIFICATIONS_KAFKA_BROKERS', '') || '')
       .split(',')
       .map((value) => value.trim())
       .filter(Boolean);
-    this.clientId = this.configService.get<string>(
-      'OTEL_SERVICE_NAME',
-      'kini-api',
-    );
+    this.clientId = this.configService.get<string>('OTEL_SERVICE_NAME', 'kini-api');
   }
 
   buildTeamInvitationEvent(data: {
@@ -139,9 +127,7 @@ export class EmailNotificationPublisher
           },
         ],
       });
-      this.logger.log(
-        `Queued email notification ${event.templateId} for ${event.recipient.email}`,
-      );
+      this.logger.log(`Queued email notification ${event.templateId} for ${event.recipient.email}`);
     } catch (error) {
       this.resetProducerState(producer);
       throw error;
@@ -160,7 +146,7 @@ export class EmailNotificationPublisher
     void this.probeBroker();
     this.probeTimer = setInterval(
       () => void this.probeBroker(),
-      EmailNotificationPublisher.PROBE_INTERVAL_MS,
+      EmailNotificationPublisher.PROBE_INTERVAL_MS
     );
     // Never hold the process open for a health probe.
     this.probeTimer.unref?.();
@@ -236,9 +222,10 @@ export class EmailNotificationPublisher
   }
 
   private frontendUrl(): string {
-    return (
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013'
-    ).replace(/\/$/, '');
+    return (this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013').replace(
+      /\/$/,
+      ''
+    );
   }
 
   private async getProducer(): Promise<Producer> {
@@ -269,9 +256,7 @@ export class EmailNotificationPublisher
       .then(() => {
         this.producer = producer;
         this.kafkaUp = true;
-        this.logger.log(
-          `Kafka producer connected to ${this.brokers.join(', ')}`,
-        );
+        this.logger.log(`Kafka producer connected to ${this.brokers.join(', ')}`);
         return producer;
       })
       .catch((error) => {

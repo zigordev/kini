@@ -17,10 +17,7 @@ import * as passport from 'passport';
 import { Pool } from 'pg';
 
 import { AppModule } from './app.module';
-import {
-  buildSessionPoolConfig,
-  SESSION_TABLE_NAME,
-} from './auth/session-store.config';
+import { buildSessionPoolConfig, SESSION_TABLE_NAME } from './auth/session-store.config';
 import { HttpErrorFilter } from './common/http-exception.filter';
 import { httpMetricsMiddleware, JsonLogger } from './observability';
 
@@ -40,11 +37,7 @@ function parseTrustProxy(input: string | undefined): TrustProxy {
   if (normalized === 'false' || normalized === '0' || normalized === 'no') {
     return false;
   }
-  if (
-    normalized === 'loopback' ||
-    normalized === 'linklocal' ||
-    normalized === 'uniquelocal'
-  ) {
+  if (normalized === 'loopback' || normalized === 'linklocal' || normalized === 'uniquelocal') {
     return normalized;
   }
   if (/^\d+$/.test(normalized)) {
@@ -52,7 +45,7 @@ function parseTrustProxy(input: string | undefined): TrustProxy {
   }
 
   throw new Error(
-    'TRUST_PROXY must be one of: false, true, loopback, linklocal, uniquelocal, or a numeric hop count',
+    'TRUST_PROXY must be one of: false, true, loopback, linklocal, uniquelocal, or a numeric hop count'
   );
 }
 
@@ -102,7 +95,7 @@ async function bootstrap() {
   app.use((req: Request, res: Response, next: NextFunction) =>
     req.path === SWAGGER_PATH || req.path.startsWith(`${SWAGGER_PATH}/`)
       ? swaggerSecurityHeaders(req, res, next)
-      : apiSecurityHeaders(req, res, next),
+      : apiSecurityHeaders(req, res, next)
   );
 
   app.use(cookieParser(configService.get<string>('SESSION_COOKIE_SECRET')));
@@ -129,7 +122,7 @@ async function bootstrap() {
         secure: configService.get<string>('SESSION_COOKIE_SECURE') === 'true',
         domain: configService.get<string>('SESSION_COOKIE_DOMAIN') ?? undefined,
       },
-    }),
+    })
   );
 
   app.use(passport.initialize());
@@ -140,7 +133,7 @@ async function bootstrap() {
       transform: true,
       transformOptions: { enableImplicitConversion: true },
       whitelist: true,
-    }),
+    })
   );
 
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));

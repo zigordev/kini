@@ -41,7 +41,7 @@ describe('TeamsController over HTTP', () => {
         transform: true,
         transformOptions: { enableImplicitConversion: true },
         whitelist: true,
-      }),
+      })
     );
     await app.init();
   });
@@ -104,10 +104,6 @@ describe('TeamsController over HTTP', () => {
 
     // Inviting is an action on an existing team, not a create.
     expect(response.status).toBe(200);
-    expect(service.inviteUser).toHaveBeenCalledWith(
-      teamId,
-      'friend@example.com',
-      sessionUser,
-    );
+    expect(service.inviteUser).toHaveBeenCalledWith(teamId, 'friend@example.com', sessionUser);
   });
 });

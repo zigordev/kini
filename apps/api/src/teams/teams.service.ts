@@ -1,9 +1,4 @@
-import {
-  ForbiddenException,
-  Injectable,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FutPool } from 'src/fut-pool/entities/fut-pool.entity';
@@ -33,7 +28,7 @@ export class TeamsService {
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
     private readonly notifier: NotifierService,
-    private readonly configService: ConfigService,
+    private readonly configService: ConfigService
   ) {}
 
   async listTeams(actor: Actor): Promise<TeamResponseDto[]> {
@@ -44,20 +39,15 @@ export class TeamsService {
       order: { createdAt: 'ASC' },
     });
 
-    return memberships.map((membership) =>
-      this.toResponseDto(membership.team, membership.role),
-    );
+    return memberships.map((membership) => this.toResponseDto(membership.team, membership.role));
   }
 
-  async createTeam(
-    payload: CreateTeamDto,
-    actor: Actor,
-  ): Promise<TeamResponseDto> {
+  async createTeam(payload: CreateTeamDto, actor: Actor): Promise<TeamResponseDto> {
     const team = await this.teamsRepository.save(
       this.teamsRepository.create({
         name: payload.name.trim(),
         ownerId: actor.id,
-      }),
+      })
     );
 
     const membership = await this.membershipsRepository.save(
@@ -69,7 +59,7 @@ export class TeamsService {
         status: 'active',
         invitedById: actor.id,
         joinedAt: new Date(),
-      }),
+      })
     );
 
     return this.toResponseDto(team, membership.role);
@@ -78,7 +68,7 @@ export class TeamsService {
   async inviteUser(
     teamId: string,
     email: string,
-    actor: Actor,
+    actor: Actor
   ): Promise<{ success: true; message: string }> {
     const team = await this.getTeamOrThrow(teamId);
     await this.assertAdmin(teamId, actor.id);
@@ -101,7 +91,7 @@ export class TeamsService {
           status: 'pending',
           invitedById: actor.id,
           joinedAt: null,
-        }),
+        })
       );
     }
 
@@ -121,7 +111,7 @@ export class TeamsService {
 
   async acceptInvitation(
     teamId: string,
-    actor: Actor,
+    actor: Actor
   ): Promise<{ success: true; message: string; team: TeamResponseDto }> {
     const team = await this.getTeamOrThrow(teamId);
 
@@ -254,13 +244,11 @@ export class TeamsService {
           status: 'active',
           invitedById,
           joinedAt: new Date(),
-        }),
+        })
       );
     }
 
-    this.logger.log(
-      `Adopted ${legacyPools.length} legacy pools into default team ${teamId}`,
-    );
+    this.logger.log(`Adopted ${legacyPools.length} legacy pools into default team ${teamId}`);
   }
 
   private async getTeamOrThrow(teamId: string): Promise<Team> {
@@ -272,8 +260,7 @@ export class TeamsService {
   }
 
   private teamAcceptUrl(teamId: string): string {
-    const frontendUrl =
-      this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013';
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL') ?? 'http://localhost:3013';
     return `${frontendUrl.replace(/\/$/, '')}/teams/${teamId}/accept`;
   }
 

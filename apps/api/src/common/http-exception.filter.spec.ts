@@ -20,9 +20,7 @@ describe('HttpErrorFilter', () => {
     mockArgumentsHost = {
       switchToHttp: vi.fn().mockReturnValue({
         getResponse: vi.fn().mockReturnValue(mockResponse),
-        getRequest: vi
-          .fn()
-          .mockReturnValue({ url: '/fut-pools/7f3a', method: 'GET' }),
+        getRequest: vi.fn().mockReturnValue({ url: '/fut-pools/7f3a', method: 'GET' }),
       }),
     } as unknown as ArgumentsHost;
   });
@@ -35,9 +33,9 @@ describe('HttpErrorFilter', () => {
           message: 'Pool not found',
           params: { poolId: '7f3a' },
         },
-        HttpStatus.NOT_FOUND,
+        HttpStatus.NOT_FOUND
       ),
-      mockArgumentsHost,
+      mockArgumentsHost
     );
 
     expect(mockResponse.status).toHaveBeenCalledWith(404);
@@ -54,10 +52,7 @@ describe('HttpErrorFilter', () => {
   });
 
   it('derives a code from the status when the throw carries none', () => {
-    filter.catch(
-      new HttpException('Nope', HttpStatus.FORBIDDEN),
-      mockArgumentsHost,
-    );
+    filter.catch(new HttpException('Nope', HttpStatus.FORBIDDEN), mockArgumentsHost);
 
     expect(body()).toMatchObject({
       status: 403,
@@ -68,10 +63,7 @@ describe('HttpErrorFilter', () => {
   });
 
   it('turns anything that is not an HttpException into an opaque 500', () => {
-    filter.catch(
-      new Error('relation "fut_pool" does not exist'),
-      mockArgumentsHost,
-    );
+    filter.catch(new Error('relation "fut_pool" does not exist'), mockArgumentsHost);
 
     expect(mockResponse.status).toHaveBeenCalledWith(500);
     expect(body()).toEqual({
@@ -85,11 +77,8 @@ describe('HttpErrorFilter', () => {
 
   it('says nothing about why a thrown 5xx happened', () => {
     filter.catch(
-      new HttpException(
-        'connection terminated',
-        HttpStatus.SERVICE_UNAVAILABLE,
-      ),
-      mockArgumentsHost,
+      new HttpException('connection terminated', HttpStatus.SERVICE_UNAVAILABLE),
+      mockArgumentsHost
     );
 
     expect(body().status).toBe(503);
@@ -103,9 +92,9 @@ describe('HttpErrorFilter', () => {
           statusCode: 400,
           message: ['name must be a string', 'size must be a number'],
         },
-        HttpStatus.BAD_REQUEST,
+        HttpStatus.BAD_REQUEST
       ),
-      mockArgumentsHost,
+      mockArgumentsHost
     );
 
     expect(body()).toMatchObject({

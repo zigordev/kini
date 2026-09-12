@@ -22,10 +22,7 @@ import {
 import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { CreateFutPoolDto } from './dto/create-fut-pool.dto';
 import { FutPoolQueryDto } from './dto/fut-pool-query.dto';
-import {
-  FutPoolPaginatedResponseDto,
-  FutPoolResponseDto,
-} from './dto/fut-pool-response.dto';
+import { FutPoolPaginatedResponseDto, FutPoolResponseDto } from './dto/fut-pool-response.dto';
 import { StatsDto } from './dto/stats.dto';
 import { UpdateFutPoolDto } from './dto/update-fut-pool.dto';
 import { FutPoolService } from './fut-pool.service';
@@ -44,7 +41,7 @@ export class FutPoolController {
   })
   getFutPools(
     @Query() query: FutPoolQueryDto,
-    @Req() req: any,
+    @Req() req: any
   ): Promise<FutPoolPaginatedResponseDto> {
     const actor = req.user as { id: string } | undefined;
     return this.futPoolService.findAll(query, actor);
@@ -59,10 +56,7 @@ export class FutPoolController {
     type: StatsDto,
     isArray: true,
   })
-  getStats(
-    @Query('teamId') teamId?: string,
-    @Req() req?: any,
-  ): Promise<StatsDto> {
+  getStats(@Query('teamId') teamId?: string, @Req() req?: any): Promise<StatsDto> {
     const actor = req?.user as { id: string } | undefined;
     return this.futPoolService.getStats(teamId, actor);
   }
@@ -74,10 +68,7 @@ export class FutPoolController {
     description: 'Created Fut Pool',
     type: FutPoolResponseDto,
   })
-  createPool(
-    @Body() payload: CreateFutPoolDto,
-    @Req() req: any,
-  ): Promise<FutPoolResponseDto> {
+  createPool(@Body() payload: CreateFutPoolDto, @Req() req: any): Promise<FutPoolResponseDto> {
     const actor = req.user as { id: string; name?: string } | undefined;
     return this.futPoolService.createPool(payload, actor);
   }
@@ -92,7 +83,7 @@ export class FutPoolController {
   updatePool(
     @Param('poolId', new ParseUUIDPipe({ version: '4' })) poolId: string,
     @Body() payload: UpdateFutPoolDto,
-    @Req() req: any,
+    @Req() req: any
   ): Promise<FutPoolResponseDto> {
     const actor = req.user as { id: string; name?: string } | undefined;
     return this.futPoolService.updatePool(poolId, payload, actor);

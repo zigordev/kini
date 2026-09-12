@@ -46,16 +46,30 @@ export function PreviewGallery() {
         <Button variant="outline">Outline</Button>
         <Button variant="ghost">Ghost</Button>
         <Button variant="danger">Danger</Button>
-        <Button variant="primary" disabled>Disabled</Button>
+        <Button variant="primary" disabled>
+          Disabled
+        </Button>
       </Row>
 
       <Row title="Button — sizes, icons, and as={Link}">
-        <Button variant="primary" size="sm">Small</Button>
-        <Button variant="primary" size="md">Medium</Button>
-        <Button variant="primary" size="lg">Large</Button>
-        <Button variant="secondary"><Icon name="plus" /> With icon</Button>
-        <Button variant="primary" size="icon" aria-label="Icon only"><Icon name="settings" /></Button>
-        <Button as={Link} href="/dev/preview" variant="primary">Link as button</Button>
+        <Button variant="primary" size="sm">
+          Small
+        </Button>
+        <Button variant="primary" size="md">
+          Medium
+        </Button>
+        <Button variant="primary" size="lg">
+          Large
+        </Button>
+        <Button variant="secondary">
+          <Icon name="plus" /> With icon
+        </Button>
+        <Button variant="primary" size="icon" aria-label="Icon only">
+          <Icon name="settings" />
+        </Button>
+        <Button as={Link} href="/dev/preview" variant="primary">
+          Link as button
+        </Button>
       </Row>
 
       {/* The exact composition the pools and stats screens use, so the grid
@@ -69,14 +83,27 @@ export function PreviewGallery() {
       </section>
 
       <section className="metrics-grid metrics-grid-compact" style={{ marginTop: 16 }}>
-        <StatTile tone="accent" label="Balance — positive" value="€1,240" hint="valueTone: default" />
-        <StatTile tone="accent" valueTone="danger" label="Balance — negative" value="-€310" hint="valueTone: danger" />
+        <StatTile
+          tone="accent"
+          label="Balance — positive"
+          value="€1,240"
+          hint="valueTone: default"
+        />
+        <StatTile
+          tone="accent"
+          valueTone="danger"
+          label="Balance — negative"
+          value="-€310"
+          hint="valueTone: danger"
+        />
       </section>
 
       <Row title="Badge">
         <Badge>Neutral</Badge>
         <Badge variant="accent">Accent</Badge>
-        <Badge variant="success" dot>Success</Badge>
+        <Badge variant="success" dot>
+          Success
+        </Badge>
         <Badge variant="warning">Warning</Badge>
         <Badge variant="danger">Danger</Badge>
         <Badge variant="info">Info</Badge>
@@ -85,7 +112,11 @@ export function PreviewGallery() {
       <h2 style={{ margin: '28px 0 12px' }}>Form controls</h2>
       <section className="panel">
         <div className="form-grid">
-          <Field className="field-span-2" label="Pool name" hint="Shown everywhere this pool appears.">
+          <Field
+            className="field-span-2"
+            label="Pool name"
+            hint="Shown everywhere this pool appears."
+          >
             <Input placeholder="Jornada 12" defaultValue="" />
           </Field>
           <Field label="Date" required>
@@ -106,7 +137,10 @@ export function PreviewGallery() {
           <Field label="Invalid example" error="Enter a value between 0 and 14.">
             <Input type="number" defaultValue={99} invalid />
           </Field>
-          <div className="field-span-2" style={{ display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}>
+          <div
+            className="field-span-2"
+            style={{ display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap' }}
+          >
             <Checkbox label="Elige 8" defaultChecked />
             <Switch label="Receive notifications" checked onChange={() => {}} />
           </div>
@@ -123,9 +157,8 @@ export function PreviewGallery() {
 
       <h2 style={{ margin: '28px 0 12px' }}>Table — the matches list, as a real table</h2>
       <p className="muted" style={{ margin: '0 0 12px' }}>
-        Quinielas and Próximas were CSS grids with a header row of column labels. Same
-        columns, now a real table on the shared component, so kini matches gpool and the
-        operator console.
+        Quinielas and Próximas were CSS grids with a header row of column labels. Same columns, now
+        a real table on the shared component, so kini matches gpool and the operator console.
       </p>
       <Table density="compact" hoverable={false} minWidth={520} className="matches-table">
         <thead>
@@ -142,7 +175,9 @@ export function PreviewGallery() {
             { n: 2, home: 'Atlético', away: 'Sevilla' },
           ].map((m) => (
             <tr className="match-row" key={m.n}>
-              <td className="match-order"><span className="match-order">{m.n}</span></td>
+              <td className="match-order">
+                <span className="match-order">{m.n}</span>
+              </td>
               <td className="match-teams">
                 <strong>{m.home}</strong>
                 <span>{m.away}</span>
@@ -150,7 +185,9 @@ export function PreviewGallery() {
               <td>
                 <div className="result-buttons">
                   {['1', 'X', '2'].map((v) => (
-                    <button className="result-button" key={v} type="button">{v}</button>
+                    <button className="result-button" key={v} type="button">
+                      {v}
+                    </button>
                   ))}
                 </div>
               </td>
@@ -168,10 +205,36 @@ export function PreviewGallery() {
       <h2 style={{ margin: '28px 0 12px' }}>Icons</h2>
       <section className="panel">
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
-          {(['trophy', 'list-plus', 'trending-up', 'users', 'user', 'settings', 'log-out',
-             'sun', 'moon', 'globe', 'star', 'clock', 'calendar', 'search', 'plus',
-             'pencil', 'trash-2', 'copy', 'filter', 'info', 'circle-check', 'circle-x',
-             'triangle-alert', 'external-link', 'dollar-sign', 'chart-column'] as const).map((n) => (
+          {(
+            [
+              'trophy',
+              'list-plus',
+              'trending-up',
+              'users',
+              'user',
+              'settings',
+              'log-out',
+              'sun',
+              'moon',
+              'globe',
+              'star',
+              'clock',
+              'calendar',
+              'search',
+              'plus',
+              'pencil',
+              'trash-2',
+              'copy',
+              'filter',
+              'info',
+              'circle-check',
+              'circle-x',
+              'triangle-alert',
+              'external-link',
+              'dollar-sign',
+              'chart-column',
+            ] as const
+          ).map((n) => (
             <span key={n} style={{ display: 'grid', justifyItems: 'center', gap: 4, width: 76 }}>
               <Icon name={n} size={20} />
               <small style={{ fontSize: 10, color: 'var(--ink-muted)' }}>{n}</small>

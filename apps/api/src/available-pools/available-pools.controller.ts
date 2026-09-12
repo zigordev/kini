@@ -12,12 +12,7 @@ import {
   HttpCode,
   HttpStatus,
 } from '@nestjs/common';
-import {
-  ApiCreatedResponse,
-  ApiOkResponse,
-  ApiOperation,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthenticatedGuard } from '../auth/authenticated.guard';
 import { FutPoolResponseDto } from '../fut-pool/dto/fut-pool-response.dto';
 import { User } from '../users/user.entity';
@@ -66,12 +61,12 @@ export class AvailablePoolsController {
     @Param('availablePoolId', new ParseUUIDPipe({ version: '4' }))
     availablePoolId: string,
     @Param('order', ParseIntPipe) order: number,
-    @Body() payload: UpdateAvailablePoolMatchResultDto,
+    @Body() payload: UpdateAvailablePoolMatchResultDto
   ): Promise<AvailablePoolResponseDto> {
     return this.availablePools.updateAvailablePoolMatchResult(
       availablePoolId,
       order,
-      payload.officialResults,
+      payload.officialResults
     );
   }
 
@@ -83,12 +78,8 @@ export class AvailablePoolsController {
     @Param('availablePoolId', new ParseUUIDPipe({ version: '4' }))
     availablePoolId: string,
     @Body() payload: AddAvailablePoolToTeamDto,
-    @Req() req: any,
+    @Req() req: any
   ): Promise<FutPoolResponseDto> {
-    return this.availablePools.addToTeam(
-      availablePoolId,
-      payload.teamId,
-      req.user as User,
-    );
+    return this.availablePools.addToTeam(availablePoolId, payload.teamId, req.user as User);
   }
 }

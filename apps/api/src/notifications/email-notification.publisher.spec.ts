@@ -62,7 +62,7 @@ describe('EmailNotificationPublisher', () => {
           teamId: 'team-123',
           locale: 'en',
         }),
-      }),
+      })
     );
     expect(event.messageId).toEqual(expect.any(String));
     expect(event.requestedAt).toEqual(expect.any(String));
