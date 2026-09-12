@@ -7,6 +7,7 @@ COPY apps/api/package.json apps/api/package.json
 COPY apps/ui/package.json apps/ui/package.json
 COPY scripts/prepare-husky.mjs scripts/prepare-husky.mjs
 RUN HUSKY=0 npm ci --workspace @kini/web --include-workspace-root --ignore-scripts
+RUN mkdir -p /workspace/apps/ui/node_modules
 
 FROM base AS build
 ARG NEXT_PUBLIC_API_BASE_URL=http://localhost:3012
