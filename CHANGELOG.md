@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.1](https://github.com/zigordev/kini/compare/kini-v0.7.0...kini-v0.7.1) (2026-09-12)
+
+
+### Bug Fixes
+
+* **docker:** build the api and web images on node 24 ([#89](https://github.com/zigordev/kini/issues/89)) ([60ab9d4](https://github.com/zigordev/kini/commit/60ab9d471069e536bfbad1e317c472f71bd64d5a))
+
 ## [0.7.0](https://github.com/zigordev/kini/compare/kini-v0.6.5...kini-v0.7.0) (2026-09-09)
 
 
