@@ -70,8 +70,7 @@ body {
   margin: 0;
   color: var(--ink);
   background:
-    radial-gradient(circle at 85% 0%, rgb(215 25 32 / 6%), transparent 26rem),
-    var(--background);
+    radial-gradient(circle at 85% 0%, rgb(215 25 32 / 6%), transparent 26rem), var(--background);
   font-family:
     Inter,
     ui-sans-serif,
@@ -217,7 +216,6 @@ select:disabled {
 
 .panel,
 .team-card,
-
 .panel {
   padding: 24px;
 }
@@ -569,8 +567,6 @@ select:disabled {
   display: grid;
   gap: 18px;
 }
-
-
 
 /* Was another grid-as-table. Row separators, padding and column widths now
    come from the design system's Table. */
