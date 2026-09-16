@@ -100,13 +100,20 @@ services:
     environment:
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:?NEXT_PUBLIC_API_BASE_URL is required}
       NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:?NEXT_PUBLIC_RELEASE is required}
+      OPENBAO_ADDR: http://openbao:8200
+      OPENBAO_TOKEN: ${OPENBAO_TOKEN:?OPENBAO_TOKEN is required}
+      OPENBAO_KV_MOUNT: kv
+      OPENBAO_SECRET_PATH: kini
+      OPENBAO_REQUIRED_KEYS: TOLGEE_API_KEY
+      TOLGEE_API_URL: http://tolgee:8080
+      TOLGEE_PROJECT_ID: ${TOLGEE_PROJECT_ID:?TOLGEE_PROJECT_ID is required}
     depends_on:
       - kini_api
     command:
       [
         'sh',
         '-lc',
-        'until wget -qO- http://kini-api:3000/health >/dev/null 2>&1; do sleep 2; done; exec node apps/web/server.js',
+        'until wget -qO- http://kini-api:3000/health >/dev/null 2>&1; do sleep 2; done; exec node /app/scripts/openbao-run.mjs -- node apps/web/server.js',
       ]
     logging: *default-logging
     networks:

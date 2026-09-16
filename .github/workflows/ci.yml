@@ -42,6 +42,7 @@ jobs:
           GOOGLE_CLIENT_ID: ci-google-client-id
           GOOGLE_CALLBACK_URL: http://localhost:3012/auth/google/callback
           OPENBAO_TOKEN: ci-openbao-token
+          TOLGEE_PROJECT_ID: '4'
         run: |
           docker compose -f docker/compose.app.local.yml config > /dev/null
           docker compose -f docker/compose.ci.yml config > /dev/null

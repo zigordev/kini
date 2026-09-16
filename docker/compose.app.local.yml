@@ -109,6 +109,14 @@ services:
       NODE_ENV: production
       NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:3012}
       NEXT_PUBLIC_RELEASE: ${NEXT_PUBLIC_RELEASE:-local}
+      OPENBAO_ADDR: http://openbao:8200
+      OPENBAO_TOKEN: ${OPENBAO_TOKEN:?OPENBAO_TOKEN is required}
+      OPENBAO_KV_MOUNT: kv
+      OPENBAO_SECRET_PATH: kini
+      OPENBAO_REQUIRED_KEYS: TOLGEE_API_KEY
+      TOLGEE_API_URL: http://tolgee:8080
+      TOLGEE_PROJECT_ID: ${TOLGEE_PROJECT_ID:?TOLGEE_PROJECT_ID is required}
+    command: ['node', '/app/scripts/openbao-run.mjs', '--', 'node', 'apps/web/server.js']
     ports:
       - '${WEB_PORT:-3013}:3001'
     depends_on:
