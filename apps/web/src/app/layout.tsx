@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { AppShell } from '@/components/AppShell';
 import { Providers } from '@/components/Providers';
+import { I18nProvider } from '@/i18n/client';
+import { getLocale, getMessages } from '@/i18n/server';
 import './globals.css';
 import { RumProvider } from '@/observability/RumProvider';
 
@@ -14,14 +16,19 @@ export const metadata: Metadata = {
   icons: { icon: '/icon.svg' },
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({ children }: { children: ReactNode }) {
+  const locale = await getLocale();
+  const messages = await getMessages(locale);
+
   return (
-    <html data-theme="kini" lang="en" suppressHydrationWarning>
+    <html data-theme="kini" lang={locale} suppressHydrationWarning>
       <body>
         <RumProvider />
-        <Providers>
-          <AppShell>{children}</AppShell>
-        </Providers>
+        <I18nProvider locale={locale} messages={messages}>
+          <Providers>
+            <AppShell>{children}</AppShell>
+          </Providers>
+        </I18nProvider>
       </body>
     </html>
   );
