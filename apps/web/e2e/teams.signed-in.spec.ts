@@ -6,9 +6,7 @@ import { expect, test } from '@playwright/test';
  * production without CI noticing.
  */
 test.describe('signed in', () => {
-  test('reaches the pools page rather than being sent back to login', async ({
-    page,
-  }) => {
+  test('reaches the pools page rather than being sent back to login', async ({ page }) => {
     await page.goto('/pools');
     await page.waitForLoadState('networkidle');
 
@@ -17,11 +15,9 @@ test.describe('signed in', () => {
     await expect(page.getByRole('button', { name: /google/i })).toHaveCount(0);
   });
 
-  test('the API recognises the session the browser carries', async ({
-    page,
-  }) => {
+  test('the API recognises the session the browser carries', async ({ page }) => {
     const response = await page.request.get(
-      `${process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:3012'}/auth/me`,
+      `${process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:3012'}/auth/me`
     );
 
     expect(response.status()).toBe(200);

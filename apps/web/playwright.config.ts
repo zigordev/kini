@@ -5,9 +5,7 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   // The html reporter is what writes playwright-report/, which CI uploads. Its
   // absence is why that artifact has always been empty.
-  reporter: process.env.CI
-    ? [['github'], ['list'], ['html', { open: 'never' }]]
-    : [['list']],
+  reporter: process.env.CI ? [['github'], ['list'], ['html', { open: 'never' }]] : [['list']],
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://127.0.0.1:3013',
     trace: 'on-first-retry',

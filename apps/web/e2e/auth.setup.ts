@@ -32,7 +32,7 @@ setup('sign in through the provider', async ({ page }) => {
     ).slice(0, 800);
     throw new Error(
       `Expected the provider login form.\nURL: ${page.url()}\nTitle: ${await page.title()}\nBody:\n${body}`,
-      { cause: error },
+      { cause: error }
     );
   }
   await subject.fill('e2e-user');
@@ -41,32 +41,26 @@ setup('sign in through the provider', async ({ page }) => {
   // Wait to be back on the application, not merely off the login page: the
   // callback runs on the API's origin, and "not /login" is already true while
   // the browser is still sitting on it with the code in the query string.
-  const appOrigin = new URL(
-    process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3013',
-  ).origin;
+  const appOrigin = new URL(process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3013').origin;
   try {
-    await page.waitForURL(
-      (url) => url.origin === appOrigin && !url.pathname.startsWith('/login'),
-      {
-        timeout: 30_000,
-      },
-    );
+    await page.waitForURL((url) => url.origin === appOrigin && !url.pathname.startsWith('/login'), {
+      timeout: 30_000,
+    });
   } catch (error) {
     throw new Error(
       `The provider callback never returned to ${appOrigin}.\nStopped at: ${page.url()}`,
-      { cause: error },
+      { cause: error }
     );
   }
 
-  const apiBaseUrl =
-    process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:3012';
+  const apiBaseUrl = process.env.PLAYWRIGHT_API_BASE_URL ?? 'http://localhost:3012';
   const me = await page.request.get(`${apiBaseUrl}/auth/me`);
   if (!me.ok()) {
     throw new Error(
       `Signed in but the API does not know it.\n` +
         `GET ${apiBaseUrl}/auth/me -> ${me.status()}\n` +
         `Landed on: ${page.url()}\n` +
-        `Body:\n${(await me.text()).slice(0, 500)}`,
+        `Body:\n${(await me.text()).slice(0, 500)}`
     );
   }
 
