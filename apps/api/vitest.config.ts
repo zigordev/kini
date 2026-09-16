@@ -20,6 +20,12 @@ export default defineConfig({
       provider: 'v8',
       reportsDirectory: '../coverage',
       include: ['src/**/*.ts'],
+      thresholds: {
+        branches: 43,
+        functions: 53,
+        lines: 42,
+        statements: 43,
+      },
     },
   },
   resolve: {
