@@ -22,7 +22,7 @@
     "empty_title": "No hay quinielas disponibles",
     "eyebrow": "Catálogo",
     "loading": "Cargando quinielas disponibles...",
-    "match_count": "{{count}} partidos disponibles",
+    "match_count": "{count} partidos disponibles",
     "no_matches": "Sin partidos detallados todavía",
     "no_team_selected": "Selecciona un equipo antes de añadir la quiniela.",
     "play": "Jugar",
@@ -46,13 +46,13 @@
       "INVALID": "Introduce un correo válido."
     },
     "FUT_POOL_MATCH": {
-      "ELIGE8_LIMIT": "Se permiten como máximo {{max}} partidos E8."
+      "ELIGE8_LIMIT": "Se permiten como máximo {max} partidos E8."
     },
     "GENERIC": {
       "UNKNOWN": "Ha ocurrido un error. Inténtalo de nuevo."
     },
     "PASSWORD": {
-      "MIN_LENGTH": "La contraseña debe tener al menos {{min}} caracteres."
+      "MIN_LENGTH": "La contraseña debe tener al menos {min} caracteres."
     },
     "VALIDATION": {
       "FAILED": "Algunos campos requieren atención."
@@ -100,7 +100,7 @@
     "full15": "Pleno al 15",
     "home_team": "Local",
     "official_result": "Resultado oficial",
-    "official_result_label": "Resultado oficial de {{home}} contra {{away}}",
+    "official_result_label": "Resultado oficial de {home} contra {away}",
     "prediction": "Pronóstico",
     "remove_elige8": "Quitar E8",
     "success_no": "Fallo ❌",
@@ -132,7 +132,7 @@
     "discard_changes": "Tienes cambios sin guardar. ¿Descartarlos?",
     "earning": "Ganancia",
     "edit_title": "Editar quiniela",
-    "failure_count": "{{count}} fallos",
+    "failure_count": "{count} fallos",
     "finalized": "Quiniela finalizada",
     "history_title": "Historial de quinielas",
     "inspector_subtitle": "Ajustes de la quiniela seleccionada",
@@ -148,22 +148,22 @@
     "metric_successes": "Aciertos",
     "name_placeholder": "Nombre de la quiniela",
     "no_pools": "No se encontraron quinielas disponibles.",
-    "pending_result_count": "{{count}} sin resultado",
+    "pending_result_count": "{count} sin resultado",
     "pool_fallback": "Quiniela",
     "pool_selector_label": "Seleccionar quiniela",
     "results_checked": "Resultados comprobados",
     "settings_accessibility": "Ajustes de quiniela",
-    "success_count": "{{count}} aciertos",
-    "success_fail_summary": "{{successes}} aciertos · {{failures}} fallos",
+    "success_count": "{count} aciertos",
+    "success_fail_summary": "{successes} aciertos · {failures} fallos",
     "team_stats": "Estadísticas del equipo",
     "update_app_for_date": "Actualiza tu app para seleccionar otra fecha",
     "updated": "Quiniela actualizada",
-    "workflow_assignments": "{{count}} partidos asignados",
-    "workflow_pending": "{{count}} resultados pendientes",
-    "workflow_successes": "{{count}} aciertos por ahora",
+    "workflow_assignments": "{count} partidos asignados",
+    "workflow_pending": "{count} resultados pendientes",
+    "workflow_successes": "{count} aciertos por ahora",
     "workflow_title": "Flujo de la quiniela",
     "workspace_subtitle": "Revisa la quiniela seleccionada, ajusta una quiniela desde sus detalles o crea la siguiente quiniela del equipo.",
-    "workspace_title": "Quinielas de {{team}}"
+    "workspace_title": "Quinielas de {team}"
   },
   "profile": {
     "pool_defaults": "Configuración quiniela por defecto",
@@ -221,15 +221,15 @@
     "create_first": "Crear primer equipo",
     "create_prompt": "Nombre del equipo",
     "created": "Equipo creado",
-    "created_at": "Creado {{date}}",
+    "created_at": "Creado {date}",
     "current": "Actual",
     "empty_text": "Crea un equipo para empezar a agrupar quinielas e invitar a las personas que participarán.",
     "empty_title": "Aún no hay equipos",
     "eyebrow": "Equipos",
     "go_to_team": "Ir al equipo",
     "invite": "Invitar",
-    "invite_prompt": "Email para invitar a {{team}}",
-    "invited": "Invitación enviada a {{email}}",
+    "invite_prompt": "Email para invitar a {team}",
+    "invited": "Invitación enviada a {email}",
     "jackpot": "Bote",
     "jackpot_loading": "Cargando bote...",
     "jackpot_not_published": "Aún no publicado",
