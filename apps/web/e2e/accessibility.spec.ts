@@ -2,7 +2,9 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
 test.describe('signed-out visitor', () => {
-  test('is shown the sign-in card rather than a blank document or a loading spinner', async ({ page }) => {
+  test('is shown the sign-in card rather than a blank document or a loading spinner', async ({
+    page,
+  }) => {
     await page.goto('/login');
     await page.waitForLoadState('networkidle');
 
@@ -18,10 +20,14 @@ test.describe('signed-out visitor', () => {
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
       .analyze();
 
-    expect(results.violations.map((v) => `${v.id}: ${v.nodes.length} node(s) — ${v.help}`)).toEqual([]);
+    expect(results.violations.map((v) => `${v.id}: ${v.nodes.length} node(s) — ${v.help}`)).toEqual(
+      []
+    );
   });
 
-  test('gets the sign-in card on a protected route too, never the page behind it', async ({ page }) => {
+  test('gets the sign-in card on a protected route too, never the page behind it', async ({
+    page,
+  }) => {
     await page.goto('/pools');
     await page.waitForLoadState('networkidle');
 
