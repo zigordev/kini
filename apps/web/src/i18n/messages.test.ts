@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import en from '../../messages/en.json';
 import es from '../../messages/es.json';
-import { translate } from './messages';
+import { createTranslator, type Messages } from './translator';
 
 const leafKeys = (value: unknown, prefix = ''): string[] => {
   if (!value || typeof value !== 'object') return [prefix];
@@ -16,11 +16,19 @@ describe('translation snapshots', () => {
   });
 
   it('interpolates named parameters', () => {
-    expect(translate('en', 'pools.success_count', { count: 7 })).toBe('7 successes');
-    expect(translate('es', 'pools.success_count', { count: 7 })).toBe('7 aciertos');
+    expect(createTranslator(en as Messages)('pools.success_count', { count: 7 })).toBe(
+      '7 successes'
+    );
+    expect(createTranslator(es as Messages)('pools.success_count', { count: 7 })).toBe(
+      '7 aciertos'
+    );
   });
 
   it('falls back to the key for unknown messages', () => {
-    expect(translate('en', 'unknown.message')).toBe('unknown.message');
+    expect(createTranslator(en as Messages)('unknown.message')).toBe('unknown.message');
+  });
+
+  it('leaves a placeholder alone when no value is given for it', () => {
+    expect(createTranslator(en as Messages)('pools.success_count')).toBe('{count} successes');
   });
 });

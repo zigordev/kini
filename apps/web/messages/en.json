@@ -22,7 +22,7 @@
     "empty_title": "No available pools",
     "eyebrow": "Catalog",
     "loading": "Loading available pools...",
-    "match_count": "{{count}} available matches",
+    "match_count": "{count} available matches",
     "no_matches": "No detailed matches yet",
     "no_team_selected": "Select a team before adding the pool.",
     "play": "Play",
@@ -46,13 +46,13 @@
       "INVALID": "Please enter a valid email."
     },
     "FUT_POOL_MATCH": {
-      "ELIGE8_LIMIT": "A maximum of {{max}} E8 matches are allowed."
+      "ELIGE8_LIMIT": "A maximum of {max} E8 matches are allowed."
     },
     "GENERIC": {
       "UNKNOWN": "Something went wrong. Please try again."
     },
     "PASSWORD": {
-      "MIN_LENGTH": "Password must be at least {{min}} characters."
+      "MIN_LENGTH": "Password must be at least {min} characters."
     },
     "VALIDATION": {
       "FAILED": "Some fields need attention."
@@ -100,7 +100,7 @@
     "full15": "Full 15",
     "home_team": "Home",
     "official_result": "Official result",
-    "official_result_label": "Official result for {{home}} versus {{away}}",
+    "official_result_label": "Official result for {home} versus {away}",
     "prediction": "Prediction",
     "remove_elige8": "Remove E8",
     "success_no": "Fail ❌",
@@ -132,7 +132,7 @@
     "discard_changes": "You have unsaved changes. Discard them?",
     "earning": "Earning",
     "edit_title": "Edit pool",
-    "failure_count": "{{count}} failures",
+    "failure_count": "{count} failures",
     "finalized": "Pool finalized",
     "history_title": "Pool history",
     "inspector_subtitle": "Settings for the selected pool",
@@ -148,22 +148,22 @@
     "metric_successes": "Successes",
     "name_placeholder": "Pool name",
     "no_pools": "No pools found.",
-    "pending_result_count": "{{count}} no result yet",
+    "pending_result_count": "{count} no result yet",
     "pool_fallback": "Pool",
     "pool_selector_label": "Select pool",
     "results_checked": "Results checked",
     "settings_accessibility": "Pool settings",
-    "success_count": "{{count}} successes",
-    "success_fail_summary": "{{successes}} successes · {{failures}} failures",
+    "success_count": "{count} successes",
+    "success_fail_summary": "{successes} successes · {failures} failures",
     "team_stats": "Team stats",
     "update_app_for_date": "Update your app to select another date",
     "updated": "Pool updated",
-    "workflow_assignments": "{{count}} assigned matches",
-    "workflow_pending": "{{count}} pending results",
-    "workflow_successes": "{{count}} successes so far",
+    "workflow_assignments": "{count} assigned matches",
+    "workflow_pending": "{count} pending results",
+    "workflow_successes": "{count} successes so far",
     "workflow_title": "Pool workflow",
     "workspace_subtitle": "Review the selected pool, adjust one pool from its details, or create the next pool for this team.",
-    "workspace_title": "{{team}} pools"
+    "workspace_title": "{team} pools"
   },
   "profile": {
     "pool_defaults": "Pool defaults",
@@ -221,15 +221,15 @@
     "create_first": "Create first team",
     "create_prompt": "Team name",
     "created": "Team created",
-    "created_at": "Created {{date}}",
+    "created_at": "Created {date}",
     "current": "Current",
     "empty_text": "Create a team to start grouping pools and inviting the people who will participate.",
     "empty_title": "No teams yet",
     "eyebrow": "Teams",
     "go_to_team": "Go to team",
     "invite": "Invite",
-    "invite_prompt": "Email to invite to {{team}}",
-    "invited": "Invitation sent to {{email}}",
+    "invite_prompt": "Email to invite to {team}",
+    "invited": "Invitation sent to {email}",
     "jackpot": "Jackpot",
     "jackpot_loading": "Loading jackpot...",
     "jackpot_not_published": "Not published yet",
