@@ -46,6 +46,12 @@ jobs:
         run: |
           docker compose -f docker/compose.app.local.yml config > /dev/null
           docker compose -f docker/compose.ci.yml config > /dev/null
+          (
+            set -a
+            . docker/.env.app.prod
+            set +a
+            docker compose -f docker/compose.app.prod.yml config > /dev/null
+          )
 
       - name: Format check
         run: npm run format:check
