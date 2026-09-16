@@ -38,7 +38,7 @@ RUN apk upgrade --no-cache \
 COPY --from=deps-prod --chown=node:node /workspace/node_modules /app/node_modules
 COPY --from=build --chown=node:node /workspace/apps/api/dist /app/apps/api/dist
 COPY --from=build --chown=node:node /workspace/apps/api/package.json /app/apps/api/package.json
-COPY --chown=node:node apps/api/scripts/openbao-run.mjs /app/scripts/openbao-run.mjs
+COPY --chown=node:node scripts/openbao-run.mjs /app/scripts/openbao-run.mjs
 WORKDIR /app/apps/api
 USER node
 EXPOSE 3000
@@ -51,7 +51,7 @@ ENV NODE_ENV=development
 COPY --from=deps-build /workspace/node_modules /workspace/node_modules
 COPY --from=deps-build /workspace/apps/api/node_modules /workspace/apps/api/node_modules
 COPY package.json package-lock.json /workspace/
-COPY apps/api/scripts/openbao-run.mjs /workspace/scripts/openbao-run.mjs
+COPY scripts/openbao-run.mjs /workspace/scripts/openbao-run.mjs
 COPY apps/api /workspace/apps/api
 WORKDIR /workspace/apps/api
 EXPOSE 3000

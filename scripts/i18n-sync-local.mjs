@@ -59,7 +59,7 @@ function runPush(repoRoot, workspace, env) {
   return new Promise((resolve) => {
     const child = spawn(
       'node',
-      ['apps/api/scripts/openbao-run.mjs', '--', 'npm', 'run', 'i18n:push', '-w', workspace],
+      ['scripts/openbao-run.mjs', '--', 'npm', 'run', 'i18n:push', '-w', workspace],
       {
         cwd: repoRoot,
         stdio: 'inherit',
