@@ -37,6 +37,8 @@ RUN apk upgrade --no-cache zlib libcrypto3 libssl3 \
 COPY --from=build --chown=node:node /workspace/apps/web/.next/standalone ./
 COPY --from=build --chown=node:node /workspace/apps/web/.next/static ./apps/web/.next/static
 COPY --from=build --chown=node:node /workspace/apps/web/public ./apps/web/public
+COPY --from=build --chown=node:node /workspace/apps/web/messages ./apps/web/messages
+COPY --chown=node:node scripts/openbao-run.mjs /app/scripts/openbao-run.mjs
 USER node
 EXPOSE 3001
 CMD ["node", "apps/web/server.js"]
