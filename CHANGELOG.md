@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/zigordev/kini/compare/kini-v0.7.1...kini-v0.8.0) (2026-09-16)
+
+
+### Features
+
+* **i18n:** read Tolgee at runtime over the committed bundle ([#116](https://github.com/zigordev/kini/issues/116)) ([2a7fe25](https://github.com/zigordev/kini/commit/2a7fe256a652889c4761288a34d5cdd2853bb981))
+
 ## [0.7.1](https://github.com/zigordev/kini/compare/kini-v0.7.0...kini-v0.7.1) (2026-09-12)
 
 
