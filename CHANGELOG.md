@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.1](https://github.com/zigordev/kini/compare/kini-v0.8.0...kini-v0.8.1) (2026-09-16)
+
+
+### Bug Fixes
+
+* **ci:** validate the production compose manifest too ([#120](https://github.com/zigordev/kini/issues/120)) ([490836c](https://github.com/zigordev/kini/commit/490836cb8e31329fa13e47f2ac82e8b1294f660c))
+
 ## [0.8.0](https://github.com/zigordev/kini/compare/kini-v0.7.1...kini-v0.8.0) (2026-09-16)
 
 
