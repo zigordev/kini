@@ -28,6 +28,7 @@ RUN npm run build
 FROM node:24-alpine AS prod
 WORKDIR /app
 ENV NODE_ENV=production
+ENV NODE_OPTIONS=--disable-warning=TimeoutNegativeWarning
 # Pull the latest Alpine security patches at build time rather than waiting on
 # the upstream node:24-alpine tag to be rebuilt, and drop the bundled npm CLI —
 # this image only ever runs `node dist/main.js`, so npm/npx/corepack (and their
@@ -48,6 +49,7 @@ FROM prod AS local
 
 FROM base AS dev
 ENV NODE_ENV=development
+ENV NODE_OPTIONS=--disable-warning=TimeoutNegativeWarning
 COPY --from=deps-build /workspace/node_modules /workspace/node_modules
 COPY --from=deps-build /workspace/apps/api/node_modules /workspace/apps/api/node_modules
 COPY package.json package-lock.json /workspace/
