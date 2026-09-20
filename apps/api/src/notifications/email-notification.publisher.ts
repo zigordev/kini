@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Admin, Kafka, logLevel, Producer } from 'kafkajs';
+import { Admin, Kafka, logLevel, Partitioners, Producer } from 'kafkajs';
 import { kafkaLogCreator } from '../observability';
 
 export interface EmailNotificationEvent {
@@ -249,6 +249,7 @@ export class EmailNotificationPublisher implements OnModuleInit, OnModuleDestroy
     const producer = kafka.producer({
       idempotent: true,
       allowAutoTopicCreation: true,
+      createPartitioner: Partitioners.DefaultPartitioner,
     });
 
     this.connectPromise = producer
