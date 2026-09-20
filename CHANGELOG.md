@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.3](https://github.com/zigordev/kini/compare/kini-v0.8.2...kini-v0.8.3) (2026-09-20)
+
+
+### Bug Fixes
+
+* **rum:** record real visits again ([#129](https://github.com/zigordev/kini/issues/129)) ([57ca0f9](https://github.com/zigordev/kini/commit/57ca0f9447e3ab02a318990ba01f2f1da750bd06))
+
 ## [0.8.2](https://github.com/zigordev/kini/compare/kini-v0.8.1...kini-v0.8.2) (2026-09-20)
 
 
