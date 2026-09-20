@@ -80,7 +80,6 @@ services:
       GOOGLE_TOKEN_URL: http://oauth:8080/kini/token
       GOOGLE_USERINFO_URL: http://oauth:8080/kini/userinfo
       FRONTEND_URL: http://localhost:${CI_WEB_PORT:-3013}
-      NOTIFICATIONS_KAFKA_BROKERS: platform-redpanda:9092
       NOTIFICATIONS_EMAIL_TOPIC: notification.email.requested.v1
       EDUARDO_LOSILLA_SYNC_ENABLED: 'false'
     ports:
@@ -116,7 +115,7 @@ services:
       api:
         condition: service_healthy
     healthcheck:
-      test: ['CMD-SHELL', 'wget -qO- http://localhost:3001/health >/dev/null 2>&1']
+      test: ['CMD-SHELL', 'wget -qO- http://127.0.0.1:3001/health >/dev/null 2>&1']
       interval: 5s
       timeout: 3s
       retries: 20
