@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.2](https://github.com/zigordev/kini/compare/kini-v0.8.1...kini-v0.8.2) (2026-09-20)
+
+
+### Bug Fixes
+
+* **lifecycle:** stop cleanly on SIGTERM and start without warnings ([#126](https://github.com/zigordev/kini/issues/126)) ([6827dfa](https://github.com/zigordev/kini/commit/6827dfa63eb69f5b905bae2d6d0882e43d50e490))
+
 ## [0.8.1](https://github.com/zigordev/kini/compare/kini-v0.8.0...kini-v0.8.1) (2026-09-16)
 
 
