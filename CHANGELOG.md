@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.0](https://github.com/zigordev/kini/compare/kini-v0.8.4...kini-v0.9.0) (2026-09-21)
+
+
+### Features
+
+* **observability:** export the release as service_build_info ([#133](https://github.com/zigordev/kini/issues/133)) ([846bb18](https://github.com/zigordev/kini/commit/846bb18fc65a50e2ece4546c9fdd3a1d020e5fc6))
+
 ## [0.8.4](https://github.com/zigordev/kini/compare/kini-v0.8.3...kini-v0.8.4) (2026-09-21)
 
 
