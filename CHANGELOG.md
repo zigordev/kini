@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.4](https://github.com/zigordev/kini/compare/kini-v0.8.3...kini-v0.8.4) (2026-09-21)
+
+
+### Bug Fixes
+
+* **observability:** name a trace only when it was sampled ([#131](https://github.com/zigordev/kini/issues/131)) ([90e303a](https://github.com/zigordev/kini/commit/90e303a91b773cc0fb875fe14c1407bbbce617bc))
+
 ## [0.8.3](https://github.com/zigordev/kini/compare/kini-v0.8.2...kini-v0.8.3) (2026-09-20)
 
 
