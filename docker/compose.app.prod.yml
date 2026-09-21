@@ -69,6 +69,7 @@ services:
       EDUARDO_LOSILLA_QUINIELA_TICKET_URL: ${EDUARDO_LOSILLA_QUINIELA_TICKET_URL:-https://www.eduardolosilla.es/quiniela/boletos}
       EDUARDO_LOSILLA_QUINIELA_RESULTS_URL: ${EDUARDO_LOSILLA_QUINIELA_RESULTS_URL:-https://www.eduardolosilla.es/quiniela/ayudas/escrutinio}
       OTEL_SERVICE_NAME: kini-api
+      APP_RELEASE: ${NEXT_PUBLIC_RELEASE:?NEXT_PUBLIC_RELEASE is required}
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OPENBAO_ADDR: http://openbao:8200
       OPENBAO_TOKEN: ${OPENBAO_TOKEN:?OPENBAO_TOKEN is required}
