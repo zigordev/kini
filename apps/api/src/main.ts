@@ -19,7 +19,13 @@ import { Pool } from 'pg';
 import { AppModule } from './app.module';
 import { buildSessionPoolConfig, SESSION_TABLE_NAME } from './auth/session-store.config';
 import { HttpErrorFilter } from './common/http-exception.filter';
-import { httpMetricsMiddleware, JsonLogger } from './observability';
+import { startDomainMetricsAtZero } from './metrics/domain-metrics';
+import {
+  httpMetricsMiddleware,
+  JsonLogger,
+  logServiceStarted,
+  observeProcessFailures,
+} from './observability';
 
 const SWAGGER_PATH = '/docs';
 
@@ -50,6 +56,8 @@ function parseTrustProxy(input: string | undefined): TrustProxy {
 }
 
 async function bootstrap() {
+  observeProcessFailures();
+  startDomainMetricsAtZero();
   // `bufferLogs` holds the bootstrap lines until the logger is installed, so
   // startup logs come out as JSON with a traceId like everything else.
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -164,5 +172,6 @@ async function bootstrap() {
   const port = configService.get<string>('PORT');
   app.enableShutdownHooks();
   await app.listen(port);
+  logServiceStarted({ port: Number(port) });
 }
 bootstrap();

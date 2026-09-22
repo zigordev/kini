@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UpdateFutPoolMatchDto } from 'src/fut-pool-match/dto/update-fut-pool-match.dto';
 import { FutPoolMatch } from 'src/fut-pool-match/entities/fut-pool-match.entity';
@@ -10,8 +10,6 @@ import { NotificationProducer } from './notification.producer';
 
 @Injectable()
 export class NotifierService {
-  private readonly logger = new Logger(NotifierService.name);
-
   constructor(
     private readonly notifications: NotificationProducer,
     private readonly emailNotifications: EmailNotificationPublisher,
@@ -160,10 +158,6 @@ export class NotifierService {
     acceptUrl: string;
     locale?: string;
   }): Promise<void> {
-    this.logger.log(
-      `Team invitation requested for ${data.to} to ${data.teamName}. Accept URL: ${data.acceptUrl}`
-    );
-
     await this.notifications.emit({
       type: 'team',
       title: 'Invitación a equipo',

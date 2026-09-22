@@ -3,6 +3,7 @@ import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { Admin, Kafka, logLevel, Partitioners, Producer } from 'kafkajs';
 import { kafkaLogCreator } from '../observability';
+import { countNotification } from '../metrics/domain-metrics';
 
 export interface EmailNotificationEvent {
   messageId: string;
@@ -127,8 +128,20 @@ export class EmailNotificationPublisher implements OnModuleInit, OnModuleDestroy
           },
         ],
       });
-      this.logger.log(`Queued email notification ${event.templateId} for ${event.recipient.email}`);
+      this.logger.log({
+        event: 'notification.queued',
+        template: event.templateId,
+        messageId: event.messageId,
+      });
+      countNotification(event.templateId, 'queued');
     } catch (error) {
+      countNotification(event.templateId, 'failed');
+      this.logger.error({
+        event: 'notification.publish_failed',
+        template: event.templateId,
+        messageId: event.messageId,
+        error,
+      });
       this.resetProducerState(producer);
       throw error;
     }
@@ -217,7 +230,7 @@ export class EmailNotificationPublisher implements OnModuleInit, OnModuleDestroy
 
     await this.producer.disconnect().catch((error: unknown) => {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Failed to disconnect Kafka producer: ${message}`);
+      this.logger.warn({ event: 'kafka.producer_disconnect_failed', reason: message });
     });
   }
 
@@ -257,7 +270,7 @@ export class EmailNotificationPublisher implements OnModuleInit, OnModuleDestroy
       .then(() => {
         this.producer = producer;
         this.kafkaUp = true;
-        this.logger.log(`Kafka producer connected to ${this.brokers.join(', ')}`);
+        this.logger.log({ event: 'kafka.producer_connected', brokers: this.brokers });
         return producer;
       })
       .catch((error) => {

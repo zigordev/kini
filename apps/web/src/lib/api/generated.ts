@@ -108,16 +108,6 @@ export type ApiOperation = {
   responseCodes: ['200'];
 } | {
   method: 'POST';
-  path: '/logs';
-  operationId: 'LogsController_ingest';
-  responseCodes: ['204'];
-} | {
-  method: 'POST';
-  path: '/rum/events';
-  operationId: 'RumController_ingest';
-  responseCodes: ['204'];
-} | {
-  method: 'POST';
   path: '/teams';
   operationId: 'TeamsController_createTeam';
   responseCodes: ['201'];
@@ -133,7 +123,7 @@ export type ApiOperation = {
   responseCodes: ['200'];
 };
 
-export const API_OPERATION_COUNT = 26 as const;
+export const API_OPERATION_COUNT = 24 as const;
 
 export const API_OPERATIONS = [
   {
@@ -302,22 +292,6 @@ export const API_OPERATIONS = [
     "operationId": "FutPoolResultsController_checkResults",
     "responseCodes": [
       "200"
-    ]
-  },
-  {
-    "method": "POST",
-    "path": "/logs",
-    "operationId": "LogsController_ingest",
-    "responseCodes": [
-      "204"
-    ]
-  },
-  {
-    "method": "POST",
-    "path": "/rum/events",
-    "operationId": "RumController_ingest",
-    "responseCodes": [
-      "204"
     ]
   },
   {
