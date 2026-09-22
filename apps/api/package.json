@@ -43,7 +43,7 @@
     "@opentelemetry/semantic-conventions": "^1.43.0",
     "@types/pdf-parse": "^1.1.4",
     "class-transformer": "^0.5.1",
-    "class-validator": "^0.14.0",
+    "class-validator": "^0.15.1",
     "connect-pg-simple": "^10.0.0",
     "cookie-parser": "^1.4.7",
     "express-session": "^1.17.3",
