@@ -11,6 +11,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { availablePoolsApi, poolsApi } from '@/lib/api';
 import { formatDate, full15Results, regularResults } from '@/lib/pools';
 import { readPoolDefaults } from '@/lib/preferences';
+import { trackInteraction } from '@/observability/rum-events';
 import type { AvailablePool, AvailablePoolJackpot, ResultValue } from '@/types/domain';
 import { Button } from 'design-system/components/core/Button.jsx';
 import { Table, TableEmpty } from 'design-system/components/data-display/Table.jsx';
@@ -62,6 +63,7 @@ export default function AvailablePoolsPage() {
     setSyncing(true);
     try {
       setPools(await availablePoolsApi.sync());
+      trackInteraction('available-pools-synced');
       showToast(t('available_pools.synced'), 'success');
     } catch (error) {
       showToast(error instanceof Error ? error.message : String(error), 'error');
@@ -80,6 +82,7 @@ export default function AvailablePoolsPage() {
       const created = await availablePoolsApi.addToTeam(availablePool.id, selectedTeam.id);
       const defaults = readPoolDefaults(selectedTeam.id);
       await poolsApi.update(created.id, defaults);
+      trackInteraction('available-pool-added');
       showToast(t('available_pools.added'), 'success');
       router.push(`/pools?poolId=${encodeURIComponent(created.id)}`);
     } catch (error) {

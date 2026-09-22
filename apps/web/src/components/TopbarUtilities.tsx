@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { usersApi } from '@/lib/api';
+import { trackInteraction } from '@/observability/rum-events';
 import type { Language, ThemeMode } from '@/types/domain';
 import { Button } from 'design-system/components/core/Button.jsx';
 import { Flag } from 'design-system/components/icons/Flag.jsx';
@@ -44,10 +45,11 @@ export function ThemeButton() {
 }
 
 export function LanguageButton() {
-  const { t } = usePreferences();
+  const { language, t } = usePreferences();
   const { updateUser } = useAuth();
 
   const change = (next: Language) => {
+    if (next !== language) trackInteraction('language-switched');
     void usersApi
       .update({ language: next })
       .then(updateUser)

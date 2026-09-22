@@ -6,6 +6,7 @@ import { Loading } from '@/components/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
+import { trackInteraction } from '@/observability/rum-events';
 import { Button } from 'design-system/components/core/Button.jsx';
 
 export default function AcceptInvitationPage() {
@@ -29,9 +30,11 @@ export default function AcceptInvitationPage() {
     let active = true;
     void accept(teamId)
       .then(() => {
+        trackInteraction('invitation-accepted');
         if (active) setMessage(t('teams.accept_success'));
       })
       .catch(() => {
+        trackInteraction('invitation-accept-failed');
         if (active) setMessage(t('teams.accept_failed'));
       })
       .finally(() => {
