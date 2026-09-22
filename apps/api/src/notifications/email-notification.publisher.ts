@@ -108,12 +108,13 @@ export class EmailNotificationPublisher implements OnModuleInit, OnModuleDestroy
   }
 
   async publishEmail(event: EmailNotificationEvent): Promise<void> {
-    if (this.brokers.length === 0) {
-      throw new Error('NOTIFICATIONS_KAFKA_BROKERS is required');
-    }
-
-    const producer = await this.getProducer();
+    let producer: Producer | undefined;
     try {
+      if (this.brokers.length === 0) {
+        throw new Error('NOTIFICATIONS_KAFKA_BROKERS is required');
+      }
+
+      producer = await this.getProducer();
       await producer.send({
         topic: this.topic,
         messages: [
@@ -142,7 +143,7 @@ export class EmailNotificationPublisher implements OnModuleInit, OnModuleDestroy
         messageId: event.messageId,
         error,
       });
-      this.resetProducerState(producer);
+      if (producer) this.resetProducerState(producer);
       throw error;
     }
   }

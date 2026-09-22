@@ -429,7 +429,7 @@ export class AvailablePoolsService implements OnModuleInit {
         this.logger.warn({
           event: 'pools_sync.failed',
           source: 'eduardo_losilla',
-          item: value,
+          url: value,
           reason: message,
         });
         countSyncProblem('eduardo_losilla', 'failed');
@@ -471,12 +471,12 @@ export class AvailablePoolsService implements OnModuleInit {
     for (const [jornada, season] of [...candidates.entries()].sort(
       ([left], [right]) => left - right
     )) {
+      const url = new URL('https://api.eduardolosilla.es/jornada');
+      url.searchParams.set('jornada', String(jornada));
+      if (season) {
+        url.searchParams.set('temporada', String(season));
+      }
       try {
-        const url = new URL('https://api.eduardolosilla.es/jornada');
-        url.searchParams.set('jornada', String(jornada));
-        if (season) {
-          url.searchParams.set('temporada', String(season));
-        }
         const source = extractEduardoLosillaPoolFromJornada(
           JSON.parse(await this.fetchEduardoLosillaText(url))
         );
@@ -489,6 +489,7 @@ export class AvailablePoolsService implements OnModuleInit {
           event: 'pools_sync.failed',
           source: 'eduardo_losilla_api',
           jornada,
+          url: url.toString(),
           reason: message,
         });
         countSyncProblem('eduardo_losilla_api', 'failed');
@@ -626,7 +627,11 @@ export class AvailablePoolsService implements OnModuleInit {
       const noticesHtml = await this.fetchSelaeText(noticesUrl);
       const documentUrls = await this.findSelaeCompositionDocuments(noticesHtml, noticesUrl);
       if (documentUrls.length === 0) {
-        this.logger.warn({ event: 'pools_sync.empty', source: 'selae_composition' });
+        this.logger.warn({
+          event: 'pools_sync.empty',
+          source: 'selae_composition',
+          url: noticesUrl.toString(),
+        });
         countSyncProblem('selae_composition', 'empty');
         return;
       }
@@ -667,7 +672,12 @@ export class AvailablePoolsService implements OnModuleInit {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn({ event: 'pools_sync.failed', source: 'selae_notices', reason: message });
+      this.logger.warn({
+        event: 'pools_sync.failed',
+        source: 'selae_notices',
+        url: noticesUrl.toString(),
+        reason: message,
+      });
       countSyncProblem('selae_notices', 'failed');
     }
   }
@@ -732,7 +742,12 @@ export class AvailablePoolsService implements OnModuleInit {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn({ event: 'pools_sync.failed', source: 'selae_jackpots', reason: message });
+      this.logger.warn({
+        event: 'pools_sync.failed',
+        source: 'selae_jackpots',
+        url: feedUrl.toString(),
+        reason: message,
+      });
       countSyncProblem('selae_jackpots', 'failed');
     }
   }
@@ -780,6 +795,7 @@ export class AvailablePoolsService implements OnModuleInit {
           this.logger.warn({
             event: 'pools_sync.failed',
             source: 'selae_results',
+            url: item.link ?? feedUrl.toString(),
             reason: message,
           });
           countSyncProblem('selae_results', 'failed');
@@ -787,7 +803,12 @@ export class AvailablePoolsService implements OnModuleInit {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn({ event: 'pools_sync.failed', source: 'selae_results', reason: message });
+      this.logger.warn({
+        event: 'pools_sync.failed',
+        source: 'selae_results',
+        url: feedUrl.toString(),
+        reason: message,
+      });
       countSyncProblem('selae_results', 'failed');
     }
   }
