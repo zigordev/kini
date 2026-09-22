@@ -31,7 +31,7 @@
     "@nestjs/passport": "^12.0.0",
     "@nestjs/platform-express": "^11.1.19",
     "@nestjs/platform-socket.io": "^11.1.19",
-    "@nestjs/schedule": "^12.0.1",
+    "@nestjs/schedule": "^12.0.2",
     "@nestjs/swagger": "^11.4.5",
     "@nestjs/typeorm": "^12.0.1",
     "@nestjs/websockets": "^11.1.19",
@@ -63,7 +63,7 @@
     "typeorm": "^0.3.31"
   },
   "devDependencies": {
-    "@nestjs/cli": "^11.0.10",
+    "@nestjs/cli": "^12.0.1",
     "@nestjs/schematics": "^12.0.2",
     "@nestjs/testing": "^11.1.19",
     "@swc/core": "^1.16.2",
