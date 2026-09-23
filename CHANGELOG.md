@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/zigordev/kini/compare/kini-v0.11.1...kini-v0.11.2) (2026-09-23)
+
+
+### Bug Fixes
+
+* **observability:** take the kit as it is, byte for byte ([#155](https://github.com/zigordev/kini/issues/155)) ([023ad16](https://github.com/zigordev/kini/commit/023ad16773dc161778bdc3fc8dd2efe7294ddabd))
+
 ## [0.11.1](https://github.com/zigordev/kini/compare/kini-v0.11.0...kini-v0.11.1) (2026-09-23)
 
 
