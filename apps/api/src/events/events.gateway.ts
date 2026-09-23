@@ -1,4 +1,3 @@
-import { Logger } from '@nestjs/common';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
@@ -6,6 +5,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server } from 'socket.io';
+import { websocketConnected, websocketDisconnected } from '../metrics/domain-metrics';
 
 const corsOrigins = (process.env.AUTH_CORS_ORIGINS ?? '')
   .split(',')
@@ -19,17 +19,15 @@ const corsOrigins = (process.env.AUTH_CORS_ORIGINS ?? '')
   },
 })
 export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  private readonly logger = new Logger(EventsGateway.name);
-
   @WebSocketServer()
   server!: Server;
 
-  handleConnection(client: any) {
-    this.logger.debug(`WebSocket client connected: ${client.id}`);
+  handleConnection() {
+    websocketConnected();
   }
 
-  handleDisconnect(client: any) {
-    this.logger.debug(`WebSocket client disconnected: ${client.id}`);
+  handleDisconnect() {
+    websocketDisconnected();
   }
 
   emitPoolUpdated(payload: { poolId: string; pool: any }) {

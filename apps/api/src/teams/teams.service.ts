@@ -105,7 +105,7 @@ export class TeamsService {
       locale: actor.language ?? undefined,
     });
 
-    this.logger.log(`User ${normalizedEmail} invited to team ${teamId}`);
+    this.logger.log({ event: 'team.invitation_sent', teamId });
     return { success: true, message: 'Invitation sent successfully' };
   }
 
@@ -248,7 +248,7 @@ export class TeamsService {
       );
     }
 
-    this.logger.log(`Adopted ${legacyPools.length} legacy pools into default team ${teamId}`);
+    this.logger.log({ event: 'team.legacy_pools_adopted', teamId, pools: legacyPools.length });
   }
 
   private async getTeamOrThrow(teamId: string): Promise<Team> {

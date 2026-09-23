@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
+import { registry } from '../observability';
 import { EventsGateway } from './events.gateway';
 
 describe('EventsGateway', () => {
@@ -24,25 +25,19 @@ describe('EventsGateway', () => {
     expect(gateway).toBeDefined();
   });
 
-  describe('handleConnection', () => {
-    it('should log connection', () => {
-      const mockClient = { id: 'client-123' };
-      const loggerSpy = vi.spyOn(gateway['logger'], 'debug');
+  describe('connected clients', () => {
+    const connected = async () =>
+      (await registry.getSingleMetric('kini_websocket_clients')?.get())?.values[0]?.value;
 
-      gateway.handleConnection(mockClient);
+    it('counts a client up on connection and down on disconnection', async () => {
+      const before = (await connected()) ?? 0;
 
-      expect(loggerSpy).toHaveBeenCalledWith('WebSocket client connected: client-123');
-    });
-  });
+      gateway.handleConnection();
+      gateway.handleConnection();
+      expect(await connected()).toBe(before + 2);
 
-  describe('handleDisconnect', () => {
-    it('should log disconnection', () => {
-      const mockClient = { id: 'client-123' };
-      const loggerSpy = vi.spyOn(gateway['logger'], 'debug');
-
-      gateway.handleDisconnect(mockClient);
-
-      expect(loggerSpy).toHaveBeenCalledWith('WebSocket client disconnected: client-123');
+      gateway.handleDisconnect();
+      expect(await connected()).toBe(before + 1);
     });
   });
 

@@ -1,15 +1,14 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpException } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import {
   internalProblem,
   PROBLEM_CONTENT_TYPE,
   problemFromException,
 } from './http/problem-details';
+import { logRequestFailed } from '../observability/standard-events';
 
 @Catch()
 export class HttpErrorFilter implements ExceptionFilter {
-  private readonly logger = new Logger(HttpErrorFilter.name);
-
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -23,11 +22,12 @@ export class HttpErrorFilter implements ExceptionFilter {
     if (problem.status >= 500) {
       // The response withholds the reason; the log must not. Without this a
       // 500 says only HTTP.INTERNAL_ERROR, in the body and in the log alike.
-      const reason = exception instanceof Error ? exception.message : String(exception);
-      this.logger.error(
-        `${request.method} ${request.url} - ${problem.status} - ${problem.code}: ${reason}`,
-        exception instanceof Error ? exception.stack : undefined
-      );
+      logRequestFailed({
+        method: request.method,
+        route: (request.route?.path as string | undefined) ?? 'unmatched',
+        status: problem.status,
+        error: exception,
+      });
     }
 
     return response.status(problem.status).type(PROBLEM_CONTENT_TYPE).json(problem);
