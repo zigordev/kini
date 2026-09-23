@@ -8,12 +8,10 @@ import { EventsModule } from './events/events.module';
 import { FutPoolMatchModule } from './fut-pool-match/fut-pool-match.module';
 import { FutPoolModule } from './fut-pool/fut-pool.module';
 import { HealthModule } from './health/health.module';
-import { LogsModule } from './logs/logs.module';
 import { NotificationModule } from './notifications/notification.module';
-import { RumModule } from './rum/rum.module';
 import { TeamsModule } from './teams/teams.module';
 import { UsersModule } from './users/users.module';
-import { ObservabilityModule } from './observability';
+import { LifecycleService, ObservabilityModule } from './observability';
 
 @Module({
   imports: [
@@ -79,9 +77,8 @@ import { ObservabilityModule } from './observability';
     EventsModule,
     TeamsModule,
     NotificationModule,
-    RumModule,
-    LogsModule,
     AvailablePoolsModule,
   ],
+  providers: [LifecycleService],
 })
 export class AppModule {}

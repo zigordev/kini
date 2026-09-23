@@ -82,7 +82,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     await new Promise<void>((resolve, reject) =>
       request.logIn(user, { session: true, keepSessionInfo: true }, (error) => {
         if (error) {
-          this.logger.error('[GoogleStrategy] request.logIn failed', error);
+          this.logger.error({ event: 'auth.login_failed', error });
           reject(error);
         } else {
           resolve();

@@ -35,6 +35,7 @@ import {
   parseSelaeRss,
   SelaeRssItem,
 } from './selae-quiniela.parser';
+import { countSyncProblem, countSyncRun } from '../metrics/domain-metrics';
 
 const PROVIDER = 'eduardo-losilla';
 const GAME_TYPE = 'quiniela';
@@ -56,7 +57,7 @@ export class AvailablePoolsService implements OnModuleInit {
   ) {}
 
   onModuleInit(): void {
-    this.logger.log('Eduardo Losilla Quiniela sync is enabled.');
+    this.logger.log({ event: 'pools_sync.enabled', source: 'eduardo_losilla' });
   }
 
   async list(): Promise<AvailablePoolResponseDto[]> {
@@ -87,9 +88,12 @@ export class AvailablePoolsService implements OnModuleInit {
 
     try {
       await this.syncUpcomingPools();
+      countSyncRun('completed');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`Available pool sync failed: ${message}`);
+      countSyncRun('failed');
+      countSyncProblem('all', 'failed');
+      this.logger.warn({ event: 'pools_sync.failed', source: 'all', reason: message });
     }
   }
 
@@ -422,7 +426,13 @@ export class AvailablePoolsService implements OnModuleInit {
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        this.logger.warn(`Eduardo Losilla sync failed for ${value}: ${message}`);
+        this.logger.warn({
+          event: 'pools_sync.failed',
+          source: 'eduardo_losilla',
+          url: value,
+          reason: message,
+        });
+        countSyncProblem('eduardo_losilla', 'failed');
       }
     }
 
@@ -461,12 +471,12 @@ export class AvailablePoolsService implements OnModuleInit {
     for (const [jornada, season] of [...candidates.entries()].sort(
       ([left], [right]) => left - right
     )) {
+      const url = new URL('https://api.eduardolosilla.es/jornada');
+      url.searchParams.set('jornada', String(jornada));
+      if (season) {
+        url.searchParams.set('temporada', String(season));
+      }
       try {
-        const url = new URL('https://api.eduardolosilla.es/jornada');
-        url.searchParams.set('jornada', String(jornada));
-        if (season) {
-          url.searchParams.set('temporada', String(season));
-        }
         const source = extractEduardoLosillaPoolFromJornada(
           JSON.parse(await this.fetchEduardoLosillaText(url))
         );
@@ -475,9 +485,14 @@ export class AvailablePoolsService implements OnModuleInit {
         }
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        this.logger.warn(
-          `Eduardo Losilla jornada API sync failed for jornada ${jornada}: ${message}`
-        );
+        this.logger.warn({
+          event: 'pools_sync.failed',
+          source: 'eduardo_losilla_api',
+          jornada,
+          url: url.toString(),
+          reason: message,
+        });
+        countSyncProblem('eduardo_losilla_api', 'failed');
       }
     }
   }
@@ -612,7 +627,12 @@ export class AvailablePoolsService implements OnModuleInit {
       const noticesHtml = await this.fetchSelaeText(noticesUrl);
       const documentUrls = await this.findSelaeCompositionDocuments(noticesHtml, noticesUrl);
       if (documentUrls.length === 0) {
-        this.logger.warn('SELAE returned no Quiniela composition documents');
+        this.logger.warn({
+          event: 'pools_sync.empty',
+          source: 'selae_composition',
+          url: noticesUrl.toString(),
+        });
+        countSyncProblem('selae_composition', 'empty');
         return;
       }
 
@@ -623,9 +643,12 @@ export class AvailablePoolsService implements OnModuleInit {
           const drawDate = extractSelaeDate(documentText);
           const matches = extractCompositionMatches(documentText);
           if (!drawDate || matches.length < 14) {
-            this.logger.warn(
-              `SELAE composition document could not be mapped: ${documentUrl.toString()}`
-            );
+            this.logger.warn({
+              event: 'pools_sync.unmapped',
+              source: 'selae_composition',
+              url: documentUrl.toString(),
+            });
+            countSyncProblem('selae_composition', 'unmapped');
             continue;
           }
 
@@ -638,14 +661,24 @@ export class AvailablePoolsService implements OnModuleInit {
           });
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          this.logger.warn(
-            `SELAE composition document sync failed for ${documentUrl.toString()}: ${message}`
-          );
+          this.logger.warn({
+            event: 'pools_sync.failed',
+            source: 'selae_composition',
+            url: documentUrl.toString(),
+            reason: message,
+          });
+          countSyncProblem('selae_composition', 'failed');
         }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`SELAE notices sync failed: ${message}`);
+      this.logger.warn({
+        event: 'pools_sync.failed',
+        source: 'selae_notices',
+        url: noticesUrl.toString(),
+        reason: message,
+      });
+      countSyncProblem('selae_notices', 'failed');
     }
   }
 
@@ -660,7 +693,12 @@ export class AvailablePoolsService implements OnModuleInit {
     try {
       const items = parseSelaeRss(await this.fetchSelaeText(feedUrl));
       if (items.length === 0) {
-        this.logger.warn(`SELAE jackpot RSS returned no items: ${feedUrl.toString()}`);
+        this.logger.warn({
+          event: 'pools_sync.empty',
+          source: 'selae_jackpots',
+          url: feedUrl.toString(),
+        });
+        countSyncProblem('selae_jackpots', 'empty');
         return;
       }
       const jackpots = items
@@ -704,7 +742,13 @@ export class AvailablePoolsService implements OnModuleInit {
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`SELAE jackpot RSS sync failed: ${message}`);
+      this.logger.warn({
+        event: 'pools_sync.failed',
+        source: 'selae_jackpots',
+        url: feedUrl.toString(),
+        reason: message,
+      });
+      countSyncProblem('selae_jackpots', 'failed');
     }
   }
 
@@ -719,7 +763,12 @@ export class AvailablePoolsService implements OnModuleInit {
     try {
       const items = parseSelaeRss(await this.fetchSelaeText(feedUrl));
       if (items.length === 0) {
-        this.logger.warn(`SELAE results RSS returned no items: ${feedUrl.toString()}`);
+        this.logger.warn({
+          event: 'pools_sync.empty',
+          source: 'selae_results',
+          url: feedUrl.toString(),
+        });
+        countSyncProblem('selae_results', 'empty');
         return;
       }
       for (const item of items.slice(0, 8)) {
@@ -743,12 +792,24 @@ export class AvailablePoolsService implements OnModuleInit {
           await this.applySelaeOfficialResults(targetPool, officialResults, item);
         } catch (error) {
           const message = error instanceof Error ? error.message : String(error);
-          this.logger.warn(`SELAE result item sync failed: ${message}`);
+          this.logger.warn({
+            event: 'pools_sync.failed',
+            source: 'selae_results',
+            url: item.link ?? feedUrl.toString(),
+            reason: message,
+          });
+          countSyncProblem('selae_results', 'failed');
         }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      this.logger.warn(`SELAE results RSS sync failed: ${message}`);
+      this.logger.warn({
+        event: 'pools_sync.failed',
+        source: 'selae_results',
+        url: feedUrl.toString(),
+        reason: message,
+      });
+      countSyncProblem('selae_results', 'failed');
     }
   }
 
@@ -871,9 +932,13 @@ export class AvailablePoolsService implements OnModuleInit {
         discoveredDocuments.push(...this.extractSelaeLinks(detailHtml, detailUrl, true));
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
-        this.logger.warn(
-          `SELAE notice detail fetch failed for ${detailUrl.toString()}: ${message}`
-        );
+        this.logger.warn({
+          event: 'pools_sync.failed',
+          source: 'selae_notices',
+          url: detailUrl.toString(),
+          reason: message,
+        });
+        countSyncProblem('selae_notices', 'failed');
       }
     }
 
