@@ -2,10 +2,18 @@ import { vi, type Mocked } from 'vitest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
 import { NotifierService } from '../notifications/notifier.service';
+import { registry } from '../observability';
 import { TeamsService } from '../teams/teams.service';
 import { FutPool } from './entities/fut-pool.entity';
 import { FutPoolRepository } from './fut-pool.repository';
 import { FutPoolService } from './fut-pool.service';
+
+const poolActions = async (action: string): Promise<number> => {
+  const line = `kini_pool_actions_total{action="${action}"}`;
+  const text = await registry.metrics();
+  const row = text.split('\n').find((entry) => entry.startsWith(`${line} `));
+  return row ? Number(row.slice(line.length + 1)) : 0;
+};
 
 describe('FutPoolService', () => {
   let service: FutPoolService;
@@ -298,6 +306,31 @@ describe('FutPoolService', () => {
         updateDto,
         actor
       );
+    });
+  });
+
+  describe('counters', () => {
+    it('counts a created pool once, and not as an update', async () => {
+      repository.createPool.mockResolvedValue(mockPool);
+      const created = await poolActions('created');
+      const updated = await poolActions('updated');
+
+      await service.createPool({ doubles: 2, date: '2024-01-15', matches: [] });
+
+      expect(await poolActions('created')).toBe(created + 1);
+      expect(await poolActions('updated')).toBe(updated);
+    });
+
+    it('counts an updated pool once, and not as a create', async () => {
+      repository.findById.mockResolvedValue(mockPool);
+      repository.updatePool.mockResolvedValue(mockPool);
+      const created = await poolActions('created');
+      const updated = await poolActions('updated');
+
+      await service.updatePool('pool-123', { doubles: 3 });
+
+      expect(await poolActions('updated')).toBe(updated + 1);
+      expect(await poolActions('created')).toBe(created);
     });
   });
 });

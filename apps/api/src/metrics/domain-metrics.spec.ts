@@ -1,17 +1,25 @@
 import { describe, expect, it } from 'vitest';
 import { registry } from '../observability';
 import {
+  countMatchOutcome,
   countNotification,
+  countPoolAction,
+  countPrediction,
   countSyncProblem,
   countSyncRun,
+  countTeamAction,
   countWebsocketAccepted,
   countWebsocketRejected,
+  MATCH_OUTCOMES,
   NOTIFICATION_OUTCOMES,
   NOTIFICATION_TEMPLATES,
+  POOL_ACTIONS,
+  PREDICTION_ACTIONS,
   startDomainMetricsAtZero,
   SYNC_OUTCOMES,
   SYNC_PROBLEMS,
   SYNC_SOURCES,
+  TEAM_ACTIONS,
   WEBSOCKET_REJECTIONS,
   websocketConnected,
   websocketDisconnected,
@@ -46,6 +54,18 @@ describe('kini domain metrics', () => {
       );
     }
     expect(text).toContain('kini_websocket_clients 0');
+    for (const action of TEAM_ACTIONS) {
+      expect(text).toContain(`kini_team_actions_total{action="${action}"} 0`);
+    }
+    for (const action of POOL_ACTIONS) {
+      expect(text).toContain(`kini_pool_actions_total{action="${action}"} 0`);
+    }
+    for (const action of PREDICTION_ACTIONS) {
+      expect(text).toContain(`kini_predictions_total{action="${action}"} 0`);
+    }
+    for (const outcome of MATCH_OUTCOMES) {
+      expect(text).toContain(`kini_match_results_total{outcome="${outcome}"} 0`);
+    }
   });
 
   it('counts on top of the zero and follows connected clients', async () => {
@@ -58,6 +78,10 @@ describe('kini domain metrics', () => {
     websocketDisconnected();
     countWebsocketAccepted();
     countWebsocketRejected('no_session');
+    countTeamAction('invitation_accepted');
+    countPoolAction('predictions_completed');
+    countPrediction('set');
+    countMatchOutcome('hit');
     const text = await registry.metrics();
 
     expect(text).toContain('kini_pools_sync_runs_total{outcome="completed"} 1');
@@ -72,5 +96,12 @@ describe('kini domain metrics', () => {
     expect(text).toContain(
       'kini_websocket_connections_total{outcome="rejected",reason="no_session"} 1'
     );
+    expect(text).toContain('kini_team_actions_total{action="invitation_accepted"} 1');
+    expect(text).toContain('kini_team_actions_total{action="created"} 0');
+    expect(text).toContain('kini_pool_actions_total{action="predictions_completed"} 1');
+    expect(text).toContain('kini_predictions_total{action="set"} 1');
+    expect(text).toContain('kini_predictions_total{action="cleared"} 0');
+    expect(text).toContain('kini_match_results_total{outcome="hit"} 1');
+    expect(text).toContain('kini_match_results_total{outcome="miss"} 0');
   });
 });

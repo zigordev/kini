@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { countMatchOutcome } from 'src/metrics/domain-metrics';
 import { User } from 'src/users/user.entity';
 import { Not, Repository } from 'typeorm';
 import { UpdateFutPoolMatchDto } from './dto/update-fut-pool-match.dto';
@@ -33,6 +34,7 @@ export class FutPoolMatchRepository {
     });
 
     const { userId, ...otherUpdates } = matchUpdate;
+    const unscored = match.success === null || match.success === undefined;
 
     Object.assign(match, otherUpdates);
 
@@ -55,6 +57,9 @@ export class FutPoolMatchRepository {
 
     if (matchUpdate.results !== undefined || matchUpdate.officialResults !== undefined) {
       match.success = this.computeSuccess(match.results, match.officialResults, match.full15);
+      if (unscored && match.success !== null) {
+        countMatchOutcome(match.success ? 'hit' : 'miss');
+      }
     }
 
     await this.repository.save(match);

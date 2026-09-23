@@ -1,9 +1,10 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { FutPool } from 'src/fut-pool/entities/fut-pool.entity';
 import { NotifierService } from 'src/notifications/notifier.service';
+import { registry } from 'src/observability';
 import { User } from 'src/users/user.entity';
 import { vi } from 'vitest';
 import { TeamMembership } from './entities/team-membership.entity';
@@ -35,10 +36,18 @@ const repository = () => ({
   save: vi.fn(async (entity: unknown) => entity),
 });
 
+const teamActions = async (action: string): Promise<number> => {
+  const line = `kini_team_actions_total{action="${action}"}`;
+  const text = await registry.metrics();
+  const row = text.split('\n').find((entry) => entry.startsWith(`${line} `));
+  return row ? Number(row.slice(line.length + 1)) : 0;
+};
+
 describe('TeamsService', () => {
   let service: TeamsService;
   let teams: ReturnType<typeof repository>;
   let memberships: ReturnType<typeof repository>;
+  let futPools: ReturnType<typeof repository>;
   let notifier: {
     sendTeamInvitation: ReturnType<typeof vi.fn>;
     notifyTeamInvitationAccepted: ReturnType<typeof vi.fn>;
@@ -47,6 +56,7 @@ describe('TeamsService', () => {
   beforeEach(async () => {
     teams = repository();
     memberships = repository();
+    futPools = repository();
     notifier = {
       sendTeamInvitation: vi.fn().mockResolvedValue(undefined),
       notifyTeamInvitationAccepted: vi.fn().mockResolvedValue(undefined),
@@ -58,7 +68,7 @@ describe('TeamsService', () => {
         TeamsService,
         { provide: getRepositoryToken(Team), useValue: teams },
         { provide: getRepositoryToken(TeamMembership), useValue: memberships },
-        { provide: getRepositoryToken(FutPool), useValue: repository() },
+        { provide: getRepositoryToken(FutPool), useValue: futPools },
         { provide: getRepositoryToken(User), useValue: repository() },
         { provide: NotifierService, useValue: notifier },
         {
@@ -189,6 +199,96 @@ describe('TeamsService', () => {
         expect.objectContaining({ teamId: team.id, userEmail: actor.email })
       );
       expect(result.team.role).toBe('member');
+    });
+  });
+
+  describe('counters', () => {
+    it('counts a team a player asked for, and not as a default team', async () => {
+      const created = await teamActions('created');
+      const defaultCreated = await teamActions('default_created');
+
+      await service.createTeam({ name: 'Saturday pool' }, actor);
+
+      expect(await teamActions('created')).toBe(created + 1);
+      expect(await teamActions('default_created')).toBe(defaultCreated);
+    });
+
+    it('counts the team provisioned for a player who has none, and not as a create', async () => {
+      memberships.count.mockResolvedValue(0);
+      memberships.find.mockResolvedValue([]);
+      futPools.find.mockResolvedValue([]);
+      const created = await teamActions('created');
+      const defaultCreated = await teamActions('default_created');
+
+      await service.listTeams(actor);
+
+      expect(await teamActions('default_created')).toBe(defaultCreated + 1);
+      expect(await teamActions('created')).toBe(created);
+    });
+
+    it('counts an invitation once it has been handed to notifications', async () => {
+      memberships.findOne
+        .mockResolvedValueOnce({
+          teamId: team.id,
+          userId: actor.id,
+          role: 'admin',
+          status: 'active',
+        })
+        .mockResolvedValueOnce(null);
+      const sent = await teamActions('invitation_sent');
+
+      await service.inviteUser(team.id, 'friend@example.com', actor);
+
+      expect(await teamActions('invitation_sent')).toBe(sent + 1);
+    });
+
+    it('counts and logs an accepted invitation, and nothing else', async () => {
+      const log = vi.spyOn(Logger.prototype, 'log').mockImplementation(() => undefined);
+      memberships.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce({
+        teamId: team.id,
+        userId: null as string | null,
+        invitedEmail: 'owner@example.com',
+        role: 'member',
+        status: 'pending',
+      });
+      const accepted = await teamActions('invitation_accepted');
+      const alreadyMember = await teamActions('invitation_already_member');
+
+      await service.acceptInvitation(team.id, actor);
+
+      expect(await teamActions('invitation_accepted')).toBe(accepted + 1);
+      expect(await teamActions('invitation_already_member')).toBe(alreadyMember);
+      expect(log).toHaveBeenCalledWith({ event: 'team.invitation_accepted', teamId: team.id });
+      log.mockRestore();
+    });
+
+    it('counts a second accept from a member as already a member, not as an accept', async () => {
+      memberships.findOne.mockResolvedValueOnce({
+        teamId: team.id,
+        userId: actor.id,
+        role: 'member',
+        status: 'active',
+      });
+      const accepted = await teamActions('invitation_accepted');
+      const alreadyMember = await teamActions('invitation_already_member');
+
+      await service.acceptInvitation(team.id, actor);
+
+      expect(await teamActions('invitation_already_member')).toBe(alreadyMember + 1);
+      expect(await teamActions('invitation_accepted')).toBe(accepted);
+    });
+
+    it('counts an accept with nothing pending as a failure', async () => {
+      memberships.findOne.mockResolvedValueOnce(null).mockResolvedValueOnce(null);
+      const failed = await teamActions('invitation_accept_failed');
+      const accepted = await teamActions('invitation_accepted');
+
+      await expect(service.acceptInvitation(team.id, actor)).rejects.toBeInstanceOf(
+        NotFoundException
+      );
+
+      expect(await teamActions('invitation_accept_failed')).toBe(failed + 1);
+      expect(await teamActions('invitation_accepted')).toBe(accepted);
     });
   });
 });

@@ -4,9 +4,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FutPool } from '../fut-pool/entities/fut-pool.entity';
+import { registry } from '../observability';
 import { User } from '../users/user.entity';
 import { FutPoolMatch, Result } from './entities/fut-pool-match.entity';
 import { FutPoolMatchRepository } from './fut-pool-match.repository';
+
+const matchOutcomes = async (outcome: string): Promise<number> => {
+  const line = `kini_match_results_total{outcome="${outcome}"}`;
+  const text = await registry.metrics();
+  const row = text.split('\n').find((entry) => entry.startsWith(`${line} `));
+  return row ? Number(row.slice(line.length + 1)) : 0;
+};
 
 describe('FutPoolMatchRepository', () => {
   let repository: FutPoolMatchRepository;
@@ -268,6 +276,72 @@ describe('FutPoolMatchRepository', () => {
       await repository.update('match-123', updateDto);
 
       expect(qb.andWhere).toHaveBeenCalledWith('futPoolMatch.full15 = false');
+    });
+  });
+
+  describe('match verdict counters', () => {
+    const scoreable = (officialResults: Result[]): FutPoolMatch =>
+      ({
+        ...mockMatch,
+        results: [Result.HOME],
+        officialResults,
+        success: null,
+      }) as FutPoolMatch;
+
+    const acceptEveryLimit = (): void => {
+      typeormRepository.count.mockResolvedValue(0);
+      typeormRepository.createQueryBuilder.mockReturnValue({
+        where: vi.fn().mockReturnThis(),
+        andWhere: vi.fn().mockReturnThis(),
+        getCount: vi.fn().mockResolvedValue(0),
+      } as any);
+    };
+
+    it('counts a first verdict as a hit and never counts the same match twice', async () => {
+      const match = scoreable([Result.HOME]);
+      typeormRepository.findOne.mockResolvedValue(match);
+      typeormRepository.save.mockResolvedValue(match);
+      acceptEveryLimit();
+      const hit = await matchOutcomes('hit');
+
+      await repository.update('match-123', { results: [Result.HOME] });
+
+      expect(match.success).toBe(true);
+      expect(await matchOutcomes('hit')).toBe(hit + 1);
+
+      await repository.update('match-123', { results: [Result.HOME] });
+
+      expect(await matchOutcomes('hit')).toBe(hit + 1);
+    });
+
+    it('counts a first verdict as a miss when the official result differs', async () => {
+      const match = scoreable([Result.DRAW]);
+      typeormRepository.findOne.mockResolvedValue(match);
+      typeormRepository.save.mockResolvedValue(match);
+      acceptEveryLimit();
+      const hit = await matchOutcomes('hit');
+      const miss = await matchOutcomes('miss');
+
+      await repository.update('match-123', { results: [Result.HOME] });
+
+      expect(match.success).toBe(false);
+      expect(await matchOutcomes('miss')).toBe(miss + 1);
+      expect(await matchOutcomes('hit')).toBe(hit);
+    });
+
+    it('counts nothing while no official result has arrived', async () => {
+      const match = scoreable([]);
+      typeormRepository.findOne.mockResolvedValue(match);
+      typeormRepository.save.mockResolvedValue(match);
+      acceptEveryLimit();
+      const hit = await matchOutcomes('hit');
+      const miss = await matchOutcomes('miss');
+
+      await repository.update('match-123', { results: [Result.HOME] });
+
+      expect(match.success).toBeNull();
+      expect(await matchOutcomes('hit')).toBe(hit);
+      expect(await matchOutcomes('miss')).toBe(miss);
     });
   });
 });

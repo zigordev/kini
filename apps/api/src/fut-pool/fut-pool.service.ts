@@ -11,6 +11,7 @@ import { StatsDto } from 'src/fut-pool/dto/stats.dto';
 import { UpdateFutPoolDto } from 'src/fut-pool/dto/update-fut-pool.dto';
 import { FutPool } from 'src/fut-pool/entities/fut-pool.entity';
 import { FutPoolRepository } from 'src/fut-pool/fut-pool.repository';
+import { countPoolAction } from 'src/metrics/domain-metrics';
 import { NotifierService } from 'src/notifications/notifier.service';
 import { TeamsService } from 'src/teams/teams.service';
 
@@ -48,6 +49,7 @@ export class FutPoolService {
       await this.teamsService.assertMember(payload.teamId, actor.id);
     }
     const created = await this.futPoolRepository.createPool(payload);
+    countPoolAction('created');
     const response = this.toResponseDto(created);
     this.events.emitPoolUpdated(response);
     await this.notifier.notifyPoolCreated(created, payload, actor);
@@ -61,6 +63,7 @@ export class FutPoolService {
   ): Promise<FutPoolResponseDto> {
     const oldPool = await this.futPoolRepository.findById(poolId);
     const updated = await this.futPoolRepository.updatePool(poolId, payload);
+    countPoolAction('updated');
     const response = this.toResponseDto(updated);
     this.events.emitPoolUpdated(response);
     await this.notifier.notifyPoolUpdated(updated, oldPool, payload, actor);

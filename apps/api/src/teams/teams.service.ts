@@ -2,6 +2,7 @@ import { ForbiddenException, Injectable, Logger, NotFoundException } from '@nest
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FutPool } from 'src/fut-pool/entities/fut-pool.entity';
+import { countTeamAction } from 'src/metrics/domain-metrics';
 import { NotifierService } from 'src/notifications/notifier.service';
 import { User } from 'src/users/user.entity';
 import { IsNull, Repository } from 'typeorm';
@@ -43,26 +44,9 @@ export class TeamsService {
   }
 
   async createTeam(payload: CreateTeamDto, actor: Actor): Promise<TeamResponseDto> {
-    const team = await this.teamsRepository.save(
-      this.teamsRepository.create({
-        name: payload.name.trim(),
-        ownerId: actor.id,
-      })
-    );
-
-    const membership = await this.membershipsRepository.save(
-      this.membershipsRepository.create({
-        teamId: team.id,
-        userId: actor.id,
-        invitedEmail: normalizeEmail(actor.email),
-        role: 'admin',
-        status: 'active',
-        invitedById: actor.id,
-        joinedAt: new Date(),
-      })
-    );
-
-    return this.toResponseDto(team, membership.role);
+    const created = await this.persistTeam(payload, actor);
+    countTeamAction('created');
+    return created;
   }
 
   async inviteUser(
@@ -106,6 +90,7 @@ export class TeamsService {
     });
 
     this.logger.log({ event: 'team.invitation_sent', teamId });
+    countTeamAction('invitation_sent');
     return { success: true, message: 'Invitation sent successfully' };
   }
 
@@ -119,6 +104,7 @@ export class TeamsService {
       where: { teamId, userId: actor.id, status: 'active' },
     });
     if (existingActive) {
+      countTeamAction('invitation_already_member');
       return {
         success: true,
         message: 'You are already a member of this team',
@@ -135,6 +121,7 @@ export class TeamsService {
     });
 
     if (!pending) {
+      countTeamAction('invitation_accept_failed');
       throw new NotFoundException('Team invitation not found');
     }
 
@@ -149,6 +136,9 @@ export class TeamsService {
       userName: actor.name,
       userEmail: actor.email,
     });
+
+    this.logger.log({ event: 'team.invitation_accepted', teamId });
+    countTeamAction('invitation_accepted');
 
     return {
       success: true,
@@ -189,6 +179,29 @@ export class TeamsService {
       .filter((user): user is User => Boolean(user?.id));
   }
 
+  private async persistTeam(payload: CreateTeamDto, actor: Actor): Promise<TeamResponseDto> {
+    const team = await this.teamsRepository.save(
+      this.teamsRepository.create({
+        name: payload.name.trim(),
+        ownerId: actor.id,
+      })
+    );
+
+    const membership = await this.membershipsRepository.save(
+      this.membershipsRepository.create({
+        teamId: team.id,
+        userId: actor.id,
+        invitedEmail: normalizeEmail(actor.email),
+        role: 'admin',
+        status: 'active',
+        invitedById: actor.id,
+        joinedAt: new Date(),
+      })
+    );
+
+    return this.toResponseDto(team, membership.role);
+  }
+
   private async ensureDefaultTeam(actor: Actor): Promise<void> {
     const count = await this.membershipsRepository.count({
       where: { userId: actor.id, status: 'active' },
@@ -198,7 +211,8 @@ export class TeamsService {
       return;
     }
 
-    const team = await this.createTeam({ name: 'My team' }, actor);
+    const team = await this.persistTeam({ name: 'My team' }, actor);
+    countTeamAction('default_created');
     await this.adoptLegacyPools(team.id, actor.id);
   }
 
