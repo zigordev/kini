@@ -11,6 +11,7 @@ import { useTeams } from '@/contexts/TeamsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { API_BASE_URL, poolsApi, usersApi } from '@/lib/api';
 import { formatDate, full15Results, poolOutcome, poolStatus, regularResults } from '@/lib/pools';
+import { trackInteraction } from '@/observability/rum-events';
 import type { FutPool, FutPoolMatch, ResultValue, UserSummary } from '@/types/domain';
 import { Button } from 'design-system/components/core/Button.jsx';
 import { StatTile } from 'design-system/components/data-display/StatTile.jsx';
@@ -116,7 +117,10 @@ function PoolsContent() {
       setChecking(true);
       try {
         replacePool(await poolsApi.checkResults(selectedPoolId));
-        if (!quiet) showToast(t('pools.results_checked'), 'success');
+        if (!quiet) {
+          trackInteraction('results-checked');
+          showToast(t('pools.results_checked'), 'success');
+        }
       } catch (error) {
         if (!quiet) {
           showToast(error instanceof Error ? error.message : String(error), 'error');
@@ -168,6 +172,8 @@ function PoolsContent() {
     setSaving(`match:${match.id}`);
     try {
       const updated = await poolsApi.updateMatch(selectedPool.id, match.id, payload);
+      if (payload.results) trackInteraction('match-result-set');
+      if (payload.userId) trackInteraction('match-assigned');
       setPools((current) =>
         current.map((pool) =>
           pool.id === selectedPool.id

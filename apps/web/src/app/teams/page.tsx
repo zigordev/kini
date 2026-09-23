@@ -9,6 +9,7 @@ import { useTeams } from '@/contexts/TeamsContext';
 import { useToast } from '@/contexts/ToastContext';
 import { availablePoolsApi } from '@/lib/api';
 import { formatDate } from '@/lib/pools';
+import { trackInteraction } from '@/observability/rum-events';
 import type { AvailablePoolJackpot, Team } from '@/types/domain';
 import { Button } from 'design-system/components/core/Button.jsx';
 import { StatTile } from 'design-system/components/data-display/StatTile.jsx';
@@ -40,6 +41,7 @@ export default function TeamsPage() {
     setCreating(true);
     try {
       await create(name);
+      trackInteraction('team-created');
       setNewTeamName('');
       showToast(t('teams.created'), 'success');
       router.push('/pools');
@@ -65,6 +67,7 @@ export default function TeamsPage() {
     try {
       await select(invitingTeam.id);
       await invite(inviteEmail.trim(), invitingTeam.id);
+      trackInteraction('invitation-sent');
       showToast(t('teams.invited', { email: inviteEmail.trim() }), 'success');
       setInvitingTeam(null);
       setInviteEmail('');

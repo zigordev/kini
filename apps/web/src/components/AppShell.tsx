@@ -6,6 +6,7 @@ import type { PropsWithChildren } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/contexts/PreferencesContext';
 import { useTeams } from '@/contexts/TeamsContext';
+import { trackInteraction } from '@/observability/rum-events';
 import { AuthCard } from 'design-system/components/auth/AuthCard.jsx';
 import { AuthShell } from 'design-system/components/auth/AuthShell.jsx';
 import { Button } from 'design-system/components/core/Button.jsx';
@@ -102,7 +103,10 @@ export function AppShell({ children }: PropsWithChildren) {
             size="lg"
             style={{ width: '100%' }}
             disabled={!googleAuthEnabled || signingIn}
-            onClick={() => signInWithGoogle(`${pathname}${window.location.search}`)}
+            onClick={() => {
+              trackInteraction('sign-in-started');
+              signInWithGoogle(`${pathname}${window.location.search}`);
+            }}
             type="button"
           >
             <GoogleMark />
@@ -136,7 +140,10 @@ export function AppShell({ children }: PropsWithChildren) {
             id: team.id,
             label: team.name,
             active: team.id === selectedTeam?.id,
-            onSelect: (id: string) => void select(id),
+            onSelect: (id: string) => {
+              if (id !== selectedTeam?.id) trackInteraction('team-switched');
+              void select(id);
+            },
           }))}
           footer={({ close }: { close: () => void }) => (
             <MenuItem

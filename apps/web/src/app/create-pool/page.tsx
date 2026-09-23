@@ -11,6 +11,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { poolsApi, usersApi } from '@/lib/api';
 import { readPoolDefaults } from '@/lib/preferences';
 import { todayInputValue } from '@/lib/pools';
+import { trackInteraction } from '@/observability/rum-events';
 import type { PoolForm, UserSummary } from '@/types/domain';
 import { Button } from 'design-system/components/core/Button.jsx';
 import { Field } from 'design-system/components/forms/Field.jsx';
@@ -139,9 +140,11 @@ function CreatePoolForm() {
     setCreating(true);
     try {
       const created = await poolsApi.create(payload);
+      trackInteraction('pool-created');
       showToast(t('pools.created'), 'success');
       router.replace(`/pools?poolId=${encodeURIComponent(created.id)}`);
     } catch (error) {
+      trackInteraction('pool-create-failed');
       showToast(error instanceof Error ? error.message : String(error), 'error');
     } finally {
       setCreating(false);
