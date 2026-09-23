@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.1](https://github.com/zigordev/kini/compare/kini-v0.11.0...kini-v0.11.1) (2026-09-23)
+
+
+### Bug Fixes
+
+* **observability:** declare the RUM vocabulary when the process boots ([#153](https://github.com/zigordev/kini/issues/153)) ([c0eac37](https://github.com/zigordev/kini/commit/c0eac37a547e11246dfeb9c3b260f88d2d5839c7))
+
 ## [0.11.0](https://github.com/zigordev/kini/compare/kini-v0.10.0...kini-v0.11.0) (2026-09-23)
 
 
