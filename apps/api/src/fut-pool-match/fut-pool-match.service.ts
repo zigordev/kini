@@ -53,12 +53,9 @@ export class FutPoolMatchService {
         : false;
 
     const updated = await this.futPoolMatchRepository.update(matchId, match);
+    const response = this.toResponseDto(updated);
 
-    this.events.emitMatchUpdated({
-      poolId: updated.futPool.id,
-      matchId: updated.id,
-      match: updated,
-    });
+    this.events.emitMatchUpdated(updated.futPool?.teamId, response);
 
     await this.notifier.notifyMatchUpdated(updated, oldMatch, match, actor);
 
@@ -79,7 +76,7 @@ export class FutPoolMatchService {
       }
     }
 
-    return this.toResponseDto(updated);
+    return response;
   }
 
   private toResponseDto(entity: FutPoolMatch): FutPoolMatchResponseDto {

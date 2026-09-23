@@ -22,6 +22,9 @@ export const NOTIFICATION_TEMPLATES = ['kini.team-invitation'] as const;
 export const NOTIFICATION_OUTCOMES = ['queued', 'failed'] as const;
 export type NotificationOutcome = (typeof NOTIFICATION_OUTCOMES)[number];
 
+export const WEBSOCKET_REJECTIONS = ['no_session', 'bad_origin'] as const;
+export type WebsocketRejection = (typeof WEBSOCKET_REJECTIONS)[number];
+
 const syncRuns = new Counter({
   name: 'kini_pools_sync_runs_total',
   help: 'Scheduled syncs of the available pools, by outcome',
@@ -40,6 +43,13 @@ const notifications = new Counter({
   name: 'kini_notifications_total',
   help: 'Emails kini asked notifications to send, by template and outcome',
   labelNames: ['template', 'outcome'] as const,
+  registers: [registry],
+});
+
+const websocketConnections = new Counter({
+  name: 'kini_websocket_connections_total',
+  help: 'WebSocket connection attempts, by outcome and the reason a refused one was refused',
+  labelNames: ['outcome', 'reason'] as const,
   registers: [registry],
 });
 
@@ -64,6 +74,10 @@ export function startDomainMetricsAtZero(): void {
       NOTIFICATION_OUTCOMES.map((outcome) => ({ template, outcome }))
     )
   );
+  startAtZero(websocketConnections, [
+    { outcome: 'accepted', reason: 'none' },
+    ...WEBSOCKET_REJECTIONS.map((reason) => ({ outcome: 'rejected', reason })),
+  ]);
   websocketClients.set(0);
 }
 
@@ -77,6 +91,14 @@ export function countSyncProblem(source: SyncSource, problem: SyncProblem): void
 
 export function countNotification(template: string, outcome: NotificationOutcome): void {
   notifications.inc({ template, outcome });
+}
+
+export function countWebsocketAccepted(): void {
+  websocketConnections.inc({ outcome: 'accepted', reason: 'none' });
+}
+
+export function countWebsocketRejected(reason: WebsocketRejection): void {
+  websocketConnections.inc({ outcome: 'rejected', reason });
 }
 
 export function websocketConnected(): void {

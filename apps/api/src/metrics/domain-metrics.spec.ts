@@ -4,12 +4,15 @@ import {
   countNotification,
   countSyncProblem,
   countSyncRun,
+  countWebsocketAccepted,
+  countWebsocketRejected,
   NOTIFICATION_OUTCOMES,
   NOTIFICATION_TEMPLATES,
   startDomainMetricsAtZero,
   SYNC_OUTCOMES,
   SYNC_PROBLEMS,
   SYNC_SOURCES,
+  WEBSOCKET_REJECTIONS,
   websocketConnected,
   websocketDisconnected,
 } from './domain-metrics';
@@ -36,6 +39,12 @@ describe('kini domain metrics', () => {
         );
       }
     }
+    expect(text).toContain('kini_websocket_connections_total{outcome="accepted",reason="none"} 0');
+    for (const reason of WEBSOCKET_REJECTIONS) {
+      expect(text).toContain(
+        `kini_websocket_connections_total{outcome="rejected",reason="${reason}"} 0`
+      );
+    }
     expect(text).toContain('kini_websocket_clients 0');
   });
 
@@ -47,6 +56,8 @@ describe('kini domain metrics', () => {
     websocketConnected();
     websocketConnected();
     websocketDisconnected();
+    countWebsocketAccepted();
+    countWebsocketRejected('no_session');
     const text = await registry.metrics();
 
     expect(text).toContain('kini_pools_sync_runs_total{outcome="completed"} 1');
@@ -57,5 +68,9 @@ describe('kini domain metrics', () => {
       'kini_notifications_total{template="kini.team-invitation",outcome="queued"} 1'
     );
     expect(text).toContain('kini_websocket_clients 1');
+    expect(text).toContain('kini_websocket_connections_total{outcome="accepted",reason="none"} 1');
+    expect(text).toContain(
+      'kini_websocket_connections_total{outcome="rejected",reason="no_session"} 1'
+    );
   });
 });

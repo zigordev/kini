@@ -220,9 +220,34 @@ describe('FutPoolService', () => {
 
       expect(result).toBeDefined();
       expect(repository.createPool).toHaveBeenCalledWith(createDto);
-      expect(events.emitPoolUpdated).toHaveBeenCalledWith({
-        poolId: 'pool-123',
-        pool: mockPool,
+      expect(events.emitPoolUpdated).toHaveBeenCalledWith(result);
+    });
+
+    it('emits the same trimmed pool the API returns, without emails or Google ids', async () => {
+      const player = {
+        id: 'user-1',
+        name: 'Ana',
+        email: 'ana@example.com',
+        googleId: 'google-1',
+        textColor: '#fff',
+        backgroundColor: '#000',
+      };
+      repository.createPool.mockResolvedValue({
+        ...mockPool,
+        teamId: 'team-1',
+        matches: [{ id: 'match-1', futPoolId: 'pool-123', userId: 'user-1', user: player }],
+      } as unknown as FutPool);
+
+      const result = await service.createPool({ doubles: 2, date: '2024-01-15', matches: [] });
+
+      const emitted = events.emitPoolUpdated.mock.calls[0][0];
+      expect(emitted).toEqual(result);
+      expect(emitted.teamId).toBe('team-1');
+      expect(emitted.matches[0].user).toEqual({
+        id: 'user-1',
+        name: 'Ana',
+        textColor: '#fff',
+        backgroundColor: '#000',
       });
     });
 
@@ -254,10 +279,7 @@ describe('FutPoolService', () => {
 
       expect(result.doubles).toBe(3);
       expect(repository.updatePool).toHaveBeenCalledWith('pool-123', updateDto);
-      expect(events.emitPoolUpdated).toHaveBeenCalledWith({
-        poolId: 'pool-123',
-        pool: updatedPool,
-      });
+      expect(events.emitPoolUpdated).toHaveBeenCalledWith(result);
     });
 
     it('should trigger notification with changes', async () => {
