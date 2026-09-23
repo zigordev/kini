@@ -100,10 +100,35 @@ describe('FutPoolMatchService', () => {
 
       expect(result.success).toBe(false);
       expect(repository.update).toHaveBeenCalledWith('match-123', updateDto);
-      expect(events.emitMatchUpdated).toHaveBeenCalledWith({
-        poolId: 'pool-123',
-        matchId: 'match-123',
-        match: updatedMatch,
+      expect(events.emitMatchUpdated).toHaveBeenCalledWith(undefined, result);
+    });
+
+    it("sends the trimmed match to the pool's team, without emails or Google ids", async () => {
+      const teamPool = { ...mockPool, teamId: 'team-1' } as FutPool;
+      const updatedMatch = {
+        ...mockMatch,
+        futPool: teamPool,
+        user: {
+          id: 'user-123',
+          name: 'Test User',
+          email: 'test@example.com',
+          googleId: 'google-123',
+          textColor: '#fff',
+          backgroundColor: '#000',
+        },
+      } as unknown as FutPoolMatch;
+
+      repository.findById.mockResolvedValue(mockMatch);
+      repository.update.mockResolvedValue(updatedMatch);
+
+      const result = await service.update(POOL_ID, 'match-123', { success: false });
+
+      expect(events.emitMatchUpdated).toHaveBeenCalledWith('team-1', result);
+      expect(result.user).toEqual({
+        id: 'user-123',
+        name: 'Test User',
+        textColor: '#fff',
+        backgroundColor: '#000',
       });
     });
 

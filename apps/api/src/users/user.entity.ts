@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -25,6 +26,7 @@ export class User {
 
   @Index('IDX_user_google_id', { unique: true })
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
+  @Exclude({ toPlainOnly: true })
   googleId: string | null;
 
   @Column({ type: 'varchar', length: 255, nullable: true })

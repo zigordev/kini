@@ -48,9 +48,10 @@ export class FutPoolService {
       await this.teamsService.assertMember(payload.teamId, actor.id);
     }
     const created = await this.futPoolRepository.createPool(payload);
-    this.events.emitPoolUpdated({ poolId: created.id, pool: created });
+    const response = this.toResponseDto(created);
+    this.events.emitPoolUpdated(response);
     await this.notifier.notifyPoolCreated(created, payload, actor);
-    return this.toResponseDto(created);
+    return response;
   }
 
   async updatePool(
@@ -60,9 +61,10 @@ export class FutPoolService {
   ): Promise<FutPoolResponseDto> {
     const oldPool = await this.futPoolRepository.findById(poolId);
     const updated = await this.futPoolRepository.updatePool(poolId, payload);
-    this.events.emitPoolUpdated({ poolId: updated.id, pool: updated });
+    const response = this.toResponseDto(updated);
+    this.events.emitPoolUpdated(response);
     await this.notifier.notifyPoolUpdated(updated, oldPool, payload, actor);
-    return this.toResponseDto(updated);
+    return response;
   }
 
   private toResponseDto(entity: FutPool): FutPoolResponseDto {

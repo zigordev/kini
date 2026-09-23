@@ -19,6 +19,7 @@ import { Pool } from 'pg';
 import { AppModule } from './app.module';
 import { buildSessionPoolConfig, SESSION_TABLE_NAME } from './auth/session-store.config';
 import { HttpErrorFilter } from './common/http-exception.filter';
+import { SessionIoAdapter } from './events/session-io.adapter';
 import { startDomainMetricsAtZero } from './metrics/domain-metrics';
 import {
   httpMetricsMiddleware,
@@ -111,27 +112,26 @@ async function bootstrap() {
   const PgSession = connectPgSimple(session);
   const sessionPool = new Pool(buildSessionPoolConfig(configService));
 
-  app.use(
-    session({
-      store: new PgSession({
-        pool: sessionPool,
-        tableName: SESSION_TABLE_NAME,
-        createTableIfMissing: true,
-      }),
-      secret: configService.get<string>('SESSION_SECRET'),
-      resave: false,
-      saveUninitialized: false,
-      name: configService.get<string>('SESSION_COOKIE_NAME'),
-      cookie: {
-        maxAge: Number(configService.get<string>('SESSION_COOKIE_MAX_AGE_MS')),
-        sameSite: configService.get<string>('SESSION_COOKIE_SAME_SITE') as
-          boolean | 'lax' | 'strict' | 'none',
-        httpOnly: true,
-        secure: configService.get<string>('SESSION_COOKIE_SECURE') === 'true',
-        domain: configService.get<string>('SESSION_COOKIE_DOMAIN') ?? undefined,
-      },
-    })
-  );
+  const sessionMiddleware = session({
+    store: new PgSession({
+      pool: sessionPool,
+      tableName: SESSION_TABLE_NAME,
+      createTableIfMissing: true,
+    }),
+    secret: configService.get<string>('SESSION_SECRET'),
+    resave: false,
+    saveUninitialized: false,
+    name: configService.get<string>('SESSION_COOKIE_NAME'),
+    cookie: {
+      maxAge: Number(configService.get<string>('SESSION_COOKIE_MAX_AGE_MS')),
+      sameSite: configService.get<string>('SESSION_COOKIE_SAME_SITE') as
+        boolean | 'lax' | 'strict' | 'none',
+      httpOnly: true,
+      secure: configService.get<string>('SESSION_COOKIE_SECURE') === 'true',
+      domain: configService.get<string>('SESSION_COOKIE_DOMAIN') ?? undefined,
+    },
+  });
+  app.use(sessionMiddleware);
 
   app.use(passport.initialize());
   app.use(passport.session());
@@ -157,6 +157,7 @@ async function bootstrap() {
     origin: corsOrigins,
     credentials: true,
   });
+  app.useWebSocketAdapter(new SessionIoAdapter(app, sessionMiddleware, corsOrigins));
 
   const config = new DocumentBuilder()
     .setTitle('Kini API')

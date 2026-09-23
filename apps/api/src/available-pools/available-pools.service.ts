@@ -218,8 +218,9 @@ export class AvailablePoolsService implements OnModuleInit {
       order: { matches: { poolOrder: 'ASC' } },
     });
 
-    this.events.emitPoolUpdated({ poolId: created.id, pool: created });
-    return this.toFutPoolResponse(created);
+    const response = this.toFutPoolResponse(created);
+    this.events.emitPoolUpdated(response);
+    return response;
   }
 
   async updateAvailablePoolMatchResult(
@@ -281,7 +282,7 @@ export class AvailablePoolsService implements OnModuleInit {
         changed = true;
       }
       if (changed) {
-        this.events.emitPoolUpdated({ poolId: pool.id, pool });
+        this.events.emitPoolUpdated(this.toFutPoolResponse(pool));
       }
     }
 
@@ -370,8 +371,9 @@ export class AvailablePoolsService implements OnModuleInit {
       relations: { availablePool: true, matches: { user: true } },
       order: { matches: { poolOrder: 'ASC' } },
     });
-    this.events.emitPoolUpdated({ poolId: updated.id, pool: updated });
-    return this.toFutPoolResponse(updated);
+    const response = this.toFutPoolResponse(updated);
+    this.events.emitPoolUpdated(response);
+    return response;
   }
 
   private async migrateLegacyProviderRows(): Promise<void> {
@@ -548,7 +550,7 @@ export class AvailablePoolsService implements OnModuleInit {
 
     const teamPools = await this.futPools.find({
       where: { availablePoolId: availablePool.id },
-      relations: { matches: { user: true } },
+      relations: { availablePool: true, matches: { user: true } },
       order: { matches: { poolOrder: 'ASC' } },
     });
     for (const teamPool of teamPools) {
@@ -564,7 +566,7 @@ export class AvailablePoolsService implements OnModuleInit {
         changed = true;
       }
       if (changed) {
-        this.events.emitPoolUpdated({ poolId: teamPool.id, pool: teamPool });
+        this.events.emitPoolUpdated(this.toFutPoolResponse(teamPool));
       }
     }
   }
@@ -871,7 +873,7 @@ export class AvailablePoolsService implements OnModuleInit {
 
     const teamPools = await this.futPools.find({
       where: { availablePoolId: availablePool.id },
-      relations: { matches: { user: true } },
+      relations: { availablePool: true, matches: { user: true } },
       order: { matches: { poolOrder: 'ASC' } },
     });
     for (const teamPool of teamPools) {
@@ -884,7 +886,7 @@ export class AvailablePoolsService implements OnModuleInit {
         match.success = this.computeSuccess(match.results, results, match.full15);
         await this.matches.save(match);
       }
-      this.events.emitPoolUpdated({ poolId: teamPool.id, pool: teamPool });
+      this.events.emitPoolUpdated(this.toFutPoolResponse(teamPool));
     }
   }
 

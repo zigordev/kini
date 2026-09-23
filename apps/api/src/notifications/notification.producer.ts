@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { EventsGateway } from '../events/events.gateway';
+import { EventsGateway, userRoom } from '../events/events.gateway';
 
 export interface NotificationPayload {
   type: 'pool' | 'match' | 'team';
@@ -19,6 +19,8 @@ export class NotificationProducer {
   constructor(private readonly events: EventsGateway) {}
 
   async emit(payload: NotificationPayload): Promise<void> {
-    this.events.server.emit('notification', payload);
+    for (const userId of new Set(payload.recipientUserIds)) {
+      this.events.server.to(userRoom(userId)).emit('notification', payload);
+    }
   }
 }
