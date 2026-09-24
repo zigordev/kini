@@ -9,7 +9,7 @@
     "lint": "eslint --no-cache .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "i18n:pull": "tolgee pull --config ./tolgee.config.cjs",
+    "i18n:pull": "tolgee pull --config ./tolgee.config.cjs && prettier --write \"messages/*.json\"",
     "i18n:push": "tolgee push --config ./tolgee.config.cjs --force-mode OVERRIDE",
     "clean": "rm -rf .next coverage",
     "e2e": "playwright test"
