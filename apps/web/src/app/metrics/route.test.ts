@@ -9,6 +9,7 @@ describe('GET /metrics', () => {
 
     expect(response.headers.get('content-type')).toContain('application/openmetrics-text');
     expect(body).toContain('service_build_info');
+    expect(body).toContain('kini_i18n_messages_total{source="local"} 0');
     expect(body.trimEnd().endsWith('# EOF')).toBe(true);
   });
 });
