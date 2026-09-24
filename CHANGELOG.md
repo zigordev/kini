@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.4](https://github.com/zigordev/kini/compare/kini-v0.11.3...kini-v0.11.4) (2026-09-24)
+
+
+### Bug Fixes
+
+* **observability:** one server span per web request, and bounded fetch span names ([#161](https://github.com/zigordev/kini/issues/161)) ([cd61a81](https://github.com/zigordev/kini/commit/cd61a81973ced75aaa3b81402104e342ac891fba))
+
 ## [0.11.3](https://github.com/zigordev/kini/compare/kini-v0.11.2...kini-v0.11.3) (2026-09-23)
 
 
