@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.2](https://github.com/zigordev/kini/compare/kini-v0.12.1...kini-v0.12.2) (2026-09-24)
+
+
+### Bug Fixes
+
+* **i18n:** merge the Tolgee export over committed copy and name the error code ([#167](https://github.com/zigordev/kini/issues/167)) ([aceac3d](https://github.com/zigordev/kini/commit/aceac3dcc75a534b4f9e673571037238094030ac))
+
 ## [0.12.1](https://github.com/zigordev/kini/compare/kini-v0.12.0...kini-v0.12.1) (2026-09-24)
 
 
