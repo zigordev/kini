@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.1](https://github.com/zigordev/kini/compare/kini-v0.12.0...kini-v0.12.1) (2026-09-24)
+
+
+### Bug Fixes
+
+* **i18n:** normalise what the Tolgee CLI writes on pull ([#164](https://github.com/zigordev/kini/issues/164)) ([be542c9](https://github.com/zigordev/kini/commit/be542c96f042b52b21e63af6bcb0dfeb58589c25))
+
 ## [0.12.0](https://github.com/zigordev/kini/compare/kini-v0.11.4...kini-v0.12.0) (2026-09-24)
 
 
