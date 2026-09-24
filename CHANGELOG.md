@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.3](https://github.com/zigordev/kini/compare/kini-v0.12.2...kini-v0.12.3) (2026-09-24)
+
+
+### Bug Fixes
+
+* **ci:** make the licence gate fail on an empty dependency tree ([#169](https://github.com/zigordev/kini/issues/169)) ([d5a1212](https://github.com/zigordev/kini/commit/d5a1212f101cde95430f528f706cea25287ec493))
+
 ## [0.12.2](https://github.com/zigordev/kini/compare/kini-v0.12.1...kini-v0.12.2) (2026-09-24)
 
 
