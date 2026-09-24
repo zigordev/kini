@@ -142,3 +142,4 @@ the secret with the required keys listed at the start of this runbook.
 - Tracked snapshots live in `apps/web/messages/{language}.json`.
 - `npm run i18n:push:local` pushes the tracked snapshots into local Tolgee.
 - `npm run local:up` pulls local Tolgee snapshots back into the tracked files when `TOLGEE_PROJECT_ID` is set.
+- The pull merges Tolgee over the tracked files instead of replacing them, so a key added in code but not pushed yet survives a `local:up` against an empty or stale Tolgee. The trade-off is that a key deleted in Tolgee has to be deleted from the tracked file as well.
