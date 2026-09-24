@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.4](https://github.com/zigordev/kini/compare/kini-v0.12.3...kini-v0.12.4) (2026-09-24)
+
+
+### Bug Fixes
+
+* **i18n:** say when promoting copy to prod fails ([#171](https://github.com/zigordev/kini/issues/171)) ([25dcc6d](https://github.com/zigordev/kini/commit/25dcc6d8ed3c2174bd43021e354f37b7d9e98e5b))
+
 ## [0.12.3](https://github.com/zigordev/kini/compare/kini-v0.12.2...kini-v0.12.3) (2026-09-24)
 
 
