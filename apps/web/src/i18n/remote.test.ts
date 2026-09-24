@@ -25,6 +25,23 @@ describe('loadRemoteMessages', () => {
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
+  it('asks for the i18next export, the dialect the committed messages are written in', async () => {
+    process.env.TOLGEE_API_URL = 'http://tolgee.invalid';
+    process.env.TOLGEE_API_KEY = 'test-key';
+    process.env.TOLGEE_PROJECT_ID = '1';
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ greeting: 'hello' }), {
+        status: 200,
+        headers: { 'content-type': 'application/json' },
+      })
+    );
+
+    await loadRemoteMessages('en');
+
+    const requested = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(requested.searchParams.get('format')).toBe('JSON_I18NEXT');
+  });
+
   it('falls back rather than throwing when the fetch rejects', async () => {
     process.env.TOLGEE_API_URL = 'http://tolgee.invalid';
     process.env.TOLGEE_API_KEY = 'test-key';
@@ -71,6 +88,29 @@ describe('loadRemoteMessages', () => {
         expect.objectContaining({
           event: 'i18n.fallback',
           error: { name: 'HttpError', message: 'Tolgee answered 401' },
+        })
+      );
+    });
+
+    it('names the Tolgee error code, not just the status', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ code: 'invalid_project_api_key' }), {
+          status: 401,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+
+      await loadRemoteMessages('en');
+
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          error: {
+            name: 'HttpError',
+            message: 'Tolgee answered 401 (invalid_project_api_key)',
+          },
         })
       );
     });
