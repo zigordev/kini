@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/zigordev/kini/compare/kini-v0.11.4...kini-v0.12.0) (2026-09-24)
+
+
+### Features
+
+* **api:** count what players do to teams, pools and predictions ([#160](https://github.com/zigordev/kini/issues/160)) ([8ff403e](https://github.com/zigordev/kini/commit/8ff403ec098838618ad74946edfd4d9bcff10ec9))
+
 ## [0.11.4](https://github.com/zigordev/kini/compare/kini-v0.11.3...kini-v0.11.4) (2026-09-24)
 
 
