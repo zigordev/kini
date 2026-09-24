@@ -15,10 +15,4 @@ module.exports = {
     filesTemplate: './messages/{languageTag}.json',
     convertPlaceholdersToIcu: false,
   },
-  pull: {
-    path: './messages',
-    fileStructureTemplate: '{languageTag}.json',
-    languages: ['en', 'es'],
-    emptyDir: false,
-  },
 };
