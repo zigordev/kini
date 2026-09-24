@@ -25,6 +25,31 @@ export type NotificationOutcome = (typeof NOTIFICATION_OUTCOMES)[number];
 export const WEBSOCKET_REJECTIONS = ['no_session', 'bad_origin'] as const;
 export type WebsocketRejection = (typeof WEBSOCKET_REJECTIONS)[number];
 
+export const TEAM_ACTIONS = [
+  'created',
+  'default_created',
+  'invitation_sent',
+  'invitation_accepted',
+  'invitation_already_member',
+  'invitation_accept_failed',
+] as const;
+export type TeamAction = (typeof TEAM_ACTIONS)[number];
+
+export const POOL_ACTIONS = [
+  'taken_up',
+  'created',
+  'updated',
+  'predictions_completed',
+  'results_checked',
+] as const;
+export type PoolAction = (typeof POOL_ACTIONS)[number];
+
+export const PREDICTION_ACTIONS = ['set', 'cleared', 'assigned', 'unassigned'] as const;
+export type PredictionAction = (typeof PREDICTION_ACTIONS)[number];
+
+export const MATCH_OUTCOMES = ['hit', 'miss'] as const;
+export type MatchOutcome = (typeof MATCH_OUTCOMES)[number];
+
 const syncRuns = new Counter({
   name: 'kini_pools_sync_runs_total',
   help: 'Scheduled syncs of the available pools, by outcome',
@@ -59,6 +84,34 @@ const websocketClients = new Gauge({
   registers: [registry],
 });
 
+const teamActions = new Counter({
+  name: 'kini_team_actions_total',
+  help: 'Things players do to teams and their invitations, by action',
+  labelNames: ['action'] as const,
+  registers: [registry],
+});
+
+const poolActions = new Counter({
+  name: 'kini_pool_actions_total',
+  help: 'Things players do to the pools a team plays, by action',
+  labelNames: ['action'] as const,
+  registers: [registry],
+});
+
+const predictions = new Counter({
+  name: 'kini_predictions_total',
+  help: 'Predictions players set or clear and matches they assign, by action',
+  labelNames: ['action'] as const,
+  registers: [registry],
+});
+
+const matchResults = new Counter({
+  name: 'kini_match_results_total',
+  help: 'Matches scored for the first time against the official results, by outcome',
+  labelNames: ['outcome'] as const,
+  registers: [registry],
+});
+
 export function startDomainMetricsAtZero(): void {
   startAtZero(
     syncRuns,
@@ -78,6 +131,22 @@ export function startDomainMetricsAtZero(): void {
     { outcome: 'accepted', reason: 'none' },
     ...WEBSOCKET_REJECTIONS.map((reason) => ({ outcome: 'rejected', reason })),
   ]);
+  startAtZero(
+    teamActions,
+    TEAM_ACTIONS.map((action) => ({ action }))
+  );
+  startAtZero(
+    poolActions,
+    POOL_ACTIONS.map((action) => ({ action }))
+  );
+  startAtZero(
+    predictions,
+    PREDICTION_ACTIONS.map((action) => ({ action }))
+  );
+  startAtZero(
+    matchResults,
+    MATCH_OUTCOMES.map((outcome) => ({ outcome }))
+  );
   websocketClients.set(0);
 }
 
@@ -99,6 +168,22 @@ export function countWebsocketAccepted(): void {
 
 export function countWebsocketRejected(reason: WebsocketRejection): void {
   websocketConnections.inc({ outcome: 'rejected', reason });
+}
+
+export function countTeamAction(action: TeamAction): void {
+  teamActions.inc({ action });
+}
+
+export function countPoolAction(action: PoolAction): void {
+  poolActions.inc({ action });
+}
+
+export function countPrediction(action: PredictionAction): void {
+  predictions.inc({ action });
+}
+
+export function countMatchOutcome(outcome: MatchOutcome): void {
+  matchResults.inc({ outcome });
 }
 
 export function websocketConnected(): void {

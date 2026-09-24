@@ -35,7 +35,12 @@ import {
   parseSelaeRss,
   SelaeRssItem,
 } from './selae-quiniela.parser';
-import { countSyncProblem, countSyncRun } from '../metrics/domain-metrics';
+import {
+  countMatchOutcome,
+  countPoolAction,
+  countSyncProblem,
+  countSyncRun,
+} from '../metrics/domain-metrics';
 
 const PROVIDER = 'eduardo-losilla';
 const GAME_TYPE = 'quiniela';
@@ -219,6 +224,7 @@ export class AvailablePoolsService implements OnModuleInit {
     });
 
     const response = this.toFutPoolResponse(created);
+    countPoolAction('taken_up');
     this.events.emitPoolUpdated(response);
     return response;
   }
@@ -277,7 +283,7 @@ export class AvailablePoolsService implements OnModuleInit {
           continue;
         }
         match.officialResults = normalizedResults as FutPoolMatch['officialResults'];
-        match.success = this.computeSuccess(match.results, normalizedResults, match.full15);
+        this.applySuccess(match, normalizedResults);
         await this.matches.save(match);
         changed = true;
       }
@@ -362,7 +368,7 @@ export class AvailablePoolsService implements OnModuleInit {
         continue;
       }
       match.officialResults = nextOfficial as FutPoolMatch['officialResults'];
-      match.success = this.computeSuccess(match.results, nextOfficial, match.full15);
+      this.applySuccess(match, nextOfficial);
       await this.matches.save(match);
     }
 
@@ -372,6 +378,7 @@ export class AvailablePoolsService implements OnModuleInit {
       order: { matches: { poolOrder: 'ASC' } },
     });
     const response = this.toFutPoolResponse(updated);
+    countPoolAction('results_checked');
     this.events.emitPoolUpdated(response);
     return response;
   }
@@ -561,7 +568,7 @@ export class AvailablePoolsService implements OnModuleInit {
           continue;
         }
         match.officialResults = results as FutPoolMatch['officialResults'];
-        match.success = this.computeSuccess(match.results, results, match.full15);
+        this.applySuccess(match, results);
         await this.matches.save(match);
         changed = true;
       }
@@ -883,10 +890,18 @@ export class AvailablePoolsService implements OnModuleInit {
           continue;
         }
         match.officialResults = results as FutPoolMatch['officialResults'];
-        match.success = this.computeSuccess(match.results, results, match.full15);
+        this.applySuccess(match, results);
         await this.matches.save(match);
       }
       this.events.emitPoolUpdated(this.toFutPoolResponse(teamPool));
+    }
+  }
+
+  private applySuccess(match: FutPoolMatch, officialResults: string[]): void {
+    const unscored = match.success === null || match.success === undefined;
+    match.success = this.computeSuccess(match.results, officialResults, match.full15);
+    if (unscored && match.success !== null) {
+      countMatchOutcome(match.success ? 'hit' : 'miss');
     }
   }
 

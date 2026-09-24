@@ -3,12 +3,25 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { EventsGateway } from '../events/events.gateway';
 import { FutPool } from '../fut-pool/entities/fut-pool.entity';
 import { NotifierService } from '../notifications/notifier.service';
+import { registry } from '../observability';
 import { TeamsService } from '../teams/teams.service';
-import { FutPoolMatch, Result } from './entities/fut-pool-match.entity';
+import { FutPoolMatch, Full15Result, Result } from './entities/fut-pool-match.entity';
 import { FutPoolMatchRepository } from './fut-pool-match.repository';
 import { FutPoolMatchService } from './fut-pool-match.service';
 
 const POOL_ID = 'pool-123';
+
+const counted = async (line: string): Promise<number> => {
+  const text = await registry.metrics();
+  const row = text.split('\n').find((entry) => entry.startsWith(`${line} `));
+  return row ? Number(row.slice(line.length + 1)) : 0;
+};
+
+const predictions = (action: string): Promise<number> =>
+  counted(`kini_predictions_total{action="${action}"}`);
+
+const poolActions = (action: string): Promise<number> =>
+  counted(`kini_pool_actions_total{action="${action}"}`);
 
 describe('FutPoolMatchService', () => {
   let service: FutPoolMatchService;
@@ -252,6 +265,77 @@ describe('FutPoolMatchService', () => {
       await service.update(POOL_ID, 'match-123', updateDto);
 
       expect(notifier.notifyMatchUpdated).toHaveBeenCalled();
+    });
+  });
+
+  describe('counters', () => {
+    beforeEach(() => {
+      repository.findById.mockResolvedValue(mockMatch);
+      repository.update.mockResolvedValue(mockMatch);
+    });
+
+    it('counts a prediction a player set, and not as a clear', async () => {
+      const set = await predictions('set');
+      const cleared = await predictions('cleared');
+
+      await service.update(POOL_ID, 'match-123', { results: [Result.DRAW] });
+
+      expect(await predictions('set')).toBe(set + 1);
+      expect(await predictions('cleared')).toBe(cleared);
+    });
+
+    it('counts emptied results as a clear, and not as a set', async () => {
+      const set = await predictions('set');
+      const cleared = await predictions('cleared');
+
+      await service.update(POOL_ID, 'match-123', { results: [Full15Result.EMPTY] });
+
+      expect(await predictions('cleared')).toBe(cleared + 1);
+      expect(await predictions('set')).toBe(set);
+    });
+
+    it('counts a match handed to a player and a match taken off one', async () => {
+      const assigned = await predictions('assigned');
+      const unassigned = await predictions('unassigned');
+
+      await service.update(POOL_ID, 'match-123', { userId: 'user-456' });
+      await service.update(POOL_ID, 'match-123', { userId: null });
+
+      expect(await predictions('assigned')).toBe(assigned + 1);
+      expect(await predictions('unassigned')).toBe(unassigned + 1);
+    });
+
+    it('counts nothing about predictions when neither results nor the owner changed', async () => {
+      const set = await predictions('set');
+      const cleared = await predictions('cleared');
+      const assigned = await predictions('assigned');
+      const unassigned = await predictions('unassigned');
+
+      await service.update(POOL_ID, 'match-123', { elige8: true });
+
+      expect(await predictions('set')).toBe(set);
+      expect(await predictions('cleared')).toBe(cleared);
+      expect(await predictions('assigned')).toBe(assigned);
+      expect(await predictions('unassigned')).toBe(unassigned);
+    });
+
+    it('counts the pool completing its predictions even when no team owns it', async () => {
+      repository.isPoolPredictionsComplete.mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+      const completed = await poolActions('predictions_completed');
+
+      await service.update(POOL_ID, 'match-123', { results: [Result.DRAW] });
+
+      expect(await poolActions('predictions_completed')).toBe(completed + 1);
+      expect(notifier.notifyPoolPredictionsCompleted).not.toHaveBeenCalled();
+    });
+
+    it('counts the completion once, not again on the next prediction of a complete pool', async () => {
+      repository.isPoolPredictionsComplete.mockResolvedValue(true);
+      const completed = await poolActions('predictions_completed');
+
+      await service.update(POOL_ID, 'match-123', { results: [Result.DRAW] });
+
+      expect(await poolActions('predictions_completed')).toBe(completed);
     });
   });
 });

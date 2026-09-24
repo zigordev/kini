@@ -1,5 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { EventsGateway } from 'src/events/events.gateway';
+import { countPoolAction, countPrediction } from 'src/metrics/domain-metrics';
 import { NotifierService } from 'src/notifications/notifier.service';
 import { TeamsService } from 'src/teams/teams.service';
 import { FutPoolMatchResponseDto } from './dto/fut-pool-match-response.dto';
@@ -53,6 +54,14 @@ export class FutPoolMatchService {
         : false;
 
     const updated = await this.futPoolMatchRepository.update(matchId, match);
+
+    if (match.results !== undefined) {
+      countPrediction(this.hasPrediction(match.results) ? 'set' : 'cleared');
+    }
+    if (match.userId !== undefined) {
+      countPrediction(match.userId ? 'assigned' : 'unassigned');
+    }
+
     const response = this.toResponseDto(updated);
 
     this.events.emitMatchUpdated(updated.futPool?.teamId, response);
@@ -63,6 +72,9 @@ export class FutPoolMatchService {
       const isComplete = await this.futPoolMatchRepository.isPoolPredictionsComplete(
         updated.futPoolId
       );
+      if (isComplete) {
+        countPoolAction('predictions_completed');
+      }
       if (isComplete && updated.futPool?.teamId) {
         const members = await this.teams.listActiveMemberUsers(updated.futPool.teamId);
         await this.notifier.notifyPoolPredictionsCompleted({
@@ -77,6 +89,10 @@ export class FutPoolMatchService {
     }
 
     return response;
+  }
+
+  private hasPrediction(results: UpdateFutPoolMatchDto['results']): boolean {
+    return (results ?? []).some((result) => String(result).trim() !== '');
   }
 
   private toResponseDto(entity: FutPoolMatch): FutPoolMatchResponseDto {
