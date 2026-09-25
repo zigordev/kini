@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.9](https://github.com/zigordev/kini/compare/kini-v0.12.8...kini-v0.12.9) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** an export with no keys is empty, and a stuck smoke says which stack ([#181](https://github.com/zigordev/kini/issues/181)) ([7c134cf](https://github.com/zigordev/kini/commit/7c134cf31ec315a621c221526c79af58329e9493))
+
 ## [0.12.8](https://github.com/zigordev/kini/compare/kini-v0.12.7...kini-v0.12.8) (2026-09-25)
 
 
