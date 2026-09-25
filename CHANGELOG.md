@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.6](https://github.com/zigordev/kini/compare/kini-v0.12.5...kini-v0.12.6) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** merge lists per entry and validate the deploy role ([#175](https://github.com/zigordev/kini/issues/175)) ([e93f347](https://github.com/zigordev/kini/commit/e93f3472d808633160477cfedd1439bfc144c796))
+
 ## [0.12.5](https://github.com/zigordev/kini/compare/kini-v0.12.4...kini-v0.12.5) (2026-09-25)
 
 
