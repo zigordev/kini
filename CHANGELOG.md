@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.8](https://github.com/zigordev/kini/compare/kini-v0.12.7...kini-v0.12.8) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** an empty export is a content fault, and make a stuck smoke legible ([#179](https://github.com/zigordev/kini/issues/179)) ([3dbf108](https://github.com/zigordev/kini/commit/3dbf108c1223812de6a98c201131b87c1d82dbbf))
+
 ## [0.12.7](https://github.com/zigordev/kini/compare/kini-v0.12.6...kini-v0.12.7) (2026-09-25)
 
 
