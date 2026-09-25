@@ -211,6 +211,48 @@ describe('loadRemoteMessages', () => {
       );
     });
 
+    it('treats an export holding zero keys as empty, not as copy worth caching', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } })
+      );
+
+      await expect(loadRemoteMessages('es')).resolves.toBeNull();
+
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          locale: 'es',
+          projectId: '1',
+          source: 'local',
+          error: { name: 'EmptyExport', message: 'Tolgee returned no messages' },
+        })
+      );
+    });
+
+    it('treats an archive whose JSON file holds zero keys as empty too', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      const zip = new JSZip();
+      zip.file('en.json', '{}');
+      const archive = await zip.generateAsync({ type: 'arraybuffer' });
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(archive, { status: 200, headers: { 'content-type': 'application/zip' } })
+      );
+
+      await expect(loadRemoteMessages('en')).resolves.toBeNull();
+
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          error: expect.objectContaining({ name: 'EmptyExport' }),
+        })
+      );
+    });
+
     it('keeps Tolgee up when the archive it sends holds no JSON file', async () => {
       configure();
       const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
