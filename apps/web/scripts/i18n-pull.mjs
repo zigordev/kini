@@ -14,6 +14,7 @@ if (!apiUrl || !apiKey || !projectId) {
 
 const exportUrl = new URL(`/v2/projects/${projectId}/export`, apiUrl);
 exportUrl.searchParams.set('format', 'JSON_I18NEXT');
+exportUrl.searchParams.set('structureDelimiter', '.');
 exportUrl.searchParams.set('supportArrays', 'true');
 exportUrl.searchParams.set('zip', 'true');
 
@@ -43,14 +44,29 @@ function normalizeLocale(tag) {
   return tag.trim().toLowerCase().split(/[-_]/)[0];
 }
 
-function mergeMessages(local, remote) {
+const keptLists = [];
+
+function mergeMessages(local, remote, path = '') {
+  if (Array.isArray(local) && Array.isArray(remote)) {
+    if (local.length !== remote.length) {
+      keptLists.push(`${path} (${local.length} committed, ${remote.length} exported)`);
+      return local;
+    }
+    return local.map((item, index) => mergeMessages(item, remote[index], `${path}.${index}`));
+  }
   if (Array.isArray(remote) || typeof remote !== 'object' || remote === null) return remote;
   if (Array.isArray(local) || typeof local !== 'object' || local === null) return remote;
   const merged = { ...local };
   for (const [key, value] of Object.entries(remote)) {
-    merged[key] = key in local ? mergeMessages(local[key], value) : value;
+    const at = path ? `${path}.${key}` : key;
+    merged[key] = key in local ? mergeMessages(local[key], value, at) : value;
   }
   return merged;
+}
+
+function isFlatExport(messages) {
+  if (!messages || typeof messages !== 'object' || Array.isArray(messages)) return false;
+  return Object.keys(messages).some((key) => key.includes('.') || key.includes('['));
 }
 
 function sortKeys(value) {
@@ -105,6 +121,13 @@ if (!entries.length) {
 const results = [];
 for (const { file, dest } of entries) {
   const remote = JSON.parse(await file.async('string'));
+  if (isFlatExport(remote)) {
+    console.error(
+      `Tolgee returned dotted keys for ${path.basename(dest)}; the app reads a nested export. ` +
+        'Check structureDelimiter and supportArrays on the project. Nothing was written.'
+    );
+    process.exit(1);
+  }
   const local = await readLocal(dest);
   results.push({ dest, messages: local ? mergeMessages(local, remote) : remote });
 }
@@ -115,6 +138,12 @@ await Promise.all(
   )
 );
 console.log(`Updated translations in ${outDir}`);
+if (keptLists.length) {
+  console.warn(
+    `Kept the committed list for: ${keptLists.join(', ')} — the export has a different number ` +
+      'of entries, which is a partial translation rather than an edit. Push, then pull again.'
+  );
+}
 if (skipped.length) {
   console.warn(`Skipped unsupported locales from Tolgee: ${skipped.join(', ')}`);
 }
