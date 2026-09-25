@@ -1,3 +1,4 @@
+import JSZip from 'jszip';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { health, reportComponent } from '@/observability/health';
@@ -190,16 +191,77 @@ describe('loadRemoteMessages', () => {
       expect(health().components.tolgee).toEqual({ status: 'down' });
     });
 
-    it('reports Tolgee down when the export comes back empty', async () => {
+    it('keeps Tolgee up when the export comes back empty, because a 200 was answered', async () => {
       configure();
-      vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
         new Response('null', { status: 200, headers: { 'content-type': 'application/json' } })
       );
 
-      await loadRemoteMessages('en');
+      await expect(loadRemoteMessages('es')).resolves.toBeNull();
+
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          locale: 'es',
+          projectId: '1',
+          error: { name: 'EmptyExport', message: 'Tolgee returned no messages' },
+        })
+      );
+    });
+
+    it('keeps Tolgee up when the archive it sends holds no JSON file', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      const zip = new JSZip();
+      zip.file('README.txt', 'exported with the wrong file filter');
+      const archive = await zip.generateAsync({ type: 'arraybuffer' });
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(archive, { status: 200, headers: { 'content-type': 'application/zip' } })
+      );
+
+      await expect(loadRemoteMessages('en')).resolves.toBeNull();
+
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          error: expect.objectContaining({ name: 'EmptyExport' }),
+        })
+      );
+    });
+
+    it('still reports Tolgee down when the body is not the archive it claims to be', async () => {
+      configure();
+      vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response('not a zip', { status: 200, headers: { 'content-type': 'application/zip' } })
+      );
+
+      await expect(loadRemoteMessages('en')).resolves.toBeNull();
 
       expect(health().components.tolgee).toEqual({ status: 'down' });
+    });
+
+    it('still reports Tolgee down when the request never completes', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockRejectedValue(
+        Object.assign(new Error('The operation was aborted due to timeout'), {
+          name: 'TimeoutError',
+        })
+      );
+
+      await expect(loadRemoteMessages('en')).resolves.toBeNull();
+
+      expect(health().components.tolgee).toEqual({ status: 'down' });
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          error: expect.objectContaining({ name: 'TimeoutError' }),
+        })
+      );
     });
 
     it('refuses a flat export but keeps Tolgee up, because a 200 is not an unreachable Tolgee', async () => {
