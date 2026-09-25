@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.5](https://github.com/zigordev/kini/compare/kini-v0.12.4...kini-v0.12.5) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** ask Tolgee for the structured export and refuse a flat one ([#173](https://github.com/zigordev/kini/issues/173)) ([644785a](https://github.com/zigordev/kini/commit/644785a3f1a302bcea02d3d929ba3714367b8af4))
+
 ## [0.12.4](https://github.com/zigordev/kini/compare/kini-v0.12.3...kini-v0.12.4) (2026-09-24)
 
 
