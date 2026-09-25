@@ -202,7 +202,7 @@ describe('loadRemoteMessages', () => {
       expect(health().components.tolgee).toEqual({ status: 'down' });
     });
 
-    it('refuses a flat export instead of serving it beside the committed tree', async () => {
+    it('refuses a flat export but keeps Tolgee up, because a 200 is not an unreachable Tolgee', async () => {
       configure();
       const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
       vi.spyOn(globalThis, 'fetch').mockResolvedValue(
@@ -214,7 +214,7 @@ describe('loadRemoteMessages', () => {
 
       await expect(loadRemoteMessages('en')).resolves.toBeNull();
 
-      expect(health().components.tolgee).toEqual({ status: 'down' });
+      expect(health().components.tolgee).toEqual({ status: 'up' });
       expect(logged(stdout)).toContainEqual(
         expect.objectContaining({
           event: 'i18n.fallback',
@@ -238,7 +238,29 @@ describe('loadRemoteMessages', () => {
       );
 
       await expect(loadRemoteMessages('en')).resolves.toBeNull();
-      expect(health().components.tolgee).toEqual({ status: 'down' });
+      expect(health().components.tolgee).toEqual({ status: 'up' });
+    });
+
+    it('names the locale and the Tolgee project on every fallback line', async () => {
+      configure();
+      const stdout = vi.spyOn(process.stdout, 'write').mockImplementation(() => true);
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+        new Response(JSON.stringify({ 'pools.title': 'Pools' }), {
+          status: 200,
+          headers: { 'content-type': 'application/json' },
+        })
+      );
+
+      await loadRemoteMessages('es');
+
+      expect(logged(stdout)).toContainEqual(
+        expect.objectContaining({
+          event: 'i18n.fallback',
+          locale: 'es',
+          project: '1',
+          error: expect.objectContaining({ name: 'FlatExport' }),
+        })
+      );
     });
 
     it('reports Tolgee up when it answers, including a 304 for copy it already sent', async () => {
