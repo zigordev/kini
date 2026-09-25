@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.7](https://github.com/zigordev/kini/compare/kini-v0.12.6...kini-v0.12.7) (2026-09-25)
+
+
+### Bug Fixes
+
+* **i18n:** a wrong-shape export is a content fault, not an unreachable tolgee ([#177](https://github.com/zigordev/kini/issues/177)) ([ce07d31](https://github.com/zigordev/kini/commit/ce07d3104f6d2f3ac9558f6dd8b5d7153d1d93fd))
+
 ## [0.12.6](https://github.com/zigordev/kini/compare/kini-v0.12.5...kini-v0.12.6) (2026-09-25)
 
 
