@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.10](https://github.com/zigordev/kini/compare/kini-v0.12.9...kini-v0.12.10) (2026-10-05)
+
+
+### Bug Fixes
+
+* **kini:** take the next patch that closes the next/og RCE ([#193](https://github.com/zigordev/kini/issues/193)) ([2e0a09d](https://github.com/zigordev/kini/commit/2e0a09dac88d7e6ba178251b9e9a6865af332b66))
+
 ## [0.12.9](https://github.com/zigordev/kini/compare/kini-v0.12.8...kini-v0.12.9) (2026-09-25)
 
 
