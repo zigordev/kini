@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.11](https://github.com/zigordev/kini/compare/kini-v0.12.10...kini-v0.12.11) (2026-10-06)
+
+
+### Bug Fixes
+
+* **kini:** take the patched proxy-addr and source-map-js ([#203](https://github.com/zigordev/kini/issues/203)) ([3c9a344](https://github.com/zigordev/kini/commit/3c9a34401129f4bfa8910b5d152072efb6270de5))
+
 ## [0.12.10](https://github.com/zigordev/kini/compare/kini-v0.12.9...kini-v0.12.10) (2026-10-05)
 
 
