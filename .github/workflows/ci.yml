@@ -56,7 +56,7 @@ jobs:
 
       - name: Upload api coverage
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-api
           path: apps/api/coverage
@@ -157,7 +157,7 @@ jobs:
 
       - name: Upload OpenAPI spec
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: openapi-api
           path: artifacts/openapi.test.json
@@ -214,7 +214,7 @@ jobs:
 
       - name: Upload Playwright report on failure
         if: failure()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-report-web
           path: |
@@ -292,7 +292,7 @@ jobs:
           jq -e '.spdxVersion and (.packages | type == "array")' artifacts/sbom-kini-web.spdx.json
 
       - name: Upload SBOM (kini-api:ci)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom-api
           path: artifacts/sbom-kini-api.spdx.json
@@ -300,7 +300,7 @@ jobs:
           if-no-files-found: error
 
       - name: Upload SBOM (kini-web:ci)
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: sbom-web
           path: artifacts/sbom-kini-web.spdx.json
@@ -336,7 +336,7 @@ jobs:
 
       - name: Upload Trivy report (kini-api:ci)
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: trivy-api
           path: artifacts/trivy-kini-api.json
@@ -345,7 +345,7 @@ jobs:
 
       - name: Upload Trivy report (kini-web:ci)
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: trivy-web
           path: artifacts/trivy-kini-web.json
